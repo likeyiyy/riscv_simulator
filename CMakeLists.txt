@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.19)
 
 # 项目信息
 project(RISCSimulator VERSION 1.0 LANGUAGES C)
@@ -14,7 +14,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.c")
 
 # 生成可执行文件
-add_executable(risc_simulator ${SOURCES})
+add_executable(riscv_simulator ${SOURCES})
 
 # 设置编译选项
-target_compile_options(risc_simulator PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(riscv_simulator PRIVATE -Wall -Wextra -Wpedantic)
