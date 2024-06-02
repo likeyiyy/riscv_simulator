@@ -2,7 +2,6 @@
 #define RISCV_DEFS_H
 
 // 指令类型宏定义
-#define OPCODE_LOAD    0x03 // 加载指令
 #define OPCODE_I_TYPE  0x13 // I-type指令，立即数操作和加载指令
 #define OPCODE_AUIPC   0x17 // AUIPC指令
 #define OPCODE_S_TYPE  0x23 // S-type指令，存储指令
@@ -23,6 +22,21 @@
 #define OPCODE_OP      0x33 // 操作指令
 #define OPCODE_MISC_MEM 0x0F // 杂项内存指令
 #define OPCODE_SYSTEM  0x73 // 系统指令
+#define OPCODE_IW_TYPE 0x1B // 宽度扩展I型指令
+#define OPCODE_RW_TYPE 0x3B // 宽度扩展R型指令
+
+
+#define FUNCT3_ADDIW 0x0  // ADDIW指令的功能码
+#define FUNCT3_SLLIW 0x1  // SLLIW指令的功能码
+#define FUNCT3_SRLIW 0x5  // SRLIW指令的功能码
+#define FUNCT3_SRAIW 0x5  // SRAIW指令的功能码
+
+#define FUNCT3_ADDW 0x0   // ADDW指令的功能码
+#define FUNCT3_SUBW 0x0   // SUBW指令的功能码
+#define FUNCT3_SLLW 0x1   // SLLW指令的功能码
+#define FUNCT3_SRLW 0x5   // SRLW指令的功能码
+#define FUNCT3_SRAW 0x5   // SRAW指令的功能码
+
 
 // 指令字段掩码
 #define OPCODE_MASK 0x7F

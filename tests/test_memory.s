@@ -12,7 +12,7 @@ test_data:
 _start:
     # 初始化寄存器
     li x1, 0            # x1 = 0
-    li x2, test_data    # x2 = 数据段起始地址
+    la x2, test_data    # x2 = 数据段起始地址
 
     # 测试LB指令
     lb x3, 0(x2)        # x3 = *(int8_t *)(x2 + 0)
@@ -44,4 +44,3 @@ _start:
 
     # 结束
     li x10, 0xDEADBEEF
-
