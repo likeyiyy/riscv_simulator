@@ -24,6 +24,85 @@ void cpu_init(CPU *cpu) {
     cpu->pc = 0;
 }
 
+void execute_b_type_instruction(CPU *cpu, uint32_t instruction) {
+    uint32_t rs1 = (instruction >> 15) & 0x1F;
+    uint32_t rs2 = (instruction >> 20) & 0x1F;
+    int32_t imm = ((instruction >> 31) << 12) |
+                  (((instruction >> 7) & 0x1) << 11) |
+                  (((instruction >> 25) & 0x3F) << 5) |
+                  (((instruction >> 8) & 0xF) << 1);
+    imm = (imm << 19) >> 19;  // 符号扩展立即数
+
+    uint32_t funct3 = (instruction >> 12) & 0x07;
+
+    switch (funct3) {
+        case FUNCT3_BEQ:
+            // BEQ指令：如果rs1等于rs2，则跳转到pc+imm
+            if (cpu->registers[rs1] == cpu->registers[rs2]) {
+                cpu->pc += imm;
+            }
+            break;
+        case FUNCT3_BNE:
+            // BNE指令：如果rs1不等于rs2，则跳转到pc+imm
+            if (cpu->registers[rs1] != cpu->registers[rs2]) {
+                cpu->pc += imm;
+            }
+            break;
+        case FUNCT3_BLT:
+            // BLT指令：如果rs1小于rs2，则跳转到pc+imm
+            if ((int64_t)cpu->registers[rs1] < (int64_t)cpu->registers[rs2]) {
+                cpu->pc += imm;
+            }
+            break;
+        case FUNCT3_BGE:
+            // BGE指令：如果rs1大于等于rs2，则跳转到pc+imm
+            if ((int64_t)cpu->registers[rs1] >= (int64_t)cpu->registers[rs2]) {
+                cpu->pc += imm;
+            }
+            break;
+        case FUNCT3_BLTU:
+            // BLTU指令：如果rs1小于rs2，则跳转到pc+imm
+            if ((uint64_t)cpu->registers[rs1] < (uint64_t)cpu->registers[rs2]) {
+                cpu->pc += imm;
+            }
+            break;
+        case FUNCT3_BGEU:
+            // BGEU指令：如果rs1大于等于rs2，则跳转到pc+imm
+            if ((uint64_t)cpu->registers[rs1] >= (uint64_t)cpu->registers[rs2]) {
+                cpu->pc += imm;
+            }
+            break;
+        default:
+            printf("Unknown B-type instruction with funct3: 0x%x\n", funct3);
+    }
+}
+
+void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
+    uint32_t rd = (instruction >> 7) & 0x1F;
+    int32_t imm = ((instruction >> 31) << 20) |
+                  (((instruction >> 21) & 0x3FF) << 1) |
+                  (((instruction >> 20) & 0x1) << 11) |
+                  ((instruction >> 12) & 0xFF);
+    imm = (imm << 11) >> 11;  // 符号扩展立即数
+
+    uint32_t opcode = instruction & 0x7F;
+
+    switch (opcode) {
+        case OPCODE_JAL:
+            cpu->registers[rd] = cpu->pc + 4;
+            cpu->pc += imm;
+            break;
+        case OPCODE_JALR:
+            cpu->registers[rd] = cpu->pc + 4;
+            cpu->pc = (cpu->registers[(instruction >> 15) & 0x1F] + imm) & ~1;
+            break;
+        default:
+            printf("Unknown J-type instruction with opcode: 0x%x\n", opcode);
+    }
+}
+
+
+
 
 
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
@@ -50,6 +129,13 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
         case OPCODE_U_TYPE:
             // LUI指令：rd = imm
             cpu->registers[RD(instruction)] = (instruction & 0xFFFFF000);
+            break;
+        case OPCODE_B_TYPE:
+            execute_b_type_instruction(cpu, instruction);
+            break;
+        case OPCODE_JAL: // 处理JAL指令
+        case OPCODE_JALR: // 处理JALR指令
+            execute_j_type_instruction(cpu, instruction);
             break;
         case OPCODE_IW_TYPE:
             switch ((instruction >> 12) & 0x7) {

@@ -100,4 +100,16 @@
 #define FUNCT3_LBU 0x4 // 加载字节无符号
 #define FUNCT3_LHU 0x5 // 加载半字无符号
 
+// B 型指令的 funct3 值
+#define FUNCT3_BEQ  0x0
+#define FUNCT3_BNE  0x1
+#define FUNCT3_BLT  0x4
+#define FUNCT3_BGE  0x5
+#define FUNCT3_BLTU 0x6
+#define FUNCT3_BGEU 0x7
+
+// J 型指令的 opcode 值
+#define OPCODE_JAL  0x6F
+#define OPCODE_JALR 0x67
+
 #endif // RISCV_DEFS_H
