@@ -2,9 +2,10 @@
 #define RISCV_DEFS_H
 
 // 指令类型宏定义
-#define OPCODE_R_TYPE  0x33 // R-type指令，算术和逻辑操作
+#define OPCODE_LOAD    0x03 // 加载指令
 #define OPCODE_I_TYPE  0x13 // I-type指令，立即数操作和加载指令
 #define OPCODE_S_TYPE  0x23 // S-type指令，存储指令
+#define OPCODE_R_TYPE  0x33 // R-type指令，算术和逻辑操作
 #define OPCODE_B_TYPE  0x63 // B-type指令，条件分支指令
 #define OPCODE_U_TYPE  0x37 // U-type指令，上部立即数
 #define OPCODE_J_TYPE  0x6F // J-type指令，无条件跳转
@@ -77,5 +78,11 @@
 #define FUNCT3_SH 0x1 // 存储半字
 #define FUNCT3_SW 0x2 // 存储字
 #define FUNCT3_SD 0x3 // 存储双字
+
+#define FUNCT3_LB  0x0 // 加载字节
+#define FUNCT3_LH  0x1 // 加载半字
+#define FUNCT3_LW  0x2 // 加载字
+#define FUNCT3_LBU 0x4 // 加载字节无符号
+#define FUNCT3_LHU 0x5 // 加载半字无符号
 
 #endif // RISCV_DEFS_H
