@@ -73,7 +73,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
                 snprintf(buffer, buffer_size, "ANDI %s, %s, %d", reg_names[rd], reg_names[rs1], imm);
                 break;
             default:
-                snprintf(buffer, buffer_size, "Unknown I-type: 0x%08x", instruction);
+                snprintf(buffer, buffer_size, "I: 0x%08x", instruction);
         }
     } else if (opcode == 0x33) {  // R型指令
         switch (funct3) {
@@ -110,9 +110,9 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
                 snprintf(buffer, buffer_size, "AND %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
                 break;
             default:
-                snprintf(buffer, buffer_size, "Unknown R: 0x%08x", instruction);
+                snprintf(buffer, buffer_size, "R: 0x%08x", instruction);
         }
     } else {
-        snprintf(buffer, buffer_size, "Unknown inst: 0x%08x", instruction);
+        snprintf(buffer, buffer_size, "E: 0x%08x", instruction);
     }
 }
