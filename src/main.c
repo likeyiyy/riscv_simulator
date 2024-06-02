@@ -4,6 +4,7 @@
 #include <unistd.h> // for usleep
 #include "cpu.h"
 #include "memory.h"
+#include "disassemble.h"
 
 #define STACK_SIZE 16
 WINDOW *create_newwin(int height, int width, int starty, int startx);
@@ -22,10 +23,14 @@ void display_stack(WINDOW *win, Memory *memory) {
 }
 
 void display_source(WINDOW *win, Memory *memory, uint32_t pc) {
+    char buffer[100];
+
+
     for (int i = 0; i < 10; i++) {
         uint32_t address = pc + i * 4;
         uint32_t instruction = memory_load_word(memory, address);
-        mvwprintw(win, i, 1, "0x%08x: 0x%08x", address, instruction);
+        disassemble(instruction, buffer, sizeof(buffer));
+        mvwprintw(win, i, 1, "0x%08x: 0x%08x \t %s", address, instruction, &buffer);
     }
 }
 
@@ -33,7 +38,7 @@ void update_display(CPU *cpu, Memory *memory, uint32_t pc) {
 //    clear();
     WINDOW *reg_win = create_newwin(32, 40, 0, 0);
     WINDOW *stack_win = create_newwin(32, 40, 0, 40);
-    WINDOW *source_win = create_newwin(32, 40, 0, 80);
+    WINDOW *source_win = create_newwin(32, 60, 0, 80);
 
     display_registers(reg_win, cpu);
     display_stack(stack_win, memory);
