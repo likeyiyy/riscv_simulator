@@ -123,11 +123,6 @@ int main(int argc, char *argv[]) {
             mvprintw(32, 0, "All instructions are zero, exiting.\n");
             break;
         }
-        cpu_execute(&cpu, &memory, instruction);
-        cpu.pc += 4; // 下一条指令
-
-        // Update display
-        update_display(&cpu, &memory, cpu.pc);
 
         if (!fast_mode) {
             nodelay(stdscr, FALSE); // Set blocking mode for step mode
@@ -143,6 +138,12 @@ int main(int argc, char *argv[]) {
             nodelay(stdscr, TRUE); // Set back to non-blocking mode
             usleep(1000);
         }
+        cpu_execute(&cpu, &memory, instruction);
+
+        // Update display
+        update_display(&cpu, &memory, cpu.pc);
+
+
     }
 
     // Wait for user input before exiting
