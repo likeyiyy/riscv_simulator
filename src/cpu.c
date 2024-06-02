@@ -146,13 +146,4 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
             }
             break;
     }
-    // 打印所有寄存器的值
-    printf("--------------------------------------------\n");
-    for (int i = 0; i < 32; i++) {
-        printf("x%d = %llu\t", i, cpu->registers[i]);
-        if ((i + 1) % 8 == 0) {
-            printf("\n");
-        }
-    }
-
 }
