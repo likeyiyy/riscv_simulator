@@ -148,9 +148,13 @@ int main(int argc, char *argv[]) {
     // Wait for user input before exiting
     mvprintw(33, 0, "Simulation complete. Press 'q' to exit.");
     refresh();
-    while ((ch = getch()) != 'q') {
+    if (ch != 'q') {
         // Wait for user to press 'q' to quit
+        while ((ch = getch()) != 'q') {
+            // Wait for user to press 'q' to quit
+        }
     }
+
 
     // End ncurses mode
     endwin();
