@@ -116,6 +116,7 @@ int main(int argc, char *argv[]) {
         if (!fast_mode) {
             nodelay(stdscr, FALSE); // Set blocking mode for step mode
             getch(); // Wait for user input in step mode
+            nodelay(stdscr, TRUE); // Set back to non-blocking mode
         } else {
             nodelay(stdscr, TRUE); // Set back to non-blocking mode
             usleep(1000);
