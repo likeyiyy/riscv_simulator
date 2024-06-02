@@ -18,7 +18,7 @@ void display_registers(WINDOW *win, CPU *cpu) {
 void display_stack(WINDOW *win, Memory *memory) {
     uint64_t base_address = 0x1000;
     for (int i = 0; i < STACK_SIZE; i++) {
-        uint64_t stack_value = memory_load_word(memory, base_address + i * 8);
+        uint64_t stack_value = memory_load_dword(memory, base_address + i * 8);
         mvwprintw(win, i, 1, "0x%08lx: 0x%016llx", base_address + i * 8, stack_value);
     }
 }
@@ -53,6 +53,37 @@ void update_display(CPU *cpu, Memory *memory, uint32_t pc) {
     refresh();
 }
 
+void load_file_to_memory(const char *filename, Memory *memory) {
+    FILE *file = fopen(filename, "rb");
+    if (!file) {
+        perror("Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+
+    // 获取文件大小
+    fseek(file, 0, SEEK_END);
+    size_t file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    // 确保内存大小足够
+    if (file_size > MEMORY_SIZE) {
+        fprintf(stderr, "File size exceeds memory size\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    // 读取文件内容到内存
+    size_t bytes_read = fread(memory->data, 1, file_size, file);
+    if (bytes_read != file_size) {
+        perror("Failed to read complete file");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    fclose(file);
+}
+
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
@@ -75,24 +106,11 @@ int main(int argc, char *argv[]) {
     clear();
     refresh();
 
-    // 打开包含指令的文件
-    FILE *file = fopen(input_file, "rb");
-    if (!file) {
-        perror("Failed to open file");
-        return 1;
-    }
+    load_file_to_memory(input_file, &memory);
 
-    // 从文件中读取指令并加载到内存
-    uint32_t address = 0;
-    uint32_t instruction;
-    while (fread(&instruction, sizeof(uint32_t), 1, file)) {
-        memory_store_word(&memory, address, instruction);
-        address += 4;
-    }
-
-    fclose(file);
     // Simulate instruction execution
     int ch;
+    uint32_t instruction;
     bool fast_mode = false;
     update_display(&cpu, &memory, cpu.pc);
 

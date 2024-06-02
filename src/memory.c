@@ -6,14 +6,21 @@ void memory_init(Memory *memory) {
     }
 }
 
-uint32_t memory_load_word(Memory *memory, uint32_t address) {
+uint32_t memory_load_word(Memory *memory, uint64_t address) {
     if (address >= MEMORY_SIZE) {
         return 0;
     }
     return *((uint32_t *)(memory->data + address));
 }
 
-void memory_store_word(Memory *memory, uint32_t address, uint32_t value) {
+uint64_t memory_load_dword(Memory *memory, uint64_t address) {
+    if (address >= MEMORY_SIZE) {
+        return 0;
+    }
+    return *((uint64_t *)(memory->data + address));
+}
+
+void memory_store_word(Memory *memory, uint64_t address, uint32_t value) {
     if (address < MEMORY_SIZE) {
         *((uint32_t *)(memory->data + address)) = value;
     }
