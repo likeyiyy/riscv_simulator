@@ -96,13 +96,10 @@ int main(int argc, char *argv[]) {
         if (ch == 'f') fast_mode = true;  // Fast mode
 
         instruction = memory_load_word(&memory, cpu.pc);
-        // Debugging: Print instruction and PC
-        mvprintw(32, 0, "PC: 0x%08x, Instruction: 0x%08x", cpu.pc, instruction);
-        refresh();
 
         // 判断指令是否全为0
         if (instruction == 0) {
-            printf("All instructions are zero, exiting.\n");
+            mvprintw(32, 0, "All instructions are zero, exiting.\n");
             break;
         }
         cpu_execute(&cpu, instruction);
@@ -112,9 +109,11 @@ int main(int argc, char *argv[]) {
         update_display(&cpu, &memory, cpu.pc);
 
         if (!fast_mode) {
+            nodelay(stdscr, FALSE); // Set blocking mode for step mode
             getch(); // Wait for user input in step mode
         } else {
-            napms(1000);; // Sleep for a short period in fast mode
+            nodelay(stdscr, TRUE); // Set back to non-blocking mode
+            usleep(1000);
         }
     }
 
