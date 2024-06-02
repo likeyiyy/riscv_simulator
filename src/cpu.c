@@ -22,6 +22,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             execute_r_type_instruction(cpu, instruction);
             break;
         case OPCODE_I_TYPE:
+            execute_i_type_instruction(cpu, instruction);
             break;
         case OPCODE_S_TYPE:
             execute_s_type_instruction(cpu, memory, instruction);
@@ -35,7 +36,6 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
 
 // R-type指令处理函数
 void execute_r_type_instruction(CPU *cpu, uint32_t instruction) {
-    uint32_t opcode = OPCODE(instruction); // 提取操作码
     uint32_t rd = RD(instruction);         // 提取目的寄存器
     uint32_t funct3 = FUNCT3(instruction); // 提取funct3字段
     uint32_t rs1 = RS1(instruction);       // 提取源寄存器1
@@ -91,12 +91,9 @@ void execute_r_type_instruction(CPU *cpu, uint32_t instruction) {
 
 // I-type指令处理函数
 void execute_i_type_instruction(CPU *cpu, uint32_t instruction) {
-    uint32_t opcode = OPCODE(instruction); // 提取操作码
     uint32_t rd = RD(instruction);         // 提取目的寄存器
     uint32_t funct3 = FUNCT3(instruction); // 提取funct3字段
     uint32_t rs1 = RS1(instruction);       // 提取源寄存器1
-    uint32_t rs2 = RS2(instruction);       // 提取源寄存器2
-    uint32_t funct7 = FUNCT7(instruction); // 提取funct7字段
     uint32_t imm = IMM(instruction);
     switch (funct3) {
         case FUNCT3_ADDI:
