@@ -13,6 +13,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # 查找源文件
 file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.c")
 
+# 设置编译选项以启用调试信息
+set(CMAKE_C_FLAGS_DEBUG "-g")
+
 # 生成可执行文件
 add_executable(riscv_simulator ${SOURCES})
 

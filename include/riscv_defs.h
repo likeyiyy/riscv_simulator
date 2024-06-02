@@ -29,6 +29,8 @@
 #define RS1_MASK    0xF8000
 #define RS2_MASK    0x1F00000
 #define FUNCT7_MASK 0xFE000000
+#define IMM_MASK 0xFFF00000
+
 
 // 宏用于提取指令字段
 #define OPCODE(instruction) ((instruction) & OPCODE_MASK)
@@ -37,6 +39,7 @@
 #define RS1(instruction)    (((instruction) & RS1_MASK) >> 15)
 #define RS2(instruction)    (((instruction) & RS2_MASK) >> 20)
 #define FUNCT7(instruction) (((instruction) & FUNCT7_MASK) >> 25)
+#define IMM(instruction) ((int32_t)((instruction) >> 20))
 
 // R-type funct3 values
 #define FUNCT3_ADD_SUB 0x0 // 加法/减法
@@ -53,5 +56,20 @@
 #define FUNCT7_SUB     0x20 // 减法
 #define FUNCT7_SRL     0x00 // 逻辑右移
 #define FUNCT7_SRA     0x20 // 算术右移
+
+// I 型指令的 funct3 定义
+#define FUNCT3_ADDI 0x0      // 加法立即数
+#define FUNCT3_SLLI 0x1      // 逻辑左移立即数
+#define FUNCT3_SLTI 0x2      // 小于比较立即数
+#define FUNCT3_SLTIU 0x3     // 无符号小于比较立即数
+#define FUNCT3_XORI 0x4      // 按位异或立即数
+#define FUNCT3_SRLI_SRAI 0x5 // 逻辑右移立即数或算术右移立即数
+#define FUNCT3_ORI 0x6       // 按位或立即数
+#define FUNCT3_ANDI 0x7      // 按位与立即数
+
+
+// SRAI 的 funct7 定义
+#define FUNCT7_SRLI 0x00     // 逻辑右移立即数
+#define FUNCT7_SRAI 0x20     // 算术右移立即数
 
 #endif // RISCV_DEFS_H

@@ -40,6 +40,11 @@ int main(int argc, char *argv[]) {
     // 模拟指令执行
     while (cpu.pc < MEMORY_SIZE) {
         uint32_t instruction = memory_load_word(&memory, cpu.pc);
+        // 判断指令是否全为0
+        if (instruction == 0) {
+            printf("All instructions are zero, exiting.\n");
+            break;
+        }
         cpu_execute(&cpu, instruction);
         cpu.pc += 4; // 下一条指令
     }
