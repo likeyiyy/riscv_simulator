@@ -31,6 +31,14 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             // 处理Load指令
             execute_load_instruction(cpu, memory, instruction);
             break;
+        case OPCODE_AUIPC:
+            // AUIPC指令：rd = pc + imm
+            cpu->registers[RD(instruction)] = cpu->pc + (instruction & 0xFFFFF000);
+            break;
+        case OPCODE_U_TYPE:
+            // LUI指令：rd = imm
+            cpu->registers[RD(instruction)] = (instruction & 0xFFFFF000);
+            break;
     }
 }
 

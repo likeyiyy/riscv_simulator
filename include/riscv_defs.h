@@ -4,6 +4,7 @@
 // 指令类型宏定义
 #define OPCODE_LOAD    0x03 // 加载指令
 #define OPCODE_I_TYPE  0x13 // I-type指令，立即数操作和加载指令
+#define OPCODE_AUIPC   0x17 // AUIPC指令
 #define OPCODE_S_TYPE  0x23 // S-type指令，存储指令
 #define OPCODE_R_TYPE  0x33 // R-type指令，算术和逻辑操作
 #define OPCODE_B_TYPE  0x63 // B-type指令，条件分支指令
