@@ -37,6 +37,7 @@ void display_source(WINDOW *win, Memory *memory, uint32_t pc) {
 void update_display(CPU *cpu, Memory *memory, uint32_t pc) {
 //    clear();
     WINDOW *reg_win = create_newwin(32, 26, 0, 0);
+    WINDOW *screen_win = create_newwin(25, 80, 0, 28);
     WINDOW *stack_win = create_newwin(32, 31, 0, 160);
     WINDOW *source_win = create_newwin(32, 50, 0, 110);
 
@@ -45,6 +46,7 @@ void update_display(CPU *cpu, Memory *memory, uint32_t pc) {
     display_source(source_win, memory, pc);
 
     wrefresh(reg_win);
+    wrefresh(screen_win);
     wrefresh(stack_win);
     wrefresh(source_win);
     refresh();
