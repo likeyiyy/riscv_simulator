@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
             mvprintw(32, 0, "All instructions are zero, exiting.\n");
             break;
         }
-        cpu_execute(&cpu, instruction);
+        cpu_execute(&cpu, &memory, instruction);
         cpu.pc += 4; // 下一条指令
 
         // Update display

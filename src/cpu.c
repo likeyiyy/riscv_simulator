@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "cpu.h"
+#include "memory.h"
+void execute_s_type_instruction(CPU *cpu, Memory *memory, uint32_t instruction);
 
 void cpu_init(CPU *cpu) {
     for (int i = 0; i < 32; i++) {
@@ -8,7 +10,8 @@ void cpu_init(CPU *cpu) {
     cpu->pc = 0;
 }
 
-void cpu_execute(CPU *cpu, uint32_t instruction) {
+
+void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
     uint32_t rd = RD(instruction);         // 提取目的寄存器
     uint32_t funct3 = FUNCT3(instruction); // 提取funct3字段
@@ -16,10 +19,6 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
     uint32_t rs2 = RS2(instruction);       // 提取源寄存器2
     uint32_t funct7 = FUNCT7(instruction); // 提取funct7字段
     uint32_t imm = IMM(instruction);
-
-    // 打印变量值以16进制格式，并对齐
-//    printf("opcode: 0x%02X | rd: 0x%02X | funct3: 0x%02X | rs1: 0x%02X | rs2: 0x%02X | funct7: 0x%02X | imm: 0x%03X\n",
-//           opcode, rd, funct3, rs1, rs2, funct7, imm);
 
     switch (opcode) {
         case OPCODE_R_TYPE: // 处理R型指令
@@ -71,8 +70,6 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
             }
             break;
         case OPCODE_I_TYPE:
-
-
             switch (funct3) {
                 case FUNCT3_ADDI:
                     // ADDI - 加法立即数
@@ -144,6 +141,56 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
                     printf("Unknown I-type instruction with funct3: 0x%x\n", funct3);
                     break;
             }
+            break;
+        case OPCODE_S_TYPE:
+            execute_s_type_instruction(cpu, memory, instruction);
+            break;
+    }
+}
+
+// S-type指令处理函数
+void execute_s_type_instruction(CPU *cpu, Memory *memory, uint32_t instruction) {
+    // 提取指令中的各个字段
+    uint32_t funct3 = (instruction >> 12) & 0x7; // 功能码
+    uint32_t rs1 = (instruction >> 15) & 0x1F;   // 源寄存器1
+    uint32_t rs2 = (instruction >> 20) & 0x1F;   // 源寄存器2
+    int32_t imm = ((instruction >> 25) << 5) | ((instruction >> 7) & 0x1F); // 立即数
+
+    // 符号扩展立即数
+    imm = (imm << 20) >> 20;
+
+    switch (funct3) {
+        case FUNCT3_SB:
+            // SB - 存储字节
+            // 示例: sb x2, 0(x1)
+            // 将 x2 寄存器的最低字节存储到 x1 寄存器地址加立即数偏移的内存中
+            memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2] & 0xFF;
+            break;
+
+        case FUNCT3_SH:
+            // SH - 存储半字
+            // 示例: sh x2, 4(x1)
+            // 将 x2 寄存器的最低 2 字节存储到 x1 寄存器地址加立即数偏移的内存中
+            *(uint16_t *)&memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2] & 0xFFFF;
+            break;
+
+        case FUNCT3_SW:
+            // SW - 存储字
+            // 示例: sw x2, 8(x1)
+            // 将 x2 寄存器的值存储到 x1 寄存器地址加立即数偏移的内存中
+            *(uint32_t *)&memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2];
+            break;
+
+        case FUNCT3_SD:
+            // SD - 存储双字（64位系统下使用）
+            // 示例: sd x2, 16(x1)
+            // 将 x2 寄存器的值存储到 x1 寄存器地址加立即数偏移的内存中
+            *(uint64_t *)&memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2];
+            break;
+
+        default:
+            // 未知指令处理
+            printf("Unknown S-type instruction with funct3: 0x%x\n", funct3);
             break;
     }
 }

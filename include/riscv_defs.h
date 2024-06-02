@@ -72,4 +72,10 @@
 #define FUNCT7_SRLI 0x00     // 逻辑右移立即数
 #define FUNCT7_SRAI 0x20     // 算术右移立即数
 
+
+#define FUNCT3_SB 0x0 // 存储字节
+#define FUNCT3_SH 0x1 // 存储半字
+#define FUNCT3_SW 0x2 // 存储字
+#define FUNCT3_SD 0x3 // 存储双字
+
 #endif // RISCV_DEFS_H

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "riscv_defs.h" // 包含指令定义和宏
+#include "memory.h" // 包含指令定义和宏
 
 typedef struct {
     uint64_t registers[32]; // 32个通用寄存器
@@ -10,6 +11,6 @@ typedef struct {
 } CPU;
 
 void cpu_init(CPU *cpu);
-void cpu_execute(CPU *cpu, uint32_t instruction);
+void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);
 
 #endif // CPU_H
