@@ -9,9 +9,16 @@
 #define STACK_SIZE 32
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 
+const char *reg_names2[32] = {
+        "zro", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+        "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+        "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
+        "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+};
+
 void display_registers(WINDOW *win, CPU *cpu) {
     for (int i = 0; i < 32; i++) {
-        mvwprintw(win, i, 1, "x%-2d: 0x%016llx", i, cpu->registers[i]);
+        mvwprintw(win, i, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
 }
 
@@ -31,15 +38,15 @@ void display_source(WINDOW *win, Memory *memory, uint32_t pc) {
         uint32_t address = pc + i * 4;
         uint32_t instruction = memory_load_word(memory, address);
         disassemble(instruction, buffer, sizeof(buffer));
-        mvwprintw(win, i, 1, "0x%08x: 0x%08x    %s", address, instruction, &buffer);
+        mvwprintw(win, i, 1, "0x%08x: 0x%08x  %s", address, instruction, &buffer);
     }
 }
 
 void update_display(CPU *cpu, Memory *memory, uint32_t pc) {
 //    clear();
-    WINDOW *reg_win = create_newwin(32, 26, 0, 0);
-    WINDOW *screen_win = create_newwin(25, 80, 0, 26);
-    WINDOW *source_win = create_newwin(32, 50, 0, 106);
+    WINDOW *reg_win = create_newwin(32, 30, 0, 0);
+    WINDOW *screen_win = create_newwin(25, 80, 0, 30);
+    WINDOW *source_win = create_newwin(32, 46, 0, 110);
     WINDOW *stack_win = create_newwin(32, 33, 0, 156);
 
     display_registers(reg_win, cpu);

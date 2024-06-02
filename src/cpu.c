@@ -199,6 +199,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     if(!pc_updated) {
         cpu->pc += 4;
     }
+    cpu->registers[0] = 0;  // 确保x0始终为0
 }
 
 // R-type指令处理函数
