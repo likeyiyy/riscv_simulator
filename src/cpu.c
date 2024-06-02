@@ -18,8 +18,8 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
     uint32_t imm = IMM(instruction);
 
     // 打印变量值以16进制格式，并对齐
-    printf("opcode: 0x%02X | rd: 0x%02X | funct3: 0x%02X | rs1: 0x%02X | rs2: 0x%02X | funct7: 0x%02X | imm: 0x%03X\n",
-           opcode, rd, funct3, rs1, rs2, funct7, imm);
+//    printf("opcode: 0x%02X | rd: 0x%02X | funct3: 0x%02X | rs1: 0x%02X | rs2: 0x%02X | funct7: 0x%02X | imm: 0x%03X\n",
+//           opcode, rd, funct3, rs1, rs2, funct7, imm);
 
     switch (opcode) {
         case OPCODE_R_TYPE: // 处理R型指令
@@ -121,8 +121,6 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
                         // SRAI 示例: srai x1, x2, 2
                         // 如果 imm 的高位为 1，执行算术右移 (SRAI)
                         // 将 x2 寄存器的值算术右移 2 位，结果存储在 x1 寄存器中
-                        // 打印cpu->registers[rs1]的值
-                        printf("cpu->registers[rs1] = %llu\n", cpu->registers[rs1]);
                         cpu->registers[rd] = (int64_t)cpu->registers[rs1] >> (imm & 0x3F);
                     }
                     break;

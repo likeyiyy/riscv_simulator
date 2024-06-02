@@ -83,7 +83,8 @@ int main(int argc, char *argv[]) {
     int ch;
     bool fast_mode = false;
 
-
+    // 打印基本信息
+    printf("Press 's' to step through instructions, 'f' to run at full speed, 'q' to quit.\n");
     // 模拟指令执行
     while (cpu.pc < MEMORY_SIZE) {
         ch = getch();
@@ -110,8 +111,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // Wait for user input before exiting
+    mvprintw(15, 0, "Simulation complete. Press 'q' to exit.");
+    refresh();
+    while ((ch = getch()) != 'q') {
+        usleep(100000); // Wait for user to press 'q' to quit
+    }
+
     // End ncurses mode
     endwin();
-
     return 0;
 }
