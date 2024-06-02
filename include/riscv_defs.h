@@ -108,8 +108,4 @@
 #define FUNCT3_BLTU 0x6
 #define FUNCT3_BGEU 0x7
 
-// J 型指令的 opcode 值
-#define OPCODE_JAL  0x6F
-#define OPCODE_JALR 0x67
-
 #endif // RISCV_DEFS_H

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "cpu.h"
 #include "memory.h"
 void execute_r_type_instruction(CPU *cpu, uint32_t instruction);
@@ -40,68 +41,76 @@ void execute_b_type_instruction(CPU *cpu, uint32_t instruction) {
             // BEQ指令：如果rs1等于rs2，则跳转到pc+imm
             if (cpu->registers[rs1] == cpu->registers[rs2]) {
                 cpu->pc += imm;
+                return;  // 跳转后不需要增加PC
             }
             break;
         case FUNCT3_BNE:
             // BNE指令：如果rs1不等于rs2，则跳转到pc+imm
             if (cpu->registers[rs1] != cpu->registers[rs2]) {
                 cpu->pc += imm;
+                return;  // 跳转后不需要增加PC
             }
             break;
         case FUNCT3_BLT:
             // BLT指令：如果rs1小于rs2，则跳转到pc+imm
             if ((int64_t)cpu->registers[rs1] < (int64_t)cpu->registers[rs2]) {
                 cpu->pc += imm;
+                return;  // 跳转后不需要增加PC
             }
             break;
         case FUNCT3_BGE:
             // BGE指令：如果rs1大于等于rs2，则跳转到pc+imm
             if ((int64_t)cpu->registers[rs1] >= (int64_t)cpu->registers[rs2]) {
                 cpu->pc += imm;
+                return;  // 跳转后不需要增加PC
             }
             break;
         case FUNCT3_BLTU:
             // BLTU指令：如果rs1小于rs2，则跳转到pc+imm
             if ((uint64_t)cpu->registers[rs1] < (uint64_t)cpu->registers[rs2]) {
                 cpu->pc += imm;
+                return;  // 跳转后不需要增加PC
             }
             break;
         case FUNCT3_BGEU:
             // BGEU指令：如果rs1大于等于rs2，则跳转到pc+imm
             if ((uint64_t)cpu->registers[rs1] >= (uint64_t)cpu->registers[rs2]) {
                 cpu->pc += imm;
+                return;  // 跳转后不需要增加PC
             }
             break;
         default:
             printf("Unknown B-type instruction with funct3: 0x%x\n", funct3);
     }
+    cpu->pc += 4;  // 如果没有跳转，则PC增加4
 }
 
 void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t rd = (instruction >> 7) & 0x1F;
-    int32_t imm = ((instruction >> 31) << 20) |
-                  (((instruction >> 21) & 0x3FF) << 1) |
-                  (((instruction >> 20) & 0x1) << 11) |
-                  ((instruction >> 12) & 0xFF);
-    imm = (imm << 11) >> 11;  // 符号扩展立即数
+    int32_t imm;
 
-    uint32_t opcode = instruction & 0x7F;
+    if ((instruction & 0x7F) == OPCODE_JAL) {
+        // 处理JAL指令
+        imm = ((instruction >> 31) << 20) |
+              (((instruction >> 21) & 0x3FF) << 1) |
+              (((instruction >> 20) & 0x1) << 11) |
+              ((instruction >> 12) & 0xFF);
+        imm = (imm << 11) >> 11;  // 符号扩展立即数
 
-    switch (opcode) {
-        case OPCODE_JAL:
-            // JAL指令：rd = pc + 4; pc = pc + imm
-            cpu->registers[rd] = cpu->pc + 4;
-            cpu->pc += imm;
-            break;
-        case OPCODE_JALR:
-            // JALR指令：rd = pc + 4; pc = (rs1 + imm) & ~1
-            cpu->registers[rd] = cpu->pc + 4;
-            cpu->pc = (cpu->registers[(instruction >> 15) & 0x1F] + imm) & ~1;
-            break;
-        default:
-            printf("Unknown J-type instruction with opcode: 0x%x\n", opcode);
+        cpu->registers[rd] = cpu->pc + 4;
+        cpu->pc += imm;
+    } else if ((instruction & 0x7F) == OPCODE_JALR) {
+        // 处理JALR指令
+        imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
+        uint32_t rs1 = (instruction >> 15) & 0x1F;
+
+        cpu->registers[rd] = cpu->pc + 4;
+        cpu->pc = (cpu->registers[rs1] + imm) & ~1;  // 确保跳转地址是对齐的
+    } else {
+        printf("Unknown J-type instruction with opcode: 0x%x\n", instruction & 0x7F);
     }
 }
+
 
 
 
@@ -109,6 +118,7 @@ void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
 
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
+    bool pc_updated = false;
 
     switch (opcode) {
         case OPCODE_R_TYPE: // 处理R型指令
@@ -134,10 +144,12 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             break;
         case OPCODE_B_TYPE:
             execute_b_type_instruction(cpu, instruction);
+            pc_updated = true;  // B型指令已经更新PC
             break;
         case OPCODE_JAL: // 处理JAL指令
         case OPCODE_JALR: // 处理JALR指令
             execute_j_type_instruction(cpu, instruction);
+            pc_updated = true;  // J型指令已经更新PC
             break;
         case OPCODE_IW_TYPE:
             switch ((instruction >> 12) & 0x7) {
@@ -183,6 +195,9 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             break;
         default:
             printf("Unknown instruction with opcode: 0x%x\n", opcode);
+    }
+    if(!pc_updated) {
+        cpu->pc += 4;
     }
 }
 
