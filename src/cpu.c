@@ -94,7 +94,7 @@ void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
         imm = ((instruction >> 31) << 20) |
               (((instruction >> 21) & 0x3FF) << 1) |
               (((instruction >> 20) & 0x1) << 11) |
-              ((instruction >> 12) & 0xFF);
+              (((instruction >> 12) & 0xFF) << 12);
         imm = (imm << 11) >> 11;  // 符号扩展立即数
 
         cpu->registers[rd] = cpu->pc + 4;

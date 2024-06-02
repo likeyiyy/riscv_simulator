@@ -238,9 +238,13 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
         imm = ((instruction >> 31) << 20) |
               (((instruction >> 21) & 0x3FF) << 1) |
               (((instruction >> 20) & 0x1) << 11) |
-              ((instruction >> 12) & 0xFF);
+                (((instruction >> 12) & 0xFF) << 12);
         imm = (imm << 11) >> 11;  // 符号扩展立即数
-        snprintf(buffer, buffer_size, "JAL %s, %d", reg_names[rd], imm);
+        if (rd == 0) {
+            snprintf(buffer, buffer_size, "J %d", imm);
+        } else {
+            snprintf(buffer, buffer_size, "JAL %s, %d", reg_names[rd], imm);
+        }
     } else if (opcode == OPCODE_JALR) {
         imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
         snprintf(buffer, buffer_size, "JALR %s, %d(%s)", reg_names[rd], imm, reg_names[rs1]);
