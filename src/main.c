@@ -98,11 +98,6 @@ int main(int argc, char *argv[]) {
 
     // 模拟指令执行
     while (cpu.pc < MEMORY_SIZE) {
-        ch = getch();
-        if (ch == 'q') break; // Quit the program
-        if (ch == 's') fast_mode = false; // Step mode
-        if (ch == 'f') fast_mode = true;  // Fast mode
-
         instruction = memory_load_word(&memory, cpu.pc);
 
         // 判断指令是否全为0
@@ -118,8 +113,14 @@ int main(int argc, char *argv[]) {
 
         if (!fast_mode) {
             nodelay(stdscr, FALSE); // Set blocking mode for step mode
-            getch(); // Wait for user input in step mode
-            nodelay(stdscr, TRUE); // Set back to non-blocking mode
+            ch = getch(); // Wait for user input in step mode
+            if (ch == 'q') break; // Quit the program
+            if (ch == 's') fast_mode = false; // Step mode
+            if (ch == 'f' || ch == 'c') {
+                fast_mode = true;  // Fast mode
+                nodelay(stdscr, TRUE); // Set back to non-blocking mode
+            }
+
         } else {
             nodelay(stdscr, TRUE); // Set back to non-blocking mode
             usleep(1000);
