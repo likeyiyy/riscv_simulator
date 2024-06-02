@@ -6,8 +6,8 @@
 
 // 定义寄存器名称
 const char* reg_names[] = {
-        "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7",
-        "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15",
+        "x0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+        "s0", "x9", "x10", "x11", "x12", "x13", "x14", "x15",
         "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
         "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"
 };
@@ -43,16 +43,17 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
 
     // 判断操作码和功能码来反汇编指令
     if (opcode == 0x13) {  // I型指令
+        imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
         switch (funct3) {
             case 0x0: // ADDI
                 if (rs1 == 0) {
                     snprintf(buffer, buffer_size, "LI %s, %d", reg_names[rd], imm);
                 } else {
-                    snprintf(buffer, buffer_size, "ADDI %s, %s, 0x%x", reg_names[rd], reg_names[rs1], imm);
+                    snprintf(buffer, buffer_size, "ADDI %s, %s, %d", reg_names[rd], reg_names[rs1], imm);
                 }
                 break;
             case 0x1: // SLLI
-                snprintf(buffer, buffer_size, "SLLI %s, %s, %d", reg_names[rd], reg_names[rs1], imm & 0x1F); // 立即数只有低5位有意义
+                snprintf(buffer, buffer_size, "SLLI %s, %s, 0x%x", reg_names[rd], reg_names[rs1], imm & 0x1F); // 立即数只有低5位有意义
                 break;
             case 0x2: // SLTI
                 snprintf(buffer, buffer_size, "SLTI %s, %s, %d", reg_names[rd], reg_names[rs1], imm);

@@ -16,9 +16,10 @@ void display_registers(WINDOW *win, CPU *cpu) {
 }
 
 void display_stack(WINDOW *win, Memory *memory) {
+    uint64_t base_address = 0x1000;
     for (int i = 0; i < STACK_SIZE; i++) {
-        uint64_t stack_value = memory_load_word(memory, MEMORY_SIZE - (i + 1) * 8);
-        mvwprintw(win, i, 1, "stack[%2d]: 0x%016llx", i, stack_value);
+        uint64_t stack_value = memory_load_word(memory, base_address + i * 8);
+        mvwprintw(win, i, 1, "0x%08lx: 0x%016llx", base_address + i * 8, stack_value);
     }
 }
 
@@ -37,9 +38,9 @@ void display_source(WINDOW *win, Memory *memory, uint32_t pc) {
 void update_display(CPU *cpu, Memory *memory, uint32_t pc) {
 //    clear();
     WINDOW *reg_win = create_newwin(32, 26, 0, 0);
-    WINDOW *screen_win = create_newwin(25, 80, 0, 28);
-    WINDOW *stack_win = create_newwin(32, 31, 0, 160);
-    WINDOW *source_win = create_newwin(32, 50, 0, 110);
+    WINDOW *screen_win = create_newwin(25, 80, 0, 26);
+    WINDOW *source_win = create_newwin(32, 50, 0, 106);
+    WINDOW *stack_win = create_newwin(32, 33, 0, 156);
 
     display_registers(reg_win, cpu);
     display_stack(stack_win, memory);

@@ -156,7 +156,7 @@ void execute_i_type_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t rd = RD(instruction);         // 提取目的寄存器
     uint32_t funct3 = FUNCT3(instruction); // 提取funct3字段
     uint32_t rs1 = RS1(instruction);       // 提取源寄存器1
-    uint32_t imm = IMM(instruction);
+    int32_t imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
     switch (funct3) {
         case FUNCT3_ADDI:
             // ADDI - 加法立即数
@@ -237,7 +237,8 @@ void execute_s_type_instruction(CPU *cpu, Memory *memory, uint32_t instruction) 
     uint32_t funct3 = (instruction >> 12) & 0x7; // 功能码
     uint32_t rs1 = (instruction >> 15) & 0x1F;   // 源寄存器1
     uint32_t rs2 = (instruction >> 20) & 0x1F;   // 源寄存器2
-    int32_t imm = ((instruction >> 25) << 5) | ((instruction >> 7) & 0x1F); // 立即数
+    int32_t imm = (int32_t)(((instruction >> 25) << 5) | ((instruction >> 7) & 0x1F)) << 20 >> 20; // 符号扩展立即数
+
 
     // 符号扩展立即数
     imm = (imm << 20) >> 20;
