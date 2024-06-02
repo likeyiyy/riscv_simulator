@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/cc -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/risc_simulator.dir/src/cpu.c.o CMakeFiles/risc_simulator.dir/src/main.c.o CMakeFiles/risc_simulator.dir/src/memory.c.o -o risc_simulator 
