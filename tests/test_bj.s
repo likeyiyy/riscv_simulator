@@ -36,7 +36,7 @@ test_jal:
 
 test_jalr:
     # 测试 JALR
-    la x4, jump_label     # 将 jump_label 的地址加载到 x4 中
+    la x4, end     # 将 jump_label 的地址加载到 x4 中
     jalr x5, 0(x4)        # 跳转到 x4 所指向的地址，并将返回地址存储在 x5 中
 
     j end                 # 跳转到结束标签，防止执行到未定义的指令
