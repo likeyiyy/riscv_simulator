@@ -1,3 +1,3 @@
-/home/likeyiyy/CLionProjects/rsicv-simulator/cmake-build-debug/CMakeFiles/risc_simulator.dir
-/home/likeyiyy/CLionProjects/rsicv-simulator/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/likeyiyy/CLionProjects/rsicv-simulator/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/glluenew/ClionProjects/riscv_simulator/cmake-build-debug/CMakeFiles/risc_simulator.dir
+/Users/glluenew/ClionProjects/riscv_simulator/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/glluenew/ClionProjects/riscv_simulator/cmake-build-debug/CMakeFiles/rebuild_cache.dir
