@@ -1,7 +1,10 @@
 # ninja log v5
-24	42	1717298737656111736	rsicv_simulator	9f096700ba22296
-0	24	1717298737634111469	CMakeFiles/rsicv_simulator.dir/main.c.o	6600794dc8404853
-0	22	1717299351386798636	CMakeFiles/risc_simulator.dir/src/cpu.c.o	2b4f82a2a43fe49a
 0	23	1717299351386798636	CMakeFiles/risc_simulator.dir/src/memory.c.o	acb00072cd224691
-0	23	1717299351389798714	CMakeFiles/risc_simulator.dir/src/main.c.o	f5ce019ffe430c20
+0	22	1717299351386798636	CMakeFiles/risc_simulator.dir/src/cpu.c.o	2b4f82a2a43fe49a
+24	42	1717298737656111736	rsicv_simulator	9f096700ba22296
 23	41	1717299351409799237	risc_simulator	9b0f7ace71ab6e89
+0	23	1717299351389798714	CMakeFiles/risc_simulator.dir/src/main.c.o	f5ce019ffe430c20
+0	24	1717298737634111469	CMakeFiles/rsicv_simulator.dir/main.c.o	6600794dc8404853
+0	23	1717304044735869874	CMakeFiles/risc_simulator.dir/src/cpu.c.o	2b4f82a2a43fe49a
+0	22	1717304061318169646	CMakeFiles/risc_simulator.dir/src/main.c.o	f5ce019ffe430c20
+22	37	1717304061336169971	risc_simulator	9b0f7ace71ab6e89
