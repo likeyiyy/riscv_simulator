@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "disassemble.h"
+#include "riscv_defs.h"
 
 // 定义寄存器名称
 const char* reg_names[] = {
@@ -42,7 +43,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
     int32_t shamt = (instruction >> 20) & 0x1F;
 
     // 判断操作码和功能码来反汇编指令
-    if (opcode == 0x13) {  // I型指令
+    if (opcode == OPCODE_I_TYPE) {  // I型指令
         imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
         switch (funct3) {
             case 0x0: // ADDI
@@ -80,7 +81,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "I: 0x%08x", instruction);
         }
-    } else if (opcode == 0x33) {  // R型指令
+    } else if (opcode == OPCODE_R_TYPE) {  // R型指令
         switch (funct3) {
             case 0x0:
                 if (funct7 == 0x00) {
@@ -117,7 +118,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "R: 0x%08x", instruction);
         }
-    } else if (opcode == 0x03) {  // LOAD指令
+    } else if (opcode == OPCODE_LOAD) {  // LOAD指令
         switch (funct3) {
             case 0x0: // LB
                 snprintf(buffer, buffer_size, "LB %s, %d(%s)", reg_names[rd], imm, reg_names[rs1]);
@@ -143,7 +144,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "LOAD: 0x%08x", instruction);
         }
-    } else if (opcode == 0x23) {  // STORE指令
+    } else if (opcode == OPCODE_S_TYPE) {  // STORE指令
         int32_t imm = ((instruction >> 25) << 5) | ((instruction >> 7) & 0x1F); // 提取存储指令的立即数
         switch (funct3) {
             case 0x0: // SB
@@ -161,13 +162,13 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "STORE: 0x%08x", instruction);
         }
-    } else if (opcode == 0x37) {  // LUI指令
+    } else if (opcode == OPCODE_U_TYPE) {  // LUI指令
         int32_t imm = instruction & 0xFFFFF000;
         snprintf(buffer, buffer_size, "LUI %s, 0x%x", reg_names[rd], imm);
-    } else if (opcode == 0x17) {  // AUIPC指令
+    } else if (opcode == OPCODE_AUIPC) {  // AUIPC指令
         int32_t imm = instruction & 0xFFFFF000;
         snprintf(buffer, buffer_size, "AUIPC %s, 0x%x", reg_names[rd], imm);
-    } else if (opcode == 0x1B) {
+    } else if (opcode == OPCODE_IW_TYPE) {
         switch (funct3) {
             case 0x0: // ADDIW
                 snprintf(buffer, buffer_size, "ADDIW %s, %s, 0x%x", reg_names[rd], reg_names[rs1], imm);
@@ -185,7 +186,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "Unknown I-type extension instruction: 0x%08x", instruction);
         }
-    } else if (opcode == 0x3B) {
+    } else if (opcode == OPCODE_RW_TYPE) {
         switch (funct3) {
             case 0x0:
                 if (funct7 == 0x00) {
@@ -207,6 +208,40 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "Unknown R-type extension instruction: 0x%08x", instruction);
         }
+    } else if (opcode == OPCODE_B_TYPE) {
+        // B型指令
+        imm = (int32_t)(((instruction >> 31) << 12) | (((instruction >> 7) & 0x1) << 11) |
+                            (((instruction >> 25) & 0x3F) << 5) | (((instruction >> 8) & 0xF) << 1)) << 19 >> 19; // 符号扩展立即数
+        switch (funct3) {
+            case FUNCT3_BEQ:
+                snprintf(buffer, buffer_size, "BEQ %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+                break;
+            case FUNCT3_BNE:
+                snprintf(buffer, buffer_size, "BNE %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+                break;
+            case FUNCT3_BLT:
+                snprintf(buffer, buffer_size, "BLT %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+                break;
+            case FUNCT3_BGE:
+                snprintf(buffer, buffer_size, "BGE %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+                break;
+            case FUNCT3_BLTU:
+                snprintf(buffer, buffer_size, "BLTU %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+                break;
+            case FUNCT3_BGEU:
+                snprintf(buffer, buffer_size, "BGEU %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+                break;
+            default:
+                snprintf(buffer, buffer_size, "Unknown B-type instruction: 0x%08x", instruction);
+        }
+    } else if (opcode == OPCODE_JAL) {
+
+        imm = (int32_t)(((instruction >> 31) << 20) | (((instruction >> 21) & 0x3FF) << 1) |
+                            (((instruction >> 20) & 0x1) << 11) | ((instruction >> 12) & 0xFF)) << 11 >> 11; // 符号扩展立即数
+        snprintf(buffer, buffer_size, "JAL %s, %d", reg_names[rd], imm);
+    } else if (opcode == OPCODE_JALR) {
+        imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
+        snprintf(buffer, buffer_size, "JALR %s, %d(%s)", reg_names[rd], imm, reg_names[rs1]);
     } else {
         snprintf(buffer, buffer_size, "E: 0x%08x", instruction);
     }

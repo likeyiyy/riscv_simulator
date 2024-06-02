@@ -89,10 +89,12 @@ void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
 
     switch (opcode) {
         case OPCODE_JAL:
+            // JAL指令：rd = pc + 4; pc = pc + imm
             cpu->registers[rd] = cpu->pc + 4;
             cpu->pc += imm;
             break;
         case OPCODE_JALR:
+            // JALR指令：rd = pc + 4; pc = (rs1 + imm) & ~1
             cpu->registers[rd] = cpu->pc + 4;
             cpu->pc = (cpu->registers[(instruction >> 15) & 0x1F] + imm) & ~1;
             break;
@@ -179,6 +181,8 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
                     printf("Unknown RW-type instruction: 0x%08x\n", instruction);
             }
             break;
+        default:
+            printf("Unknown instruction with opcode: 0x%x\n", opcode);
     }
 }
 
@@ -233,7 +237,9 @@ void execute_r_type_instruction(CPU *cpu, uint32_t instruction) {
             cpu->registers[rd] = cpu->registers[rs1] & cpu->registers[rs2];
             break;
             // 其他R型指令
-            // ...
+        default:
+            printf("Unknown R-type instruction with funct3: 0x%x\n", funct3);
+            break;
     }
 }
 

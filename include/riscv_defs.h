@@ -2,6 +2,7 @@
 #define RISCV_DEFS_H
 
 // 指令类型宏定义
+#define OPCODE_LOAD    0x03 // 加载指令
 #define OPCODE_I_TYPE  0x13 // I-type指令，立即数操作和加载指令
 #define OPCODE_AUIPC   0x17 // AUIPC指令
 #define OPCODE_S_TYPE  0x23 // S-type指令，存储指令
@@ -15,8 +16,7 @@
 #define OPCODE_AUIPC   0x17 // 加上立即数到程序计数器
 #define OPCODE_JAL     0x6F // 跳转并链接
 #define OPCODE_JALR    0x67 // 寄存器跳转并链接
-#define OPCODE_BRANCH  0x63 // 条件分支
-#define OPCODE_LOAD    0x03 // 加载指令
+
 #define OPCODE_STORE   0x23 // 存储指令
 #define OPCODE_IMM     0x13 // 立即数指令
 #define OPCODE_OP      0x33 // 操作指令
