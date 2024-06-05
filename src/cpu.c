@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "cpu.h"
 #include "memory.h"
 void execute_r_type_instruction(CPU *cpu, uint32_t instruction);
