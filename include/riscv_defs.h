@@ -2,28 +2,29 @@
 #define RISCV_DEFS_H
 
 // 指令类型宏定义
-#define OPCODE_LOAD    0x03 // 加载指令
-#define OPCODE_I_TYPE  0x13 // I-type指令，立即数操作和加载指令
-#define OPCODE_AUIPC   0x17 // AUIPC指令
-#define OPCODE_S_TYPE  0x23 // S-type指令，存储指令
-#define OPCODE_R_TYPE  0x33 // R-type指令，算术和逻辑操作
-#define OPCODE_B_TYPE  0x63 // B-type指令，条件分支指令
-#define OPCODE_U_TYPE  0x37 // U-type指令，上部立即数
-#define OPCODE_J_TYPE  0x6F // J-type指令，无条件跳转
+#define OPCODE_LOAD      0x03  // Load: LB, LH, LW, LBU, LHU, LD
+#define OPCODE_LOAD_FP   0x07  // Load Floating-Point: FLW, FLD
+#define OPCODE_MISC_MEM  0x0F  // Miscellaneous Memory: FENCE, FENCE.I
+#define OPCODE_OP_IMM    0x13  // OP-IMM: ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI
+#define OPCODE_AUIPC     0x17  // Add Upper Immediate to PC: AUIPC
+#define OPCODE_OP_IMM_32 0x1B  // Arithmetic Immediate (32-bit): ADDIW, SLLIW, SRLIW, SRAIW
+#define OPCODE_STORE     0x23  // Store: SB, SH, SW, SD
+#define OPCODE_STORE_FP  0x27  // Store Floating-Point: FSW, FSD
+#define OPCODE_AMO       0x2F  // Atomic Memory Operations: LR.W, SC.W, AMOSWAP.W, AMOADD.W, AMOXOR.W, AMOAND.W, AMOOR.W, AMOMIN.W, AMOMAX.W, AMOMINU.W, AMOMAXU.W, LR.D, SC.D, AMOSWAP.D, AMOADD.D, AMOXOR.D, AMOAND.D, AMOOR.D, AMOMIN.D, AMOMAX.D, AMOMINU.D, AMOMAXU.D
+#define OPCODE_OP        0x33  // OP: ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND
+#define OPCODE_LUI       0x37  // Load Upper Immediate: LUI
+#define OPCODE_OP_32     0x3B  // Arithmetic (32-bit): ADDW, SUBW, SLLW, SRLW, SRAW
+#define OPCODE_BRANCH    0x63  // Branch: BEQ, BNE, BLT, BGE, BLTU, BGEU
+#define OPCODE_JALR      0x67  // Jump and Link Register: JALR
+#define OPCODE_JAL       0x6F  // Jump and Link: JAL
+#define OPCODE_SYSTEM    0x73  // System: ECALL, EBREAK, CSRRW, CSRRS, CSRRC, CSRRWI, CSRRSI, CSRRCI
 
-// 其他指令类型宏定义
-#define OPCODE_LUI     0x37 // 加载上部立即数
-#define OPCODE_AUIPC   0x17 // 加上立即数到程序计数器
-#define OPCODE_JAL     0x6F // 跳转并链接
-#define OPCODE_JALR    0x67 // 寄存器跳转并链接
-
-#define OPCODE_STORE   0x23 // 存储指令
-#define OPCODE_IMM     0x13 // 立即数指令
-#define OPCODE_OP      0x33 // 操作指令
-#define OPCODE_MISC_MEM 0x0F // 杂项内存指令
-#define OPCODE_SYSTEM  0x73 // 系统指令
-#define OPCODE_IW_TYPE 0x1B // 宽度扩展I型指令
-#define OPCODE_RW_TYPE 0x3B // 宽度扩展R型指令
+// Floating-Point Instructions (if implemented)
+#define OPCODE_MADD      0x43  // Multiply-Add: FMADD.S, FMADD.D
+#define OPCODE_MSUB      0x47  // Multiply-Subtract: FMSUB.S, FMSUB.D
+#define OPCODE_NMSUB     0x4B  // Negative Multiply-Subtract: FNMSUB.S, FNMSUB.D
+#define OPCODE_NMADD     0x4F  // Negative Multiply-Add: FNMADD.S, FNMADD.D
+#define OPCODE_OP_FP     0x53  // Floating-Point Operations: FADD.S, FSUB.S, FMUL.S, FDIV.S, FSQRT.S, FSGNJ.S, FSGNJN.S, FSGNJX.S, FMIN.S, FMAX.S, FCVT.W.S, FCVT.WU.S, FMV.X.W, FEQ.S, FLT.S, FLE.S, FCLASS.S, FCVT.S.W, FCVT.S.WU, FMV.W.X, FCVT.L.S, FCVT.LU.S, FCVT.S.L, FCVT.S.LU, FMV.X.D, FSGNJ.D, FSGNJN.D, FSGNJX.D, FMIN.D, FMAX.D, FCVT.W.D, FCVT.WU.D, FMV.X.D, FEQ.D, FLT.D, FLE.D, FCLASS.D, FCVT.D.W, FCVT.D.WU, FMV.D.X
 
 
 #define FUNCT3_ADDIW 0x0  // ADDIW指令的功能码

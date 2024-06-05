@@ -119,15 +119,16 @@ void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
     bool pc_updated = false;
+    cpu->registers[0] = 0;  // 确保x0始终为0
 
     switch (opcode) {
-        case OPCODE_R_TYPE: // 处理R型指令
+        case OPCODE_OP: // 处理R型指令
             execute_r_type_instruction(cpu, instruction);
             break;
-        case OPCODE_I_TYPE:
+        case OPCODE_OP_IMM:
             execute_i_type_instruction(cpu, instruction);
             break;
-        case OPCODE_S_TYPE:
+        case OPCODE_STORE:
             execute_s_type_instruction(cpu, memory, instruction);
             break;
         case OPCODE_LOAD:
@@ -138,11 +139,11 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             // AUIPC指令：rd = pc + imm
             cpu->registers[RD(instruction)] = cpu->pc + (instruction & 0xFFFFF000);
             break;
-        case OPCODE_U_TYPE:
+        case OPCODE_LUI:
             // LUI指令：rd = imm
             cpu->registers[RD(instruction)] = (instruction & 0xFFFFF000);
             break;
-        case OPCODE_B_TYPE:
+        case OPCODE_BRANCH:
             execute_b_type_instruction(cpu, instruction);
             pc_updated = true;  // B型指令已经更新PC
             break;
@@ -151,7 +152,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             execute_j_type_instruction(cpu, instruction);
             pc_updated = true;  // J型指令已经更新PC
             break;
-        case OPCODE_IW_TYPE:
+        case OPCODE_OP_IMM_32:
             switch ((instruction >> 12) & 0x7) {
                 case 0x0: // ADDIW
                     execute_addiw(cpu, instruction);
@@ -170,7 +171,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
                     printf("Unknown IW-type instruction: 0x%08x\n", instruction);
             }
             break;
-        case OPCODE_RW_TYPE:
+        case OPCODE_OP_32:
             switch ((instruction >> 12) & 0x7) {
                 case 0x0: // ADDW 和 SUBW
                     if ((instruction >> 25) == 0x00) {

@@ -43,7 +43,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
     int32_t shamt = (instruction >> 20) & 0x1F;
 
     // 判断操作码和功能码来反汇编指令
-    if (opcode == OPCODE_I_TYPE) {  // I型指令
+    if (opcode == OPCODE_OP_IMM) {  // I型指令
         imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
         switch (funct3) {
             case 0x0: // ADDI
@@ -81,7 +81,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "I: 0x%08x", instruction);
         }
-    } else if (opcode == OPCODE_R_TYPE) {  // R型指令
+    } else if (opcode == OPCODE_OP) {  // R型指令
         switch (funct3) {
             case 0x0:
                 if (funct7 == 0x00) {
@@ -144,7 +144,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "LOAD: 0x%08x", instruction);
         }
-    } else if (opcode == OPCODE_S_TYPE) {  // STORE指令
+    } else if (opcode == OPCODE_STORE) {  // STORE指令
         int32_t imm = ((instruction >> 25) << 5) | ((instruction >> 7) & 0x1F); // 提取存储指令的立即数
         switch (funct3) {
             case 0x0: // SB
@@ -162,13 +162,13 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "STORE: 0x%08x", instruction);
         }
-    } else if (opcode == OPCODE_U_TYPE) {  // LUI指令
+    } else if (opcode == OPCODE_LUI) {  // LUI指令
         int32_t imm = instruction & 0xFFFFF000;
         snprintf(buffer, buffer_size, "LUI %s, 0x%x", reg_names[rd], imm);
     } else if (opcode == OPCODE_AUIPC) {  // AUIPC指令
         int32_t imm = instruction & 0xFFFFF000;
         snprintf(buffer, buffer_size, "AUIPC %s, 0x%x", reg_names[rd], imm);
-    } else if (opcode == OPCODE_IW_TYPE) {
+    } else if (opcode == OPCODE_OP_IMM_32) {
         switch (funct3) {
             case 0x0: // ADDIW
                 snprintf(buffer, buffer_size, "ADDIW %s, %s, 0x%x", reg_names[rd], reg_names[rs1], imm);
@@ -186,7 +186,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "Unknown I-type extension instruction: 0x%08x", instruction);
         }
-    } else if (opcode == OPCODE_RW_TYPE) {
+    } else if (opcode == OPCODE_OP_32) {
         switch (funct3) {
             case 0x0:
                 if (funct7 == 0x00) {
@@ -208,7 +208,7 @@ void disassemble(uint32_t instruction, char* buffer, size_t buffer_size) {
             default:
                 snprintf(buffer, buffer_size, "Unknown R-type extension instruction: 0x%08x", instruction);
         }
-    } else if (opcode == OPCODE_B_TYPE) {
+    } else if (opcode == OPCODE_BRANCH) {
         // B型指令
         imm = (int32_t)(((instruction >> 31) << 12) | (((instruction >> 7) & 0x1) << 11) |
                             (((instruction >> 25) & 0x3F) << 5) | (((instruction >> 8) & 0xF) << 1)) << 19 >> 19; // 符号扩展立即数
