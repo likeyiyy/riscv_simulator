@@ -17,5 +17,6 @@ typedef struct {
 
 void cpu_init(CPU *cpu, Memory *memory);
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);
+void raise_exception(CPU *cpu, uint64_t cause);
 
 #endif // CPU_H

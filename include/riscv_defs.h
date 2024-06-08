@@ -144,5 +144,15 @@
 #define FUNCT7_AMOMINU 0x18
 #define FUNCT7_AMOMAXU 0x1C
 
+// M 扩展指令的 funct3 和 funct7
+#define FUNCT7_M 0x01
+#define FUNCT3_MUL    0x0
+#define FUNCT3_MULH   0x1
+#define FUNCT3_MULHSU 0x2
+#define FUNCT3_MULHU  0x3
+#define FUNCT3_DIV    0x4
+#define FUNCT3_DIVU   0x5
+#define FUNCT3_REM    0x6
+#define FUNCT3_REMU   0x7
 
 #endif // RISCV_DEFS_H
