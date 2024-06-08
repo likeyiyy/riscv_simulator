@@ -22,22 +22,22 @@ void display_registers(WINDOW *win, CPU *cpu) {
     }
 }
 
-void display_stack(WINDOW *win, Memory *memory) {
-    uint64_t base_address = 0x1000;
+void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
+    uint64_t base_address = cpu->registers[2] - STACK_SIZE * 4;
     for (int i = 0; i < STACK_SIZE; i++) {
         uint64_t stack_value = memory_load_dword(memory, base_address + i * 8);
         mvwprintw(win, i, 1, "0x%08lx: 0x%016llx", base_address + i * 8, stack_value);
     }
 }
 
-void display_source(WINDOW *win, Memory *memory, uint32_t pc) {
+void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
     char buffer[100];
 
 
     for (int i = 0; i < 32; i++) {
-        uint32_t address = pc + i * 4;
+        uint64_t address = pc + i * 4;
         uint32_t instruction = memory_load_word(memory, address);
-        disassemble(instruction, buffer, sizeof(buffer));
+        disassemble(address, instruction, buffer, sizeof(buffer));
         mvwprintw(win, i, 1, "0x%08x: 0x%08x  %s", address, instruction, &buffer);
     }
 }
@@ -50,7 +50,7 @@ void update_display(CPU *cpu, Memory *memory, uint32_t pc) {
     WINDOW *stack_win = create_newwin(32, 33, 0, 156);
 
     display_registers(reg_win, cpu);
-    display_stack(stack_win, memory);
+    display_stack(stack_win, cpu, memory);
     display_source(source_win, memory, pc);
 
     wrefresh(reg_win);
@@ -103,6 +103,7 @@ int main(int argc, char *argv[]) {
 
     memory_init(&memory);
     cpu_init(&cpu, &memory);
+    init_csr_names();
 
 
     // Initialize ncurses

@@ -84,6 +84,9 @@
 #define CSR_DPC         0x7B1
 #define CSR_DSCRATCH    0x7B2
 
+#define MAX_CSR_INDEX 4095
+
+
 #define PRV_U 0 // User
 #define PRV_S 1 // Supervisor
 #define PRV_M 3 // Machine
