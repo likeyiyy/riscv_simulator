@@ -25,8 +25,11 @@ void cpu_init(CPU *cpu, Memory *memory) {
     cpu->pc = 0;
     cpu->priv = PRV_M;
     cpu->memory = memory;
+    init_mmu(&cpu->mmu);
+    // 初始化 CLINT 和 PLIC
+    init_clint(&cpu->clint);
+    init_plic(&cpu->plic);
 }
-
 
 
 
