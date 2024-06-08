@@ -1,5 +1,5 @@
 #include <string.h>
-#include "uart.h"
+#include "uart_sim.h"
 
 void uart_init(UART *uart) {
     memset(uart->registers, 0, sizeof(uart->registers));

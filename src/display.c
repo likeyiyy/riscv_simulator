@@ -1,7 +1,7 @@
 #include <unistd.h> // for usleep
 #include "disassemble.h"
 #include "display.h"
-#include "uart.h"
+#include "uart_sim.h"
 
 
 const char *reg_names2[32] = {

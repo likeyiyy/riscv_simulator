@@ -1,5 +1,5 @@
-#ifndef UART_H
-#define UART_H
+#ifndef RISCSIMULATOR_S_UART_H
+#define RISCSIMULATOR_S_UART_H
 
 #include <stdint.h>
 #include <ncurses.h>
@@ -31,4 +31,4 @@ void uart_init(UART *uart);
 void uart_write(UART *uart, uint64_t addr, uint8_t value);
 uint8_t uart_read(UART *uart, uint64_t addr);
 
-#endif // UART_H
+#endif // RISCSIMULATOR_S_UART_H

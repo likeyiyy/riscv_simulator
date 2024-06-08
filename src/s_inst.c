@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "s_inst.h"
-#include "uart.h"
+#include "uart_sim.h"
 
 // S-type指令处理函数
 void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {

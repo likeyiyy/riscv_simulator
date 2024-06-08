@@ -5,7 +5,7 @@
 #include <semaphore.h>
 #include "cpu.h"
 #include "memory.h"
-#include "uart.h"
+#include "uart_sim.h"
 
 #define STACK_SIZE 32
 typedef struct {

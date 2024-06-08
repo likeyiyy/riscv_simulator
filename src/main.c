@@ -7,7 +7,7 @@
 #include "memory.h"
 #include "disassemble.h"
 #include "display.h"
-#include "uart.h"
+#include "uart_sim.h"
 
 
 void load_file_to_memory(const char *filename, Memory *memory) {
