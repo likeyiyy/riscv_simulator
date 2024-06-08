@@ -87,8 +87,7 @@ int main(int argc, char *argv[]) {
                 nodelay(stdscr, TRUE); // Set back to non-blocking mode
             }
         } else {
-            nodelay(stdscr, TRUE); // Set back to non-blocking mode
-            usleep(1000);
+
         }
         cpu_execute(&cpu, &memory, instruction);
 
