@@ -24,7 +24,7 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
 
             // SB - 存储字节
             if (addr >= UART_BASE_ADDR && addr < UART_BASE_ADDR + 8) {
-                uart_write(cpu->uart, addr - UART_BASE_ADDR, cpu->registers[rs2] & 0xFF);
+                uart_write(cpu->uart, addr, cpu->registers[rs2] & 0xFF);
             } else {
                 cpu->memory->data[addr] = cpu->registers[rs2] & 0xFF;
             }

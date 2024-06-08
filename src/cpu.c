@@ -31,6 +31,7 @@ void cpu_init(CPU *cpu, Memory *memory, UART *uart) {
     init_plic(&cpu->plic);
     // 初始化中断优先级
     cpu->current_priority = 0;
+    cpu->uart = uart;
 }
 
 

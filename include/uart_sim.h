@@ -21,7 +21,7 @@
 #define SPR 7   // ScratchPad Register
 
 // Line Status Register bits
-#define LSR_THRE 0x20 // Transmitter Holding Register Empty
+#define LSR_THRE 0x60 // Transmitter Holding Register Empty
 
 typedef struct {
     uint8_t registers[8];

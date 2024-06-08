@@ -50,7 +50,7 @@ void execute_load_instruction(CPU *cpu, uint32_t instruction) {
             // 从 x2 寄存器地址加立即数偏移的内存中加载一个字节，零扩展，存储在 x1 寄存器中
             if (address >= UART_BASE_ADDR && address < UART_BASE_ADDR + 8) {
                 // 从 UART 寄存器加载字节
-                cpu->registers[rd] = uart_read(cpu->uart, address - UART_BASE_ADDR);
+                cpu->registers[rd] = uart_read(cpu->uart, address);
             } else {
                 // 从内存加载字节
                 cpu->registers[rd] = (uint8_t)cpu->memory->data[address];
