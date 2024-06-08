@@ -18,5 +18,6 @@ typedef struct {
 
 
 void *update_display(void *arg);
+void *update_screen(void *arg);
 
 #endif // DISPLAY_H

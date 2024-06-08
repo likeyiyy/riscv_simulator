@@ -1,4 +1,5 @@
 #include <unistd.h> // for usleep
+#include <pthread.h>
 #include "disassemble.h"
 #include "display.h"
 #include "uart_sim.h"
@@ -104,22 +105,19 @@ void *update_display(void *arg) {
     WINDOW *source_win = create_newwin(33, 50, 0, 110);
     WINDOW *stack_win = create_newwin(33, 33, 0, 161);
 
+    int i = 0;
     while (1) {
-
-        display_registers(reg_win, cpu);
-        display_stack(stack_win, cpu, memory);
-        display_source(source_win, memory, data->pc);
         display_screen(screen_win, uart);
-
-        wrefresh(reg_win);
         wrefresh(screen_win);
-        wrefresh(stack_win);
-        wrefresh(source_win);
-        refresh();
+        if (i++ % 100 == 0) {
+            display_registers(reg_win, cpu);
+            display_stack(stack_win, cpu, memory);
+            display_source(source_win, memory, data->pc);
+            wrefresh(reg_win);
+            wrefresh(stack_win);
+            wrefresh(source_win);
+        }
         sem_post(sem); // Signal main thread to proceed
-        usleep(10000); // Adjust the refresh rate as needed
+        usleep(1000); // Adjust the refresh rate as needed
     }
-
-    endwin();
-    return NULL;
 }

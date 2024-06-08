@@ -13,15 +13,17 @@ void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
               (((instruction >> 20) & 0x1) << 11) |
               (((instruction >> 12) & 0xFF) << 12);
         imm = (imm << 11) >> 11;  // 符号扩展立即数
-
-        cpu->registers[rd] = cpu->pc + 4;
+        if (rd != 0) {
+            cpu->registers[rd] = cpu->pc + 4;
+        }
         cpu->pc += imm;
     } else if ((instruction & 0x7F) == OPCODE_JALR) {
         // 处理JALR指令
         imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
         uint32_t rs1 = (instruction >> 15) & 0x1F;
-
-        cpu->registers[rd] = cpu->pc + 4;
+        if (rd != 0) {
+            cpu->registers[rd] = cpu->pc + 4;
+        }
         cpu->pc = (cpu->registers[rs1] + imm) & ~1;  // 确保跳转地址是对齐的
     } else {
         printf("Unknown J-type instruction with opcode: 0x%x\n", instruction & 0x7F);

@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
     pthread_t display_thread;
     pthread_create(&display_thread, NULL, update_display, &data);
 
+
     // Simulate instruction execution
     int ch;
     uint32_t instruction;
