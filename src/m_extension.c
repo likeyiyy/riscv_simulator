@@ -1,36 +1,37 @@
 #include "m_extension.h"
+#include "csr.h"
 
 // M 扩展指令实现
 inline void execute_mul(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
-    int64_t src1 = (int64_t)cpu->registers[rs1];
-    int64_t src2 = (int64_t)cpu->registers[rs2];
-    cpu->registers[rd] = (uint64_t)(src1 * src2);
+    int64_t src1 = (int64_t) cpu->registers[rs1];
+    int64_t src2 = (int64_t) cpu->registers[rs2];
+    cpu->registers[rd] = (uint64_t) (src1 * src2);
 }
 
 inline void execute_mulh(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
-    int64_t src1 = (int64_t)cpu->registers[rs1];
-    int64_t src2 = (int64_t)cpu->registers[rs2];
-    __int128_t result = (__int128_t)src1 * (__int128_t)src2;
-    cpu->registers[rd] = (uint64_t)(result >> 64);
+    int64_t src1 = (int64_t) cpu->registers[rs1];
+    int64_t src2 = (int64_t) cpu->registers[rs2];
+    __int128_t result = (__int128_t) src1 * (__int128_t) src2;
+    cpu->registers[rd] = (uint64_t) (result >> 64);
 }
 
 inline void execute_mulhsu(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
-    int64_t src1 = (int64_t)cpu->registers[rs1];
+    int64_t src1 = (int64_t) cpu->registers[rs1];
     uint64_t src2 = cpu->registers[rs2];
-    __int128_t result = (__int128_t)src1 * (__int128_t)src2;
-    cpu->registers[rd] = (uint64_t)(result >> 64);
+    __int128_t result = (__int128_t) src1 * (__int128_t) src2;
+    cpu->registers[rd] = (uint64_t) (result >> 64);
 }
 
 inline void execute_mulhu(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
     uint64_t src1 = cpu->registers[rs1];
     uint64_t src2 = cpu->registers[rs2];
-    __uint128_t result = (__uint128_t)src1 * (__uint128_t)src2;
-    cpu->registers[rd] = (uint64_t)(result >> 64);
+    __uint128_t result = (__uint128_t) src1 * (__uint128_t) src2;
+    cpu->registers[rd] = (uint64_t) (result >> 64);
 }
 
 inline void execute_div(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
-    int64_t src1 = (int64_t)cpu->registers[rs1];
-    int64_t src2 = (int64_t)cpu->registers[rs2];
+    int64_t src1 = (int64_t) cpu->registers[rs1];
+    int64_t src2 = (int64_t) cpu->registers[rs2];
     if (src2 == 0) {
         cpu->registers[rd] = -1; // Division by zero
     } else if (src1 == INT64_MIN && src2 == -1) {
@@ -51,8 +52,8 @@ inline void execute_divu(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
 }
 
 inline void execute_rem(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
-    int64_t src1 = (int64_t)cpu->registers[rs1];
-    int64_t src2 = (int64_t)cpu->registers[rs2];
+    int64_t src1 = (int64_t) cpu->registers[rs1];
+    int64_t src2 = (int64_t) cpu->registers[rs2];
     if (src2 == 0) {
         cpu->registers[rd] = src1; // Division by zero
     } else if (src1 == INT64_MIN && src2 == -1) {
