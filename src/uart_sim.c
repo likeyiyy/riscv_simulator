@@ -9,7 +9,11 @@ void uart_init(UART *uart) {
 
 void uart_write(UART *uart, uint64_t addr, uint8_t value) {
     uint64_t offset = addr - UART_BASE_ADDR;
+
     if (offset < sizeof(uart->registers)) {
+        if (uart->registers[LCR] & 0x80 && (offset == DLL || offset == DLM)) {
+            return;
+        }
         uart->registers[(uint8_t)offset] = value;
     }
 

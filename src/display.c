@@ -21,6 +21,8 @@ WINDOW *create_newwin(int height, int width, int starty, int startx) {
 }
 
 void display_registers(WINDOW *win, CPU *cpu) {
+    wclear(win);
+    box(win, 0, 0);
     mvwprintw(win, 0, 1, "pc:0x%016llx", cpu->pc);
     for (int i = 0; i < 32; i++) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
@@ -28,6 +30,8 @@ void display_registers(WINDOW *win, CPU *cpu) {
 }
 
 void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
+    wclear(win);
+    box(win, 0, 0);
     mvwprintw(win, 0, 1, "Stack (0x%016llx):", cpu->registers[2]);
     uint64_t base_address = cpu->registers[2] - STACK_SIZE;
     for (int i = 0; i < STACK_SIZE; i++) {
@@ -37,6 +41,8 @@ void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
 }
 
 void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
+    wclear(win);
+    box(win, 0, 0);
     char buffer[100];
     mvwprintw(win, 0, 1, "Source (0x%016llx):", pc);
     for (int i = 0; i < 32; i++) {
@@ -48,7 +54,7 @@ void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
 }
 
 void display_screen(WINDOW *win, UART *uart) {
-    static int line = 0;
+    static int line = 1;
     static int col = 1; // Start from column 1 to leave space for the box
     if (uart->registers[LSR] & 0x01) { // Check if data is ready
         uint8_t value = uart->registers[RHR];
@@ -66,7 +72,7 @@ void display_screen(WINDOW *win, UART *uart) {
         }
 
         if (line >= getmaxy(win) - 1) { // Clear the window if the end is reached
-            line = 0;
+            line = 1;
             col = 1; // Reset to the first column
             wclear(win);
             box(win, 0, 0);
@@ -76,7 +82,6 @@ void display_screen(WINDOW *win, UART *uart) {
         uart->registers[LSR] |= LSR_THRE; // Set Transmitter Holding Register Empty
         uart->registers[THR] = 0;
     }
-    wrefresh(win); // Refresh the window to display changes
 }
 
 void *update_display(void *arg) {
@@ -94,13 +99,12 @@ void *update_display(void *arg) {
     clear();
     refresh();
 
-
+    WINDOW *screen_win = create_newwin(26, 80, 0, 30);
+    WINDOW *reg_win = create_newwin(33, 30, 0, 0);
+    WINDOW *source_win = create_newwin(33, 50, 0, 110);
+    WINDOW *stack_win = create_newwin(33, 33, 0, 161);
 
     while (1) {
-        WINDOW *reg_win = create_newwin(33, 30, 0, 0);
-        WINDOW *screen_win = create_newwin(26, 80, 0, 30);
-        WINDOW *source_win = create_newwin(33, 50, 0, 110);
-        WINDOW *stack_win = create_newwin(33, 33, 0, 161);
 
         display_registers(reg_win, cpu);
         display_stack(stack_win, cpu, memory);
@@ -113,7 +117,7 @@ void *update_display(void *arg) {
         wrefresh(source_win);
         refresh();
         sem_post(sem); // Signal main thread to proceed
-        usleep(50000); // Adjust the refresh rate as needed
+        usleep(10000); // Adjust the refresh rate as needed
     }
 
     endwin();
