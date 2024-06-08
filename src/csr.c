@@ -1,5 +1,6 @@
 #include "csr.h"
 #include "cpu.h"
+#include "mmu.h"
 
 // 读取 CSR 寄存器的值
 uint64_t read_csr(CPU *cpu, uint32_t csr) {
@@ -101,6 +102,62 @@ void execute_uret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_UEPC];
     cpu->priv = (cpu->csr[CSR_USTATUS] >> 8) & 0x1;
 }
+
+// 假设这是模拟的内存屏障操作
+void flush_write_buffers(CPU *cpu) {
+    // 在实际硬件上，这可能是一个内存屏障指令
+    // 在模拟器中，可以只是一个占位操作
+
+}
+
+// 假设这是模拟的指令缓存失效操作
+void flush_instruction_cache(CPU *cpu) {
+    // 在实际硬件上，这可能是一个指令缓存失效指令
+    // 在模拟器中，可以只是一个占位操作
+
+}
+
+void execute_sfence_vma(CPU *cpu, uint32_t instruction) {
+    // 通常需要刷新 TLB 或其他地址翻译缓存
+    // 在模拟器中可能需要根据具体实现刷新缓存
+    // 这里只是一个示例实现
+    uint32_t rs1 = RS1(instruction);
+    uint32_t rs2 = RS2(instruction);
+
+    // 刷新所有地址翻译缓存
+    if (rs1 == 0 && rs2 == 0) {
+        flush_tlb(&cpu->mmu);
+    } else {
+        // 根据具体地址和 ASID 刷新
+        uint64_t vaddr = cpu->registers[rs1];
+        uint64_t asid = cpu->registers[rs2];
+        flush_tlb_entry(&cpu->mmu, vaddr, asid);
+    }
+}
+
+void execute_sinval_vma(CPU *cpu, uint32_t instruction) {
+    uint32_t rs1 = RS1(instruction);
+    uint32_t rs2 = RS2(instruction);
+
+    uint64_t vaddr = cpu->registers[rs1];
+    uint64_t asid = cpu->registers[rs2];
+    flush_tlb_entry(&cpu->mmu, vaddr, asid);
+}
+
+void execute_sfence_w_inval(CPU *cpu, uint32_t instruction) {
+    // 确保所有写操作完成
+    // 在模拟器中，这可以是一个内存屏障或同步机制
+    // 然后失效缓存条目
+    flush_write_buffers(cpu);  // 假设存在该函数，用于确保所有写操作完成
+    flush_tlb(&cpu->mmu);      // 失效整个 TLB
+}
+
+void execute_sfence_inval_ir(CPU *cpu, uint32_t instruction) {
+    // 失效指令缓存
+    // 确保在重新取指令之前，所有失效操作完成
+    flush_instruction_cache(cpu);  // 假设存在该函数，用于失效指令缓存
+}
+
 
 void execute_system_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t funct3 = (instruction >> 12) & 0x7;
