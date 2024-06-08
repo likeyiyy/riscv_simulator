@@ -19,16 +19,18 @@ WINDOW *create_newwin(int height, int width, int starty, int startx) {
 }
 
 void display_registers(WINDOW *win, CPU *cpu) {
+    mvwprintw(win, 0, 1, "pc:0x%016llx", cpu->pc);
     for (int i = 0; i < 32; i++) {
-        mvwprintw(win, i, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
+        mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
 }
 
 void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
-    uint64_t base_address = cpu->registers[2] - STACK_SIZE * 4;
+    mvwprintw(win, 0, 1, "Stack (0x%016llx):", cpu->registers[2]);
+    uint64_t base_address = cpu->registers[2] - STACK_SIZE;
     for (int i = 0; i < STACK_SIZE; i++) {
-        uint64_t stack_value = memory_load_dword(memory, base_address + i * 8);
-        mvwprintw(win, i, 1, "0x%08lx: 0x%016llx", base_address + i * 8, stack_value);
+        uint32_t stack_value = memory_load_word(memory, base_address + i * 4);
+        mvwprintw(win, i + 1, 1, "0x%016llx: 0x%08lx", base_address + i * 4, stack_value);
     }
 }
 
@@ -58,10 +60,10 @@ void *update_display(void *arg) {
     refresh();
 
     while (1) {
-        WINDOW *reg_win = create_newwin(32, 30, 0, 0);
-        WINDOW *screen_win = create_newwin(25, 80, 0, 30);
-        WINDOW *source_win = create_newwin(32, 46, 0, 110);
-        WINDOW *stack_win = create_newwin(32, 33, 0, 156);
+        WINDOW *reg_win = create_newwin(33, 30, 0, 0);
+        WINDOW *screen_win = create_newwin(26, 80, 0, 30);
+        WINDOW *source_win = create_newwin(33, 46, 0, 110);
+        WINDOW *stack_win = create_newwin(33, 33, 0, 156);
 
         display_registers(reg_win, cpu);
         display_stack(stack_win, cpu, memory);
