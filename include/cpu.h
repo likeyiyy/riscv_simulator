@@ -3,10 +3,19 @@
 
 #include <stdint.h>
 #include "riscv_defs.h" // 包含指令定义和宏
+#include "clint.h" // 包含指令定义和宏
 #include "memory.h" // 包含指令定义和宏
 #include "mmu.h"
 
+#define CLINT_BASE 0x2000000
+#define CLINT_MSIP(hartid) (CLINT_BASE + 8 * (hartid))
+#define CLINT_MTIME (CLINT_BASE + 0xbff8)
+#define CLINT_MTIMECMP(hartid) (CLINT_BASE + 0x4000 + 8 * (hartid))
+
+
+
 typedef struct {
+    uint8_t cpu_id;         // CPU ID
     uint64_t registers[32]; // 32个通用寄存器
     uint64_t fregisters[32]; // 32个浮点寄存器
     uint64_t csr[4096]; // 4096个CSR寄存器

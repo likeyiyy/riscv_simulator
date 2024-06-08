@@ -27,7 +27,7 @@ void cpu_init(CPU *cpu, Memory *memory) {
     cpu->memory = memory;
     init_mmu(&cpu->mmu);
     // 初始化 CLINT 和 PLIC
-    init_clint(&cpu->clint);
+    init_clint(&cpu->clint, cpu->cpu_id, memory);
     init_plic(&cpu->plic);
     // 初始化中断优先级
     cpu->current_priority = 0;
