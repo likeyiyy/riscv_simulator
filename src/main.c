@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "disassemble.h"
 #include "display.h"
+#include "uart.h"
 
 
 void load_file_to_memory(const char *filename, Memory *memory) {
@@ -48,17 +49,20 @@ int main(int argc, char *argv[]) {
     const char *input_file = argv[1];
     CPU cpu;
     Memory memory;
-
+    UART uart;
+    uart_init(&uart); // 初始化 UART
     memory_init(&memory);
-    cpu_init(&cpu, &memory);
+    cpu_init(&cpu, &memory, &uart);
     init_csr_names();
 
     load_file_to_memory(input_file, &memory);
 
     sem_t sem;
+
     sem_init(&sem, 0, 0);
+
     // Initialize ncurses display thread
-    DisplayData data = {&cpu, &memory, cpu.pc, &sem};
+    DisplayData data = {&cpu, &memory, cpu.pc, &sem, &uart};
     pthread_t display_thread;
     pthread_create(&display_thread, NULL, update_display, &data);
 

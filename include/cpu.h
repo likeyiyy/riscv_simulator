@@ -8,6 +8,7 @@
 #include "memory.h" // 包含指令定义和宏
 #include "mmu.h"
 #include "plic.h"
+#include "uart.h"
 
 #define CLINT_BASE 0x2000000
 #define CLINT_MSIP(hartid) (CLINT_BASE + 8 * (hartid))
@@ -30,9 +31,10 @@ typedef struct {
     CLINT clint;             // 核心本地中断
     PLIC plic;               // 平台级中断控制器
     int current_priority;    // 当前处理中断的优先级
+    UART *uart;              // 串口
 } CPU;
 
-void cpu_init(CPU *cpu, Memory *memory);
+void cpu_init(CPU *cpu, Memory *memory, UART *uart);
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);
 void raise_exception(CPU *cpu, uint64_t cause);
 void handle_interrupt(CPU *cpu);

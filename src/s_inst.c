@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "s_inst.h"
+#include "uart.h"
 
 // S-type指令处理函数
 void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
@@ -12,13 +13,21 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
 
     // 符号扩展立即数
     imm = (imm << 20) >> 20;
+    // 计算目标地址
+    uint64_t addr = cpu->registers[rs1] + imm;
 
     switch (funct3) {
         case FUNCT3_SB:
             // SB - 存储字节
             // 示例: sb x2, 0(x1)
             // 将 x2 寄存器的最低字节存储到 x1 寄存器地址加立即数偏移的内存中
-            cpu->memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2] & 0xFF;
+
+            // SB - 存储字节
+            if (addr >= UART_BASE_ADDR && addr < UART_BASE_ADDR + 8) {
+                uart_write(cpu->uart, addr - UART_BASE_ADDR, cpu->registers[rs2] & 0xFF);
+            } else {
+                cpu->memory->data[addr] = cpu->registers[rs2] & 0xFF;
+            }
             break;
 
         case FUNCT3_SH:

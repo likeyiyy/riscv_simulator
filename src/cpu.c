@@ -18,7 +18,7 @@
 #include "i_64_inst.h"
 
 
-void cpu_init(CPU *cpu, Memory *memory) {
+void cpu_init(CPU *cpu, Memory *memory, UART *uart) {
     for (int i = 0; i < 32; i++) {
         cpu->registers[i] = 0;
     }

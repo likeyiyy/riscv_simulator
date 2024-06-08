@@ -1,6 +1,8 @@
 #include <unistd.h> // for usleep
 #include "disassemble.h"
 #include "display.h"
+#include "uart.h"
+
 
 const char *reg_names2[32] = {
         "zro", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -12,7 +14,7 @@ const char *reg_names2[32] = {
 WINDOW *create_newwin(int height, int width, int starty, int startx) {
     WINDOW *local_win;
     local_win = newwin(height, width, starty, startx);
-    box(local_win, 0 , 0); // 0, 0 gives default characters for the vertical and horizontal lines
+    box(local_win, 0, 0); // 0, 0 gives default characters for the vertical and horizontal lines
     wrefresh(local_win);   // Show that box
 
     return local_win;
@@ -45,11 +47,44 @@ void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
     }
 }
 
+void display_screen(WINDOW *win, UART *uart) {
+    static int line = 0;
+    static int col = 1; // Start from column 1 to leave space for the box
+    if (uart->registers[LSR] & 0x01) { // Check if data is ready
+        uint8_t value = uart->registers[RHR];
+        char buffer[2] = {value, '\0'};
+
+        if (value == '\n') { // Handle newline character
+            line++;
+            col = 1; // Reset to the first column
+        } else {
+            mvwprintw(win, line, col++, "%s", buffer);
+            if (col >= getmaxx(win) - 1) { // Move to the next line if end of line is reached
+                line++;
+                col = 1; // Reset to the first column
+            }
+        }
+
+        if (line >= getmaxy(win) - 1) { // Clear the window if the end is reached
+            line = 0;
+            col = 1; // Reset to the first column
+            wclear(win);
+            box(win, 0, 0);
+        }
+
+        uart->registers[LSR] &= ~0x01; // Clear Data Ready
+        uart->registers[LSR] |= LSR_THRE; // Set Transmitter Holding Register Empty
+        uart->registers[THR] = 0;
+    }
+    wrefresh(win); // Refresh the window to display changes
+}
+
 void *update_display(void *arg) {
-    DisplayData *data = (DisplayData *)arg;
+    DisplayData *data = (DisplayData *) arg;
     CPU *cpu = data->cpu;
     Memory *memory = data->memory;
     sem_t *sem = data->sem;
+    UART *uart = data->uart;
 
     initscr();
     noecho();
@@ -59,15 +94,18 @@ void *update_display(void *arg) {
     clear();
     refresh();
 
+    WINDOW *reg_win = create_newwin(33, 30, 0, 0);
+    WINDOW *screen_win = create_newwin(26, 80, 0, 30);
+    WINDOW *source_win = create_newwin(33, 46, 0, 110);
+    WINDOW *stack_win = create_newwin(33, 33, 0, 156);
+
+
     while (1) {
-        WINDOW *reg_win = create_newwin(33, 30, 0, 0);
-        WINDOW *screen_win = create_newwin(26, 80, 0, 30);
-        WINDOW *source_win = create_newwin(33, 46, 0, 110);
-        WINDOW *stack_win = create_newwin(33, 33, 0, 156);
 
         display_registers(reg_win, cpu);
         display_stack(stack_win, cpu, memory);
         display_source(source_win, memory, data->pc);
+        display_screen(screen_win, uart);
 
         wrefresh(reg_win);
         wrefresh(screen_win);
