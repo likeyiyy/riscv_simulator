@@ -1,6 +1,10 @@
+#include <stdbool.h>
+#include <unistd.h>  // 包含 usleep 函数的头文件
+
 #include "csr.h"
 #include "cpu.h"
 #include "mmu.h"
+#include "plic.h"
 
 // 读取 CSR 寄存器的值
 uint64_t read_csr(CPU *cpu, uint32_t csr) {
@@ -158,7 +162,23 @@ void execute_sfence_inval_ir(CPU *cpu, uint32_t instruction) {
     flush_instruction_cache(cpu);  // 假设存在该函数，用于失效指令缓存
 }
 
-
+void execute_ecall(CPU *cpu) {
+    uint64_t cause;
+    switch (cpu->priv) {
+        case PRV_U:
+            cause = CAUSE_USER_ECALL;
+            break;
+        case PRV_S:
+            cause = CAUSE_SUPERVISOR_ECALL;
+            break;
+        case PRV_M:
+        default:
+            // 处理不支持的特权级
+            cause = CAUSE_MACHINE_ECALL; // 默认为机器模式
+            break;
+    }
+    raise_exception(cpu, cause);
+}
 void execute_system_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t funct3 = (instruction >> 12) & 0x7;
     if (funct3 >= 0x1 && funct3 <= 0x7) {
@@ -191,7 +211,7 @@ void execute_system_instruction(CPU *cpu, uint32_t instruction) {
         uint32_t imm = instruction >> 20;
         switch (imm) {
             case OPCODE_ECALL:
-                raise_exception(cpu, CAUSE_USER_ECALL + cpu->priv);
+                execute_ecall(cpu);
                 break;
             case OPCODE_EBREAK:
                 raise_exception(cpu, CAUSE_BREAKPOINT);
@@ -213,9 +233,18 @@ void execute_system_instruction(CPU *cpu, uint32_t instruction) {
                 // 模拟处理器等待中断
                 // 在实际的模拟器中，这里可能需要实现一个事件循环或等待条件变量。
                 // 在这里，我们使用一个简单的循环来模拟等待中断。
-                while (!cpu->interrupt_pending) {
-                    // 等待中断发生
-                    // 在真实的实现中，可能需要处理事件或检查外部输入。
+                while (true) {
+                    // 先检查并处理中断
+                    handle_interrupt(cpu);
+
+                    // 检查是否有挂起的中断
+                    if (cpu->interrupt_pending ||
+                        (cpu->clint.msip & 1) ||
+                        (cpu->clint.mtime >= cpu->clint.mtimecmp) ||
+                        (claim_interrupt(&cpu->plic) != 0)) {
+                        break;  // 如果有中断挂起，退出循环
+                    }
+                    usleep(1000);
                 }
                 break;
             default:

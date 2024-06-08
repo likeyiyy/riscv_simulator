@@ -16,10 +16,13 @@ typedef struct {
     Memory *memory;
     MMU mmu;                 // 内存管理单元
     bool interrupt_pending;
+    CLINT clint;             // 核心本地中断
+    PLIC plic;               // 平台级中断控制器
 } CPU;
 
 void cpu_init(CPU *cpu, Memory *memory);
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);
 void raise_exception(CPU *cpu, uint64_t cause);
+void handle_interrupt(CPU *cpu);
 
 #endif // CPU_H

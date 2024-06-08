@@ -14,6 +14,8 @@
 #include "b_inst.h"
 #include "j_inst.h"
 #include "csr.h"
+#include "clint.h"
+#include "plic.h"
 
 
 // 内联函数声明
@@ -35,6 +37,33 @@ void cpu_init(CPU *cpu, Memory *memory) {
     cpu->pc = 0;
     cpu->priv = PRV_M;
     cpu->memory = memory;
+}
+
+void handle_interrupt(CPU *cpu) {
+    // 检查软件中断
+    if (cpu->clint.msip & 1) {
+        // 清除软件中断
+        cpu->clint.msip &= ~1;
+        // 处理软件中断
+        raise_exception(cpu, CAUSE_MACHINE_SOFTWARE_INTERRUPT);
+    }
+
+    // 检查定时器中断
+    if (cpu->clint.mtime >= cpu->clint.mtimecmp) {
+        // 清除定时器中断
+        clear_timer_interrupt(&cpu->clint);
+        // 处理定时器中断
+        raise_exception(cpu, CAUSE_MACHINE_TIMER_INTERRUPT);
+    }
+
+    // 检查外部中断
+    uint32_t interrupt_id = claim_interrupt(&cpu->plic);
+    if (interrupt_id != 0) {
+        // 处理外部中断
+        raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
+        // 完成中断处理
+        complete_interrupt(&cpu->plic, interrupt_id);
+    }
 }
 
 
@@ -77,32 +106,12 @@ void raise_exception(CPU *cpu, uint64_t cause) {
 }
 
 
-void execute_ecall(CPU *cpu) {
-    uint64_t cause;
-    switch (cpu->priv) {
-        case PRV_U:
-            cause = CAUSE_USER_ECALL;
-            break;
-        case PRV_S:
-            cause = CAUSE_SUPERVISOR_ECALL;
-            break;
-        case PRV_M:
-        default:
-            // 处理不支持的特权级
-            cause = CAUSE_MACHINE_ECALL; // 默认为机器模式
-            break;
-    }
-    raise_exception(cpu, cause);
-}
-
-void execute_ebreak(CPU *cpu) {
-    raise_exception(cpu, 0x3); // 断点异常
-}
 
 
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
-    uint32_t funct3 = (instruction >> 12) & 0x7;
+    // 检查并处理中断
+    handle_interrupt(cpu);
 
     bool pc_updated = false;
     cpu->registers[0] = 0;  // 确保x0始终为0
