@@ -129,4 +129,20 @@
 #define FUNCT3_BLTU 0x6
 #define FUNCT3_BGEU 0x7
 
+// funct3 for LR/SC instructions
+#define FUNCT3_LR 0x2
+#define FUNCT3_SC 0x3
+
+// funct7 for AMO instructions
+#define FUNCT7_AMOSWAP 0x01
+#define FUNCT7_AMOADD 0x00
+#define FUNCT7_AMOXOR 0x04
+#define FUNCT7_AMOAND 0x0C
+#define FUNCT7_AMOOR 0x08
+#define FUNCT7_AMOMIN 0x10
+#define FUNCT7_AMOMAX 0x14
+#define FUNCT7_AMOMINU 0x18
+#define FUNCT7_AMOMAXU 0x1C
+
+
 #endif // RISCV_DEFS_H

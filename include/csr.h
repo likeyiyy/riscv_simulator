@@ -87,9 +87,11 @@
 #define PRV_M 3 // Machine
 
 // ECALL 异常代码
+#define CAUSE_ILLEGAL_INSTRUCTION 2
 #define CAUSE_USER_ECALL       8
 #define CAUSE_SUPERVISOR_ECALL 9
 #define CAUSE_HYPERVISOR_ECALL 10
 #define CAUSE_MACHINE_ECALL    11
+
 
 #endif //RISCSIMULATOR_CSR_H

@@ -101,8 +101,9 @@ int main(int argc, char *argv[]) {
     CPU cpu;
     Memory memory;
 
-    cpu_init(&cpu);
     memory_init(&memory);
+    cpu_init(&cpu, &memory);
+
 
     // Initialize ncurses
     initscr();
