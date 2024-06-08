@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define MEMORY_SIZE  4 * 1024 * 1024// 4MB内存
+#define MEMORY_SIZE  (128 * 1024 * 1024)// 128MB内存
 
 typedef struct {
     uint8_t data[MEMORY_SIZE];
