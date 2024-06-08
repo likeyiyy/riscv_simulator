@@ -22,4 +22,4 @@ target_compile_options(riscv_simulator PRIVATE -g -Wall -Wextra -Wpedantic)
 # 链接 ncurses 库和数学库
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
-target_link_libraries(riscv_simulator ${CURSES_LIBRARIES} m)
+target_link_libraries(riscv_simulator ${CURSES_LIBRARIES} m pthread)
