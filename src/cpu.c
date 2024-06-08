@@ -29,6 +29,8 @@ void cpu_init(CPU *cpu, Memory *memory) {
     // 初始化 CLINT 和 PLIC
     init_clint(&cpu->clint);
     init_plic(&cpu->plic);
+    // 初始化中断优先级
+    cpu->current_priority = 0;
 }
 
 
@@ -61,7 +63,7 @@ void handle_interrupt(CPU *cpu) {
     uint64_t status;
     uint64_t ie;  // Interrupt Enable register
     uint64_t ip;  // Interrupt Pending register
-    int current_priority = 0; // 当前处理中断的优先级
+
 
     // 根据当前特权级别选择状态寄存器和中断使能寄存器
     switch (cpu->priv) {
@@ -94,8 +96,10 @@ void handle_interrupt(CPU *cpu) {
     }
 
     // 检查并处理高优先级中断
-    if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
-        current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
+    // 处理器在每个时钟周期都会检查 CSR_MIP 寄存器的状态，以决定是否有中断需要处理。
+    // 如果一个挂起位被设置，并且相应的中断使能位也被设置，那么处理器会触发中断处理流程。
+    if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
+        cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
         // 处理外部中断
         uint32_t interrupt_id = claim_interrupt(&cpu->plic);
         if (interrupt_id != 0) {
@@ -105,8 +109,8 @@ void handle_interrupt(CPU *cpu) {
     }
 
     // 检查并处理中优先级中断
-    if ((ie & MIE_MTIE) && (cpu->clint.mtime >= cpu->clint.mtimecmp) && current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
-        current_priority = PRIORITY_MACHINE_TIMER_INTERRUPT;
+    if ((ie & MIE_MTIE) && (cpu->clint.mtime >= cpu->clint.mtimecmp) && cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
+        cpu->current_priority = PRIORITY_MACHINE_TIMER_INTERRUPT;
         // 清除定时器中断挂起位
         clear_timer_interrupt(&cpu->clint);
         // 处理定时器中断
@@ -114,8 +118,8 @@ void handle_interrupt(CPU *cpu) {
     }
 
     // 检查并处理低优先级中断
-    if ((ie & MIE_MSIE) && (ip & MIP_MSIP) && current_priority < PRIORITY_MACHINE_SOFTWARE_INTERRUPT) {
-        current_priority = PRIORITY_MACHINE_SOFTWARE_INTERRUPT;
+    if ((ie & MIE_MSIE) && (ip & MIP_MSIP) && cpu->current_priority < PRIORITY_MACHINE_SOFTWARE_INTERRUPT) {
+        cpu->current_priority = PRIORITY_MACHINE_SOFTWARE_INTERRUPT;
         // 清除软件中断挂起位
         cpu->csr[CSR_MIP] &= ~MIP_MSIP;
         // 处理软件中断

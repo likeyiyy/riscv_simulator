@@ -18,6 +18,7 @@ typedef struct {
     bool interrupt_pending;
     CLINT clint;             // 核心本地中断
     PLIC plic;               // 平台级中断控制器
+    int current_priority;    // 当前处理中断的优先级
 } CPU;
 
 void cpu_init(CPU *cpu, Memory *memory);
