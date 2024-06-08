@@ -87,10 +87,7 @@ void handle_interrupt(CPU *cpu) {
             return;
     }
 
-    // 检查全局中断使能位
-    if ((cpu->priv == PRV_M && (status & MSTATUS_MIE) == 0) ||
-        (cpu->priv == PRV_S && (status & SSTATUS_SIE) == 0) ||
-        (cpu->priv == PRV_U && (status & USTATUS_UIE) == 0)) {
+    if (cpu->priv == PRV_M && (status & MSTATUS_MIE) == 0) {
         // 如果中断未使能，直接返回
         return;
     }

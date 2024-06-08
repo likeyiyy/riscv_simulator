@@ -93,18 +93,21 @@ void execute_csrrci(CPU *cpu, uint32_t instruction) {
 void execute_mret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_MEPC];
     cpu->priv = (cpu->csr[CSR_MSTATUS] >> 11) & 0x3;
+    cpu->current_priority = 0;
 }
 
 // SRET 指令实现 - 目的是：Supervisor-mode Return
 void execute_sret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_SEPC];
     cpu->priv = (cpu->csr[CSR_SSTATUS] >> 8) & 0x1;
+    cpu->current_priority = 0;
 }
 
 // URET 指令实现 - 目的是：User-mode Return
 void execute_uret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_UEPC];
     cpu->priv = (cpu->csr[CSR_USTATUS] >> 8) & 0x1;
+    cpu->current_priority = 0;
 }
 
 // 假设这是模拟的内存屏障操作

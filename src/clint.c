@@ -1,5 +1,6 @@
 #include "clint.h"
 
+// 在 RISC-V 架构中，CLINT（Core Local Interruptor）是一个包含定时器和软件中断功能的模块。
 // 初始化 CLINT
 void init_clint(CLINT *clint) {
     clint->msip = 0;

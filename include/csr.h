@@ -23,19 +23,19 @@
 #define CSR_FCSR        0x003
 
 // 超级模式 CSRs
-#define CSR_SSTATUS     0x100
-#define CSR_SEDELEG     0x102
-#define CSR_SIDELEG     0x103
-#define CSR_SIE         0x104
-#define CSR_STVEC       0x105
-#define CSR_SCOUNTEREN  0x106
+#define CSR_SSTATUS     0x100 // 状态寄存器
+#define CSR_SEDELEG     0x102 // 异常代理
+#define CSR_SIDELEG     0x103 // 中断代理
+#define CSR_SIE         0x104 // 中断使能
+#define CSR_STVEC       0x105 // 中断向量表基址
+#define CSR_SCOUNTEREN  0x106 // 计数器使能
 
-#define CSR_SSCRATCH    0x140
-#define CSR_SEPC        0x141
-#define CSR_SCAUSE      0x142
-#define CSR_STVAL       0x143
-#define CSR_SIP         0x144
-#define CSR_SATP        0x180
+#define CSR_SSCRATCH    0x140 // 软件上下文寄存器
+#define CSR_SEPC        0x141 // 异常程序计数器
+#define CSR_SCAUSE      0x142 // 异常原因
+#define CSR_STVAL       0x143 // 异常值
+#define CSR_SIP         0x144 // 中断挂起
+#define CSR_SATP        0x180 // 地址转换和保护
 
 // 机器模式 CSRs
 #define CSR_MVENDORID   0xF11
