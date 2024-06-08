@@ -58,32 +58,70 @@ void raise_exception(CPU *cpu, uint64_t cause) {
 }
 
 void handle_interrupt(CPU *cpu) {
-    // 检查软件中断
-    if (cpu->clint.msip & 1) {
-        // 清除软件中断
-        cpu->clint.msip &= ~1;
-        // 处理软件中断
-        raise_exception(cpu, CAUSE_MACHINE_SOFTWARE_INTERRUPT);
+    uint64_t status;
+    uint64_t ie;  // Interrupt Enable register
+    uint64_t ip;  // Interrupt Pending register
+    int current_priority = 0; // 当前处理中断的优先级
+
+    // 根据当前特权级别选择状态寄存器和中断使能寄存器
+    switch (cpu->priv) {
+        case PRV_M:
+            status = cpu->csr[CSR_MSTATUS];
+            ie = cpu->csr[CSR_MIE];
+            ip = cpu->csr[CSR_MIP];
+            break;
+        case PRV_S:
+            status = cpu->csr[CSR_SSTATUS];
+            ie = cpu->csr[CSR_SIE];
+            ip = cpu->csr[CSR_SIP];
+            break;
+        case PRV_U:
+            status = cpu->csr[CSR_USTATUS];
+            ie = cpu->csr[CSR_UIE];
+            ip = cpu->csr[CSR_UIP];
+            break;
+        default:
+            // 未知的特权级别，直接返回
+            return;
     }
 
-    // 检查定时器中断
-    if (cpu->clint.mtime >= cpu->clint.mtimecmp) {
-        // 清除定时器中断
+    // 检查全局中断使能位
+    if ((cpu->priv == PRV_M && (status & MSTATUS_MIE) == 0) ||
+        (cpu->priv == PRV_S && (status & SSTATUS_SIE) == 0) ||
+        (cpu->priv == PRV_U && (status & USTATUS_UIE) == 0)) {
+        // 如果中断未使能，直接返回
+        return;
+    }
+
+    // 检查并处理高优先级中断
+    if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
+        current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
+        // 处理外部中断
+        uint32_t interrupt_id = claim_interrupt(&cpu->plic);
+        if (interrupt_id != 0) {
+            raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
+            complete_interrupt(&cpu->plic, interrupt_id);
+        }
+    }
+
+    // 检查并处理中优先级中断
+    if ((ie & MIE_MTIE) && (cpu->clint.mtime >= cpu->clint.mtimecmp) && current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
+        current_priority = PRIORITY_MACHINE_TIMER_INTERRUPT;
+        // 清除定时器中断挂起位
         clear_timer_interrupt(&cpu->clint);
         // 处理定时器中断
         raise_exception(cpu, CAUSE_MACHINE_TIMER_INTERRUPT);
     }
 
-    // 检查外部中断
-    uint32_t interrupt_id = claim_interrupt(&cpu->plic);
-    if (interrupt_id != 0) {
-        // 处理外部中断
-        raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
-        // 完成中断处理
-        complete_interrupt(&cpu->plic, interrupt_id);
+    // 检查并处理低优先级中断
+    if ((ie & MIE_MSIE) && (ip & MIP_MSIP) && current_priority < PRIORITY_MACHINE_SOFTWARE_INTERRUPT) {
+        current_priority = PRIORITY_MACHINE_SOFTWARE_INTERRUPT;
+        // 清除软件中断挂起位
+        cpu->csr[CSR_MIP] &= ~MIP_MSIP;
+        // 处理软件中断
+        raise_exception(cpu, CAUSE_MACHINE_SOFTWARE_INTERRUPT);
     }
 }
-
 
 
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {

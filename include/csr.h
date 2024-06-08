@@ -88,6 +88,20 @@
 #define PRV_S 1 // Supervisor
 #define PRV_M 3 // Machine
 
+// 状态寄存器中的中断使能位
+#define MSTATUS_MIE (1 << 3)
+#define SSTATUS_SIE (1 << 1)
+#define USTATUS_UIE (1 << 0)
+
+// 中断使能寄存器中的位
+#define MIE_MSIE (1 << 3)  // Machine Software Interrupt Enable
+#define MIE_MTIE (1 << 7)  // Machine Timer Interrupt Enable
+#define MIE_MEIE (1 << 11) // Machine External Interrupt Enable
+
+#define SIE_SSIE (1 << 1)  // Supervisor Software Interrupt Enable
+#define SIE_STIE (1 << 5)  // Supervisor Timer Interrupt Enable
+#define SIE_SEIE (1 << 9)  // Supervisor External Interrupt Enable
+
 // ECALL 异常代码
 #define CAUSE_ILLEGAL_INSTRUCTION 2
 #define CAUSE_BREAKPOINT       3
@@ -114,6 +128,19 @@
 #define OPCODE_URET 0x002
 #define OPCODE_WFI 0x105
 
+#define PRIORITY_MACHINE_SOFTWARE_INTERRUPT 1
+#define PRIORITY_MACHINE_TIMER_INTERRUPT 2
+#define PRIORITY_MACHINE_EXTERNAL_INTERRUPT 3
+
+// MIP 寄存器中的中断挂起位
+#define MIP_MSIP (1 << 3)  // Machine Software Interrupt Pending
+#define MIP_MTIP (1 << 7)  // Machine Timer Interrupt Pending
+#define MIP_MEIP (1 << 11) // Machine External Interrupt Pending
+
+// SIP 寄存器中的中断挂起位
+#define SIP_SSIP (1 << 1)  // Supervisor Software Interrupt Pending
+#define SIP_STIP (1 << 5)  // Supervisor Timer Interrupt Pending
+#define SIP_SEIP (1 << 9)  // Supervisor External Interrupt Pending
 
 uint64_t read_csr(CPU *cpu, uint32_t csr);
 void write_csr(CPU *cpu, uint32_t csr, uint64_t value);
