@@ -1,4 +1,5 @@
 #include "f_extension.h"
+#include "csr.h"
 #include <math.h>
 
 // F 扩展指令实现

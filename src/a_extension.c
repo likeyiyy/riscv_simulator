@@ -1,4 +1,5 @@
 #include "a_extension.h"
+#include "csr.h"
 
 inline void execute_lr_w(CPU *cpu, uint32_t rd, uint32_t rs1) {
     uint64_t address = cpu->registers[rs1];

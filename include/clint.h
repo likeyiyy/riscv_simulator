@@ -11,7 +11,5 @@ typedef struct {
 } CLINT;
 
 void init_clint(CLINT *clint, uint8_t cpu_id, Memory *memory);
-void set_timer_interrupt(CLINT *clint, uint64_t time);
-void clear_timer_interrupt(CLINT *clint);
 
 #endif // CLINT_H

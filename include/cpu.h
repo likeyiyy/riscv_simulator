@@ -2,10 +2,12 @@
 #define CPU_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "riscv_defs.h" // 包含指令定义和宏
 #include "clint.h" // 包含指令定义和宏
 #include "memory.h" // 包含指令定义和宏
 #include "mmu.h"
+#include "plic.h"
 
 #define CLINT_BASE 0x2000000
 #define CLINT_MSIP(hartid) (CLINT_BASE + 8 * (hartid))

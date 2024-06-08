@@ -106,10 +106,8 @@ void handle_interrupt(CPU *cpu) {
     }
 
     // 检查并处理中优先级中断
-    if ((ie & MIE_MTIE) && (cpu->clint.mtime >= cpu->clint.mtimecmp) && cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
+    if ((ie & MIE_MTIE) && (*cpu->clint.mtime >= *cpu->clint.mtimecmp) && cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
         cpu->current_priority = PRIORITY_MACHINE_TIMER_INTERRUPT;
-        // 清除定时器中断挂起位
-        clear_timer_interrupt(&cpu->clint);
         // 处理定时器中断
         raise_exception(cpu, CAUSE_MACHINE_TIMER_INTERRUPT);
     }

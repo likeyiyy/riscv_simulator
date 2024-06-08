@@ -242,8 +242,8 @@ void execute_system_instruction(CPU *cpu, uint32_t instruction) {
 
                     // 检查是否有挂起的中断
                     if (cpu->interrupt_pending ||
-                        (cpu->clint.msip & 1) ||
-                        (cpu->clint.mtime >= cpu->clint.mtimecmp) ||
+                        (*cpu->clint.msip & 0x1) ||
+                        (*cpu->clint.mtime >= *cpu->clint.mtimecmp) ||
                         (claim_interrupt(&cpu->plic) != 0)) {
                         break;  // 如果有中断挂起，退出循环
                     }
