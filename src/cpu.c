@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
-
-
 #include "cpu.h"
 #include "memory.h"
 #include "fence_inst.h"
@@ -27,6 +25,33 @@ void cpu_init(CPU *cpu, Memory *memory) {
     cpu->pc = 0;
     cpu->priv = PRV_M;
     cpu->memory = memory;
+}
+
+
+
+
+void raise_exception(CPU *cpu, uint64_t cause) {
+    switch (cpu->priv) {
+        case PRV_U:
+            // 垂直陷入到超级模式
+            cpu->csr[CSR_UEPC] = cpu->pc;
+            cpu->csr[CSR_UCAUSE] = cause;
+            cpu->pc = cpu->csr[CSR_STVEC];
+            cpu->priv = PRV_S; // 切换到超级模式
+            break;
+        case PRV_S:
+            // 水平陷入处理
+            cpu->csr[CSR_SEPC] = cpu->pc;
+            cpu->csr[CSR_SCAUSE] = cause;
+            cpu->pc = cpu->csr[CSR_STVEC];
+            break;
+        case PRV_M:
+        default:
+            cpu->csr[CSR_MEPC] = cpu->pc;
+            cpu->csr[CSR_MCAUSE] = cause;
+            cpu->pc = cpu->csr[CSR_MTVEC];
+            break;
+    }
 }
 
 void handle_interrupt(CPU *cpu) {
@@ -55,33 +80,6 @@ void handle_interrupt(CPU *cpu) {
         complete_interrupt(&cpu->plic, interrupt_id);
     }
 }
-
-
-
-void raise_exception(CPU *cpu, uint64_t cause) {
-    switch (cpu->priv) {
-        case PRV_U:
-            // 垂直陷入到超级模式
-            cpu->csr[CSR_UEPC] = cpu->pc;
-            cpu->csr[CSR_UCAUSE] = cause;
-            cpu->pc = cpu->csr[CSR_STVEC];
-            cpu->priv = PRV_S; // 切换到超级模式
-            break;
-        case PRV_S:
-            // 水平陷入处理
-            cpu->csr[CSR_SEPC] = cpu->pc;
-            cpu->csr[CSR_SCAUSE] = cause;
-            cpu->pc = cpu->csr[CSR_STVEC];
-            break;
-        case PRV_M:
-        default:
-            cpu->csr[CSR_MEPC] = cpu->pc;
-            cpu->csr[CSR_MCAUSE] = cause;
-            cpu->pc = cpu->csr[CSR_MTVEC];
-            break;
-    }
-}
-
 
 
 
