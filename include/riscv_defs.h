@@ -116,8 +116,10 @@
 #define FUNCT3_LB  0x0 // 加载字节
 #define FUNCT3_LH  0x1 // 加载半字
 #define FUNCT3_LW  0x2 // 加载字
+#define FUNCT3_LD  0x3 // 加载双字
 #define FUNCT3_LBU 0x4 // 加载字节无符号
 #define FUNCT3_LHU 0x5 // 加载半字无符号
+
 
 // B 型指令的 funct3 值
 #define FUNCT3_BEQ  0x0

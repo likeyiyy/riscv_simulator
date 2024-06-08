@@ -94,13 +94,13 @@ void *update_display(void *arg) {
     clear();
     refresh();
 
-    WINDOW *reg_win = create_newwin(33, 30, 0, 0);
-    WINDOW *screen_win = create_newwin(26, 80, 0, 30);
-    WINDOW *source_win = create_newwin(33, 46, 0, 110);
-    WINDOW *stack_win = create_newwin(33, 33, 0, 156);
 
 
     while (1) {
+        WINDOW *reg_win = create_newwin(33, 30, 0, 0);
+        WINDOW *screen_win = create_newwin(26, 80, 0, 30);
+        WINDOW *source_win = create_newwin(33, 50, 0, 110);
+        WINDOW *stack_win = create_newwin(33, 33, 0, 161);
 
         display_registers(reg_win, cpu);
         display_stack(stack_win, cpu, memory);

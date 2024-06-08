@@ -192,7 +192,11 @@ void disassemble(uint64_t address, uint32_t instruction, char* buffer, size_t bu
         dis_jal(address, instruction, buffer, buffer_size, rd, imm);
     } else if (opcode == OPCODE_JALR) {
         imm = (int32_t)((instruction >> 20) << 20) >> 20;  // 符号扩展立即数
-        snprintf(buffer, buffer_size, "jalr %s, %d(%s)", reg_names[rd], imm, reg_names[rs1]);
+        if (imm == 0 && rs1 == 1 && rd == 0) {
+            snprintf(buffer, buffer_size, "ret");
+        } else {
+            snprintf(buffer, buffer_size, "jalr %s, %d(%s)", reg_names[rd], imm, reg_names[rs1]);
+        }
     } else if (opcode == OPCODE_MISC_MEM) {
         dis_misc_mem(instruction, buffer, buffer_size, rd, funct3, rs1, rs2, funct7);
     } else if (opcode == OPCODE_SYSTEM) {
@@ -592,7 +596,11 @@ void dis_op_imm(uint32_t instruction, char *buffer, size_t buffer_size, uint32_t
     switch (funct3) {
         case 0x0: // ADDI
             if (rs1 == 0) {
-                snprintf(buffer, buffer_size, "li %s, %d", reg_names[rd], imm);
+                if (rd == 0) {
+                    snprintf(buffer, buffer_size, "nop");
+                } else {
+                    snprintf(buffer, buffer_size, "li %s, %d", reg_names[rd], imm);
+                }
             } else {
                 if (imm == 0) {
                     snprintf(buffer, buffer_size, "mv %s, %s", reg_names[rd], reg_names[rs1]);

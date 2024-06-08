@@ -37,6 +37,12 @@ void execute_load_instruction(CPU *cpu, uint32_t instruction) {
             // 从 x2 寄存器地址加立即数偏移的内存中加载四个字节，符号扩展，存储在 x1 寄存器中
             cpu->registers[rd] = (int32_t)*(uint32_t *)&cpu->memory->data[address];
             break;
+        case FUNCT3_LD:
+            // LD - 加载双字
+            // 示例: ld x1, 16(x2)
+            // 从 x2 寄存器地址加立即数偏移的内存中加载八个字节，符号扩展，存储在 x1 寄存器中
+            cpu->registers[rd] = (int64_t)*(uint64_t *)&cpu->memory->data[address];
+            break;
 
         case FUNCT3_LBU:
             // LBU - 加载无符号字节
