@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
     // Cancel the display thread
     pthread_cancel(display_thread);
     pthread_join(display_thread, NULL);
+    sem_destroy(&sem);
 
     return 0;
 }
