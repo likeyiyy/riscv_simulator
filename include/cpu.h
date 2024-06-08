@@ -7,7 +7,10 @@
 
 typedef struct {
     uint64_t registers[32]; // 32个通用寄存器
+    uint64_t fregisters[32]; // 32个浮点寄存器
+    uint64_t csr[4096]; // 4096个CSR寄存器
     uint64_t pc;            // 程序计数器
+    uint8_t priv;            // 当前特权级
 } CPU;
 
 void cpu_init(CPU *cpu);

@@ -1,23 +1,32 @@
 #ifndef RISCV_DEFS_H
 #define RISCV_DEFS_H
 
+#include "csr.h"
+
 // 指令类型宏定义
+// Load instructions: Load data from memory to register
 #define OPCODE_LOAD      0x03  // Load: LB, LH, LW, LBU, LHU, LD
+
+// Load-FP instructions: Load floating-point data from memory to FP register
 #define OPCODE_LOAD_FP   0x07  // Load Floating-Point: FLW, FLD
+
+// Custom-0 instructions: Custom extension opcode 0
+#define OPCODE_CUSTOM_0 0x0B  // Custom-0 (user-defined)
+
 #define OPCODE_MISC_MEM  0x0F  // Miscellaneous Memory: FENCE, FENCE.I
 #define OPCODE_OP_IMM    0x13  // OP-IMM: ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI
 #define OPCODE_AUIPC     0x17  // Add Upper Immediate to PC: AUIPC
 #define OPCODE_OP_IMM_32 0x1B  // Arithmetic Immediate (32-bit): ADDIW, SLLIW, SRLIW, SRAIW
 #define OPCODE_STORE     0x23  // Store: SB, SH, SW, SD
 #define OPCODE_STORE_FP  0x27  // Store Floating-Point: FSW, FSD
+
+// Custom-1 instructions: Custom extension opcode 1
+#define OPCODE_CUSTOM_1 0x2B  // Custom-1 (user-defined)
+
 #define OPCODE_AMO       0x2F  // Atomic Memory Operations: LR.W, SC.W, AMOSWAP.W, AMOADD.W, AMOXOR.W, AMOAND.W, AMOOR.W, AMOMIN.W, AMOMAX.W, AMOMINU.W, AMOMAXU.W, LR.D, SC.D, AMOSWAP.D, AMOADD.D, AMOXOR.D, AMOAND.D, AMOOR.D, AMOMIN.D, AMOMAX.D, AMOMINU.D, AMOMAXU.D
 #define OPCODE_OP        0x33  // OP: ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND
 #define OPCODE_LUI       0x37  // Load Upper Immediate: LUI
 #define OPCODE_OP_32     0x3B  // Arithmetic (32-bit): ADDW, SUBW, SLLW, SRLW, SRAW
-#define OPCODE_BRANCH    0x63  // Branch: BEQ, BNE, BLT, BGE, BLTU, BGEU
-#define OPCODE_JALR      0x67  // Jump and Link Register: JALR
-#define OPCODE_JAL       0x6F  // Jump and Link: JAL
-#define OPCODE_SYSTEM    0x73  // System: ECALL, EBREAK, CSRRW, CSRRS, CSRRC, CSRRWI, CSRRSI, CSRRCI
 
 // Floating-Point Instructions (if implemented)
 #define OPCODE_MADD      0x43  // Multiply-Add: FMADD.S, FMADD.D
@@ -25,6 +34,17 @@
 #define OPCODE_NMSUB     0x4B  // Negative Multiply-Subtract: FNMSUB.S, FNMSUB.D
 #define OPCODE_NMADD     0x4F  // Negative Multiply-Add: FNMADD.S, FNMADD.D
 #define OPCODE_OP_FP     0x53  // Floating-Point Operations: FADD.S, FSUB.S, FMUL.S, FDIV.S, FSQRT.S, FSGNJ.S, FSGNJN.S, FSGNJX.S, FMIN.S, FMAX.S, FCVT.W.S, FCVT.WU.S, FMV.X.W, FEQ.S, FLT.S, FLE.S, FCLASS.S, FCVT.S.W, FCVT.S.WU, FMV.W.X, FCVT.L.S, FCVT.LU.S, FCVT.S.L, FCVT.S.LU, FMV.X.D, FSGNJ.D, FSGNJN.D, FSGNJX.D, FMIN.D, FMAX.D, FCVT.W.D, FCVT.WU.D, FMV.X.D, FEQ.D, FLT.D, FLE.D, FCLASS.D, FCVT.D.W, FCVT.D.WU, FMV.D.X
+
+// Custom-2/rv128 instructions: Custom extension opcode 2 or RV128 instructions
+#define OPCODE_CUSTOM_2 0x5B  // Custom-2 (user-defined)
+
+#define OPCODE_BRANCH    0x63  // Branch: BEQ, BNE, BLT, BGE, BLTU, BGEU
+#define OPCODE_JALR      0x67  // Jump and Link Register: JALR
+#define OPCODE_JAL       0x6F  // Jump and Link: JAL
+#define OPCODE_SYSTEM    0x73  // System: ECALL, EBREAK, CSRRW, CSRRS, CSRRC, CSRRWI, CSRRSI, CSRRCI
+
+// Custom-3/rv128 instructions: Custom extension opcode 3 or RV128 instructions
+#define OPCODE_CUSTOM_3 0x7B  // Custom-3 (user-defined)
 
 
 #define FUNCT3_ADDIW 0x0  // ADDIW指令的功能码
