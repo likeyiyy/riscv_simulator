@@ -13,6 +13,7 @@ typedef struct {
     uint8_t priv;            // 当前特权级
     uint64_t reserved_address; // 保留地址
     Memory *memory;
+    bool interrupt_pending;
 } CPU;
 
 void cpu_init(CPU *cpu, Memory *memory);

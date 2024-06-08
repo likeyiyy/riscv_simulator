@@ -13,6 +13,7 @@
 #include "load_inst.h"
 #include "b_inst.h"
 #include "j_inst.h"
+#include "csr.h"
 
 
 // 内联函数声明
@@ -189,14 +190,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             }
             break;
         case OPCODE_SYSTEM:
-            if (funct3 == 0) {
-                uint32_t funct12 = instruction >> 20;
-                if (funct12 == 0) {
-                    execute_ecall(cpu);
-                } else if (funct12 == 1) {
-                    execute_ebreak(cpu);
-                }
-            }
+            execute_system_instruction(cpu, instruction);
             break;
         case OPCODE_AMO:
             execute_atomic_instruction(cpu, instruction);

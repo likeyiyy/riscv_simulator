@@ -1,8 +1,6 @@
 #ifndef RISCV_DEFS_H
 #define RISCV_DEFS_H
 
-#include "csr.h"
-
 // 指令类型宏定义
 // Load instructions: Load data from memory to register
 #define OPCODE_LOAD      0x03  // Load: LB, LH, LW, LBU, LHU, LD

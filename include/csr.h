@@ -4,6 +4,8 @@
 
 #ifndef RISCSIMULATOR_CSR_H
 #define RISCSIMULATOR_CSR_H
+#include <stdint.h>
+#include "cpu.h"
 
 // 用户模式 CSRs
 #define CSR_USTATUS     0x000
@@ -88,10 +90,33 @@
 
 // ECALL 异常代码
 #define CAUSE_ILLEGAL_INSTRUCTION 2
+#define CAUSE_BREAKPOINT       3
 #define CAUSE_USER_ECALL       8
 #define CAUSE_SUPERVISOR_ECALL 9
 #define CAUSE_HYPERVISOR_ECALL 10
+
 #define CAUSE_MACHINE_ECALL    11
+
+#define OPCODE_ECALL 0x0
+#define OPCODE_EBREAK 0x1
+#define OPCODE_CSRRW 0x1
+#define OPCODE_CSRRS 0x2
+#define OPCODE_CSRRC 0x3
+#define OPCODE_CSRRWI 0x5
+#define OPCODE_CSRRSI 0x6
+#define OPCODE_CSRRCI 0x7
+
+#define OPCODE_MRET 0x302
+#define OPCODE_SRET 0x102
+#define OPCODE_URET 0x002
+#define OPCODE_WFI 0x105
+
+
+uint64_t read_csr(CPU *cpu, uint32_t csr);
+void write_csr(CPU *cpu, uint32_t csr, uint64_t value);
+
+
+void execute_system_instruction(CPU *cpu, uint32_t instruction);
 
 
 #endif //RISCSIMULATOR_CSR_H
