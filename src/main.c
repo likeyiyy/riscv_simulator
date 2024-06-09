@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <ncurses.h>
 #include <unistd.h> // for usleep
+#include <fcntl.h>
 #include "cpu.h"
 #include "memory.h"
 #include "disassemble.h"
@@ -45,6 +46,15 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <input file>\n", argv[0]);
         return 1;
     }
+    // 重定向 stdout 到文件
+    int fd = open("output.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0) {
+        perror("open");
+        return 1;
+    }
+    dup2(fd, STDOUT_FILENO);
+    close(fd);
+
 
     const char *input_file = argv[1];
     CPU cpu;
