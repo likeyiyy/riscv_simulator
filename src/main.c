@@ -13,6 +13,7 @@
 #include "uart_sim.h"
 #include "helper.h"
 #include "mfprintf.h"
+#include "csr.h"
 
 
 void load_file_to_memory(const char *filename, Memory *memory, size_t address) {
@@ -118,6 +119,7 @@ int main(int argc, char *argv[]) {
                 nodelay(stdscr, TRUE); // Set back to non-blocking mode
             }
             cpu_execute(&cpu, &memory, instruction);
+            cpu.csr[CSR_MINSTRET] += 1;
 
         } else {
             if (cpu.pc == end_address) {
@@ -125,6 +127,7 @@ int main(int argc, char *argv[]) {
                 sem_post(&sem_refresh);
             } else {
                 cpu_execute(&cpu, &memory, instruction);
+                cpu.csr[CSR_MINSTRET] += 1;
             }
         }
         data.pc = cpu.pc;

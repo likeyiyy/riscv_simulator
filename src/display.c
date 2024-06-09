@@ -1,6 +1,7 @@
 #include <unistd.h> // for usleep
 #include <pthread.h>
 #include "disassemble.h"
+#include "csr.h"
 #include "display.h"
 #include "uart_sim.h"
 
@@ -34,6 +35,8 @@ void display_registers(WINDOW *win, CPU *cpu) {
     for (int i = 0; i < 32; i++) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
+    // display cpu.csr[CSR_MINSTRET] at the end of the win
+    mvwprintw(win, 33, 1, "minstret: %lld", cpu->csr[CSR_MINSTRET]);
     wrefresh(win);
 }
 
@@ -135,10 +138,10 @@ void *update_display(void *arg) {
     // 初始化颜色对 (前景色，背景色)
     init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
-    WINDOW *screen_win = create_newwin(26, 80, 0, 30);
-    WINDOW *reg_win = create_newwin(33, 30, 0, 0);
-    WINDOW *source_win = create_newwin(33, 50, 0, 110);
-    WINDOW *stack_win = create_newwin(33, 33, 0, 161);
+    WINDOW *screen_win = create_newwin(27, 80, 0, 30);
+    WINDOW *reg_win = create_newwin(34, 30, 0, 0);
+    WINDOW *source_win = create_newwin(34, 50, 0, 110);
+    WINDOW *stack_win = create_newwin(34, 33, 0, 161);
     display_screen(screen_win, uart);
 
     display_registers(reg_win, cpu);
