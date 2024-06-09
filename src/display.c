@@ -109,7 +109,7 @@ void *update_display(void *arg) {
     while (1) {
         display_screen(screen_win, uart);
         wrefresh(screen_win);
-        if (i++ % 100 == 0) {
+        if (i++ % 50 == 0) {
             display_registers(reg_win, cpu);
             display_stack(stack_win, cpu, memory);
             display_source(source_win, memory, data->pc);

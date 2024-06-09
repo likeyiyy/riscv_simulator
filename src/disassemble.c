@@ -422,27 +422,50 @@ void dis_branch(uint64_t address, uint32_t instruction, char *buffer, size_t buf
 
 void dis_op_32(uint32_t instruction, char *buffer, size_t buffer_size, uint32_t rd, uint32_t funct3, uint32_t rs1,
                uint32_t rs2, uint32_t funct7) {
-    switch (funct3) {
-        case 0x0:
-            if (funct7 == 0x00) {
-                snprintf(buffer, buffer_size, "addw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-            } else if (funct7 == 0x20) {
-                snprintf(buffer, buffer_size, "subw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-            }
-            break;
-        case 0x1: // SLLW
-            snprintf(buffer, buffer_size, "sllw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-            break;
-        case 0x5:
-            if (funct7 == 0x00) {
-                snprintf(buffer, buffer_size, "srlw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-            } else if (funct7 == 0x20) {
-                snprintf(buffer, buffer_size, "sraw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-            }
-            break;
-        default:
-            snprintf(buffer, buffer_size, "unknown R-type extension instruction: 0x%08x", instruction);
+    if (funct7 == 0x1) {
+        switch (funct3) {
+            case 0x0: // MULW
+                snprintf(buffer, buffer_size, "mulw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case 0x4: // DIVW
+                snprintf(buffer, buffer_size, "divw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case 0x5: // DIVUW
+                snprintf(buffer, buffer_size, "divuw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case 0x6: // REMW
+                snprintf(buffer, buffer_size, "remw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case 0x7: // REMUW
+                snprintf(buffer, buffer_size, "remuw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            default:
+                snprintf(buffer, buffer_size, "unknown R-type extension instruction: 0x%08x", instruction);
+        }
+    } else {
+        switch (funct3) {
+            case 0x0:
+                if (funct7 == 0x00) {
+                    snprintf(buffer, buffer_size, "addw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                } else if (funct7 == 0x20) {
+                    snprintf(buffer, buffer_size, "subw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                }
+                break;
+            case 0x1: // SLLW
+                snprintf(buffer, buffer_size, "sllw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case 0x5:
+                if (funct7 == 0x00) {
+                    snprintf(buffer, buffer_size, "srlw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                } else if (funct7 == 0x20) {
+                    snprintf(buffer, buffer_size, "sraw %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                }
+                break;
+            default:
+                snprintf(buffer, buffer_size, "unknown R-type extension instruction: 0x%08x", instruction);
+        }
     }
+
 }
 
 void dis_op_imm_32(uint32_t instruction, char *buffer, size_t buffer_size, uint32_t rd, uint32_t funct3, uint32_t rs1,
