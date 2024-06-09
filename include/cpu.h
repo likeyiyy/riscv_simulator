@@ -29,7 +29,6 @@ typedef struct {
     MMU mmu;                 // 内存管理单元
     bool interrupt_pending;
     bool fast_mode;
-    bool step_mode_refresh;
     CLINT clint;             // 核心本地中断
     PLIC plic;               // 平台级中断控制器
     int current_priority;    // 当前处理中断的优先级

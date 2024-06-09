@@ -57,12 +57,14 @@ int main(int argc, char *argv[]) {
 
     load_file_to_memory(input_file, &memory);
 
-    sem_t sem;
+    sem_t sem_refresh;
+    sem_t sem_continue;
 
-    sem_init(&sem, 0, 0);
+    sem_init(&sem_refresh, 0, 0);
+    sem_init(&sem_continue, 0, 0);
 
     // Initialize ncurses display thread
-    DisplayData data = {&cpu, &memory, cpu.pc, &sem, &uart};
+    DisplayData data = {&cpu, &memory, cpu.pc, &sem_refresh, &sem_continue, &uart};
     pthread_t display_thread;
     pthread_create(&display_thread, NULL, update_display, &data);
 
@@ -82,16 +84,17 @@ int main(int argc, char *argv[]) {
         }
 
         if (!cpu.fast_mode) {
-            sem_wait(&sem); // Wait for display thread to finish updating
+            sem_wait(&sem_continue); // Wait for display thread to finish updating
             nodelay(stdscr, FALSE); // Set blocking mode for step mode
             ch = getch(); // Wait for user input in step mode
             if (ch == 'q') break; // Quit the program
             if (ch == 's') {
                 cpu.fast_mode = false; // Step mode
-                cpu.step_mode_refresh = true;
+                sem_post(&sem_refresh); // Notify display thread to refresh
             }
             if (ch == 'f' || ch == 'c') {
                 cpu.fast_mode = true;  // Fast mode
+                sem_post(&sem_refresh);
                 nodelay(stdscr, TRUE); // Set back to non-blocking mode
             }
         }
@@ -113,7 +116,8 @@ int main(int argc, char *argv[]) {
     // Cancel the display thread
     pthread_cancel(display_thread);
     pthread_join(display_thread, NULL);
-    sem_destroy(&sem);
+    sem_destroy(&sem_continue);
+    sem_destroy(&sem_refresh);
 
     return 0;
 }

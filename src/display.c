@@ -111,7 +111,8 @@ void *update_display(void *arg) {
     DisplayData *data = (DisplayData *) arg;
     CPU *cpu = data->cpu;
     Memory *memory = data->memory;
-    sem_t *sem = data->sem;
+    sem_t *sem_refresh = data->sem_refresh;
+    sem_t *sem_continue = data->sem_continue;
     UART *uart = data->uart;
 
     initscr();
@@ -131,7 +132,7 @@ void *update_display(void *arg) {
     display_registers(reg_win, cpu);
     display_stack(stack_win, cpu, memory);
     display_source(source_win, memory, data->pc);
-
+    sem_post(sem_continue); // Signal main thread to proceed
     int i = 0;
     while (1) {
         if (cpu->fast_mode) {
@@ -142,13 +143,16 @@ void *update_display(void *arg) {
                 display_stack(stack_win, cpu, memory);
                 display_source(source_win, memory, data->pc);
             }
-            sem_post(sem); // Signal main thread to proceed
+            sem_post(sem_continue); // Signal main thread to proceed
 
-            usleep(10000); // Adjust the refresh rate as needed
+            usleep(1000); // Adjust the refresh rate as needed
         } else {
-            // some code need here
-            sem_post(sem); // Signal main thread to proceed
-            usleep(100000); // Adjust the refresh rate as needed
+            sem_wait(sem_refresh); // Wait for CPU thread to signal refresh
+            display_screen(screen_win, uart);
+            display_registers(reg_win, cpu);
+            display_stack(stack_win, cpu, memory);
+            display_source(source_win, memory, data->pc);
+            sem_post(sem_continue); // Signal main thread to proceed
         }
     }
 }
