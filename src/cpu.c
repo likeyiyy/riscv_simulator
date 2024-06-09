@@ -25,6 +25,8 @@ void cpu_init(CPU *cpu, Memory *memory, UART *uart) {
     cpu->pc = 0;
     cpu->priv = PRV_M;
     cpu->memory = memory;
+    cpu->interrupt_pending = false;
+    cpu->fast_mode = false;
     init_mmu(&cpu->mmu);
     // 初始化 CLINT 和 PLIC
     init_clint(&cpu->clint, cpu->cpu_id, memory);

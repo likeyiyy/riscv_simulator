@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     // Simulate instruction execution
     int ch;
     uint32_t instruction;
-    bool fast_mode = false;
+
 
     while (cpu.pc < MEMORY_SIZE) {
         instruction = memory_load_word(&memory, cpu.pc);
@@ -81,18 +81,19 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        if (!fast_mode) {
+        if (!cpu.fast_mode) {
             sem_wait(&sem); // Wait for display thread to finish updating
             nodelay(stdscr, FALSE); // Set blocking mode for step mode
             ch = getch(); // Wait for user input in step mode
             if (ch == 'q') break; // Quit the program
-            if (ch == 's') fast_mode = false; // Step mode
+            if (ch == 's') {
+                cpu.fast_mode = false; // Step mode
+                cpu.step_mode_refresh = true;
+            }
             if (ch == 'f' || ch == 'c') {
-                fast_mode = true;  // Fast mode
+                cpu.fast_mode = true;  // Fast mode
                 nodelay(stdscr, TRUE); // Set back to non-blocking mode
             }
-        } else {
-
         }
         cpu_execute(&cpu, &memory, instruction);
 

@@ -22,15 +22,28 @@ WINDOW *create_newwin(int height, int width, int starty, int startx) {
 }
 
 void display_registers(WINDOW *win, CPU *cpu) {
+    static uint64_t old_pc = 0;
+    if (old_pc != 0 && old_pc == cpu->pc) {
+        return;
+    } else {
+        old_pc = cpu->pc;
+    }
     wclear(win);
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "pc:0x%016llx", cpu->pc);
     for (int i = 0; i < 32; i++) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
+    wrefresh(win);
 }
 
 void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
+    static uint64_t old_sp = 0;
+    if (old_sp != 0 && old_sp == cpu->registers[2]) {
+        return;
+    } else {
+        old_sp = cpu->registers[2];
+    }
     wclear(win);
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "Stack (0x%016llx):", cpu->registers[2]);
@@ -39,9 +52,16 @@ void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
         uint32_t stack_value = memory_load_word(memory, base_address + i * 4);
         mvwprintw(win, i + 1, 1, "0x%016llx: 0x%08lx", base_address + i * 4, stack_value);
     }
+    wrefresh(win);
 }
 
 void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
+    static uint64_t old_pc = 0;
+    if (old_pc != 0 && old_pc == pc) {
+        return;
+    } else {
+        old_pc = pc;
+    }
     wclear(win);
     box(win, 0, 0);
     char buffer[100];
@@ -52,6 +72,7 @@ void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
         disassemble(address, instruction, buffer, sizeof(buffer));
         mvwprintw(win, i + 1, 1, "0x%08x: 0x%08x  %s", address, instruction, &buffer);
     }
+    wrefresh(win);
 }
 
 void display_screen(WINDOW *win, UART *uart) {
@@ -82,6 +103,7 @@ void display_screen(WINDOW *win, UART *uart) {
         uart->registers[LSR] &= ~0x01; // Clear Data Ready
         uart->registers[LSR] |= LSR_THRE; // Set Transmitter Holding Register Empty
         uart->registers[THR] = 0;
+        wrefresh(win);
     }
 }
 
@@ -104,20 +126,29 @@ void *update_display(void *arg) {
     WINDOW *reg_win = create_newwin(33, 30, 0, 0);
     WINDOW *source_win = create_newwin(33, 50, 0, 110);
     WINDOW *stack_win = create_newwin(33, 33, 0, 161);
+    display_screen(screen_win, uart);
+
+    display_registers(reg_win, cpu);
+    display_stack(stack_win, cpu, memory);
+    display_source(source_win, memory, data->pc);
 
     int i = 0;
     while (1) {
-        display_screen(screen_win, uart);
-        wrefresh(screen_win);
-        if (i++ % 50 == 0) {
-            display_registers(reg_win, cpu);
-            display_stack(stack_win, cpu, memory);
-            display_source(source_win, memory, data->pc);
-            wrefresh(reg_win);
-            wrefresh(stack_win);
-            wrefresh(source_win);
+        if (cpu->fast_mode) {
+            display_screen(screen_win, uart);
+
+            if (i++ % 50 == 0) {
+                display_registers(reg_win, cpu);
+                display_stack(stack_win, cpu, memory);
+                display_source(source_win, memory, data->pc);
+            }
+            sem_post(sem); // Signal main thread to proceed
+
+            usleep(10000); // Adjust the refresh rate as needed
+        } else {
+            // some code need here
+            sem_post(sem); // Signal main thread to proceed
+            usleep(100000); // Adjust the refresh rate as needed
         }
-        sem_post(sem); // Signal main thread to proceed
-        usleep(1000); // Adjust the refresh rate as needed
     }
 }
