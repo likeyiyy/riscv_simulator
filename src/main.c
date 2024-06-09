@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
     while (cpu.pc < MEMORY_SIZE) {
         instruction = memory_load_word(&memory, cpu.pc);
-        mfprintf("Address: 0x%016lx, Instruction: %08x\n", cpu.pc, instruction);
+//        mfprintf("Address: 0x%016lx, Instruction: %08x\n", cpu.pc, instruction);
 
 
         // 判断指令是否全为0
@@ -126,7 +126,6 @@ int main(int argc, char *argv[]) {
             } else {
                 cpu_execute(&cpu, &memory, instruction);
             }
-
         }
         data.pc = cpu.pc;
     }
