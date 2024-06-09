@@ -12,6 +12,7 @@
 #include "display.h"
 #include "uart_sim.h"
 #include "helper.h"
+#include "mfprintf.h"
 
 
 void load_file_to_memory(const char *filename, Memory *memory, size_t address) {
@@ -93,6 +94,8 @@ int main(int argc, char *argv[]) {
 
     while (cpu.pc < MEMORY_SIZE) {
         instruction = memory_load_word(&memory, cpu.pc);
+        mfprintf("Address: 0x%016lx, Instruction: %08x\n", cpu.pc, instruction);
+
 
         // 判断指令是否全为0
         if (instruction == 0) {

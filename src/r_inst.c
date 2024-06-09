@@ -14,6 +14,10 @@ void execute_r_type_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t rs1 = RS1(instruction);       // 提取源寄存器1
     uint32_t rs2 = RS2(instruction);       // 提取源寄存器2
     uint32_t funct7 = FUNCT7(instruction); // 提取funct7字段
+    if (funct7 == FUNCT7_M) {
+        execute_m_extension_instruction(cpu, instruction);
+        return;
+    }
     switch (funct3) {
         case FUNCT3_ADD_SUB:
             if (funct7 == FUNCT7_ADD) {
@@ -59,11 +63,7 @@ void execute_r_type_instruction(CPU *cpu, uint32_t instruction) {
             break;
             // 其他R型指令
         default:
-            if (funct7 == FUNCT7_M) {
-                execute_m_extension_instruction(cpu, instruction);
-            } else {
-                mfprintf("Unknown R-type instruction with funct3: 0x%x\n", funct3);
-            }
+            mfprintf("Unknown R-type instruction with funct3: 0x%x\n", funct3);
             break;
     }
 }

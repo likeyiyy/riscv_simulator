@@ -552,6 +552,37 @@ void dis_load(uint32_t instruction, char *buffer, size_t buffer_size, uint32_t r
 void
 dis_op(uint32_t instruction, char *buffer, size_t buffer_size, uint32_t rd, uint32_t funct3, uint32_t rs1, uint32_t rs2,
        uint32_t funct7) {
+    if (funct7 == FUNCT7_M) {
+        switch (funct3) {
+            case FUNCT3_MUL:
+                snprintf(buffer, buffer_size, "mul %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case FUNCT3_MULH:
+                snprintf(buffer, buffer_size, "mulh %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case FUNCT3_MULHSU:
+                snprintf(buffer, buffer_size, "mulhsu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case FUNCT3_MULHU:
+                snprintf(buffer, buffer_size, "mulhu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case FUNCT3_DIV:
+                snprintf(buffer, buffer_size, "div %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case FUNCT3_DIVU:
+                snprintf(buffer, buffer_size, "divu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case FUNCT3_REM:
+                snprintf(buffer, buffer_size, "rem %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            case FUNCT3_REMU:
+                snprintf(buffer, buffer_size, "remu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
+                break;
+            default:
+                snprintf(buffer, buffer_size, "unknown M-extension instruction: 0x%08x", instruction);
+        }
+        return;
+    }
     switch (funct3) {
         case 0x0:
             if (funct7 == 0x00) {
@@ -586,38 +617,7 @@ dis_op(uint32_t instruction, char *buffer, size_t buffer_size, uint32_t rd, uint
             snprintf(buffer, buffer_size, "and %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
             break;
         default:
-            if (funct7 == FUNCT7_M) {
-                switch (funct3) {
-                    case FUNCT3_MUL:
-                        snprintf(buffer, buffer_size, "mul %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    case FUNCT3_MULH:
-                        snprintf(buffer, buffer_size, "mulh %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    case FUNCT3_MULHSU:
-                        snprintf(buffer, buffer_size, "mulhsu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    case FUNCT3_MULHU:
-                        snprintf(buffer, buffer_size, "mulhu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    case FUNCT3_DIV:
-                        snprintf(buffer, buffer_size, "div %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    case FUNCT3_DIVU:
-                        snprintf(buffer, buffer_size, "divu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    case FUNCT3_REM:
-                        snprintf(buffer, buffer_size, "rem %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    case FUNCT3_REMU:
-                        snprintf(buffer, buffer_size, "remu %s, %s, %s", reg_names[rd], reg_names[rs1], reg_names[rs2]);
-                        break;
-                    default:
-                        snprintf(buffer, buffer_size, "unknown M-extension instruction: 0x%08x", instruction);
-                }
-            } else {
-                snprintf(buffer, buffer_size, "r: 0x%08x", instruction);
-            }
+            snprintf(buffer, buffer_size, "r: 0x%08x", instruction);
 
     }
 }
