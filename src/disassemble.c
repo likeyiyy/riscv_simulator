@@ -9,8 +9,8 @@
 // 定义寄存器名称
 const char* reg_names[] = {
         "x0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
-        "s0", "x9", "x10", "x11", "x12", "x13", "x14", "x15",
-        "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
+        "s0", "x9", "x10", "a1", "a2", "a3", "a4", "a5",
+        "a6", "a7", "x18", "x19", "x20", "x21", "x22", "x23",
         "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"
 };
 
@@ -383,7 +383,12 @@ void dis_jal(uint64_t address, uint32_t instruction, char *buffer, size_t buffer
     if (rd == 0) {
         snprintf(buffer, buffer_size, "j 0x%x", imm + address);
     } else {
-        snprintf(buffer, buffer_size, "jal %s, %d", reg_names[rd], imm);
+        if (rd == 1) {
+            snprintf(buffer, buffer_size, "jal 0x%x", imm + address);
+        } else {
+            snprintf(buffer, buffer_size, "jal %s, %d", reg_names[rd], imm + address);
+        }
+
     }
 }
 
@@ -393,27 +398,31 @@ void dis_branch(uint64_t address, uint32_t instruction, char *buffer, size_t buf
                         (((instruction >> 25) & 0x3F) << 5) | (((instruction >> 8) & 0xF) << 1)) << 19 >> 19; // 符号扩展立即数
     switch (funct3) {
         case FUNCT3_BEQ:
-            snprintf(buffer, buffer_size, "beq %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+            if (rs2 == 0) {
+                snprintf(buffer, buffer_size, "beqz %s, 0x%x", reg_names[rs1], address + imm);
+            } else {
+                snprintf(buffer, buffer_size, "beq %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+            }
             break;
         case FUNCT3_BNE:
             if (rs2 == 0) {
                 snprintf(buffer, buffer_size, "bnez %s, 0x%x", reg_names[rs1], address + imm);
             } else {
-                snprintf(buffer, buffer_size, "bne %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+                snprintf(buffer, buffer_size, "bne %s, %s, 0x%x", reg_names[rs1], reg_names[rs2], address + imm);
             }
 
             break;
         case FUNCT3_BLT:
-            snprintf(buffer, buffer_size, "blt %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+            snprintf(buffer, buffer_size, "blt %s, %s, 0x%x", reg_names[rs1], reg_names[rs2], address + imm);
             break;
         case FUNCT3_BGE:
-            snprintf(buffer, buffer_size, "bge %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+            snprintf(buffer, buffer_size, "bge %s, %s, 0x%x", reg_names[rs1], reg_names[rs2], address + imm);
             break;
         case FUNCT3_BLTU:
-            snprintf(buffer, buffer_size, "bltu %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+            snprintf(buffer, buffer_size, "bltu %s, %s, 0x%x", reg_names[rs1], reg_names[rs2], address + imm);
             break;
         case FUNCT3_BGEU:
-            snprintf(buffer, buffer_size, "bgeu %s, %s, %d", reg_names[rs1], reg_names[rs2], imm);
+            snprintf(buffer, buffer_size, "bgeu %s, %s, 0x%x", reg_names[rs1], reg_names[rs2], address + imm);
             break;
         default:
             snprintf(buffer, buffer_size, "unknown B-type instruction: 0x%08x", instruction);

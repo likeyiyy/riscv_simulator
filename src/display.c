@@ -72,7 +72,10 @@ void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
         uint32_t instruction = memory_load_word(memory, address);
         disassemble(address, instruction, buffer, sizeof(buffer));
         if (address == pc) {
-            mvwprintw(win, i + 1, 1, "0x%08x>: 0x%08x  %s", address, instruction, &buffer);
+            // 启用颜色对1
+            wattron(win, COLOR_PAIR(1));
+            mvwprintw(win, i + 1, 1, "0x%08x>: 0x%08x  %s", address, instruction, buffer);
+            wattroff(win, COLOR_PAIR(1)); // 禁用颜色对1
         } else {
             mvwprintw(win, i + 1, 1, "0x%08x : 0x%08x  %s", address, instruction, &buffer);
         }
@@ -127,6 +130,10 @@ void *update_display(void *arg) {
     // Clear the screen
     clear();
     refresh();
+    start_color();        // 启用颜色功能
+
+    // 初始化颜色对 (前景色，背景色)
+    init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
     WINDOW *screen_win = create_newwin(26, 80, 0, 30);
     WINDOW *reg_win = create_newwin(33, 30, 0, 0);
