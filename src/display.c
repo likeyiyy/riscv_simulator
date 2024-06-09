@@ -138,14 +138,14 @@ void *update_display(void *arg) {
         if (cpu->fast_mode) {
             display_screen(screen_win, uart);
 
-            if (i++ % 50 == 0) {
+            if (i++ % 5000 == 0) {
                 display_registers(reg_win, cpu);
                 display_stack(stack_win, cpu, memory);
                 display_source(source_win, memory, data->pc);
             }
             sem_post(sem_continue); // Signal main thread to proceed
 
-            usleep(1000); // Adjust the refresh rate as needed
+            usleep(10); // Adjust the refresh rate as needed
         } else {
             sem_wait(sem_refresh); // Wait for CPU thread to signal refresh
             display_screen(screen_win, uart);

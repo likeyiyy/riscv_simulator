@@ -73,7 +73,6 @@ int main(int argc, char *argv[]) {
     int ch;
     uint32_t instruction;
 
-
     while (cpu.pc < MEMORY_SIZE) {
         instruction = memory_load_word(&memory, cpu.pc);
 
@@ -104,8 +103,9 @@ int main(int argc, char *argv[]) {
         data.pc = cpu.pc;
     }
 
+
     // Wait for user input before exiting
-    mvprintw(33, 0, "Simulation complete. Press 'q' to exit.");
+    mvprintw(34, 0, "Simulation complete. Press 'q' to exit.");
     refresh();
     while ((ch = getch()) != 'q') {
         // Wait for user to press 'q' to quit
