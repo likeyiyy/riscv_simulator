@@ -8,7 +8,8 @@
 
 // 定义缓冲区大小
 #define MAX_LINES 18
-#define LINE_LENGTH 256
+#define LINE_LENGTH 80
+#define PRINT_WIDTH 78 // 打印宽度限制，使其不会覆盖边框
 
 // 循环缓冲区，用于存储最新的行
 char buffer[MAX_LINES][LINE_LENGTH];
@@ -28,7 +29,7 @@ void* ncurses_thread(void* arg) {
     keypad(stdscr, TRUE);
     refresh();
 
-    WINDOW *win = newwin(20, 80, 0, 0); // 创建新窗口
+    WINDOW *win = newwin(20, 83, 0, 0); // 创建新窗口
     box(win, 0, 0);                     // 绘制边框
     wrefresh(win);
 
@@ -42,7 +43,7 @@ void* ncurses_thread(void* arg) {
         while (fgets(line, sizeof(line), file)) {
             // 将新行添加到缓冲区
             strncpy(buffer[(buffer_start + buffer_count) % MAX_LINES], line, LINE_LENGTH - 1);
-            buffer[(buffer_start + buffer_count) % MAX_LINES][LINE_LENGTH - 1] = '\0'; // 确保字符串以 null 结尾
+//            buffer[(buffer_start + buffer_count) % MAX_LINES][LINE_LENGTH - 1] = '\0'; // 确保字符串以 null 结尾
             if (buffer_count < MAX_LINES) {
                 buffer_count++;
             } else {
@@ -59,7 +60,7 @@ void* ncurses_thread(void* arg) {
 
         // 打印缓冲区中的行
         for (int i = 0; i < buffer_count; i++) {
-            mvwprintw(win, i + 1, 1, "%s", buffer[(buffer_start + i) % MAX_LINES]);
+            mvwprintw(win, i + 1, 1, "%.80s", buffer[(buffer_start + i) % MAX_LINES]);
         }
 
         wrefresh(win);
@@ -89,12 +90,13 @@ int main() {
 
     // 主线程继续运行其他任务
     for (int i = 0; i < 100; ++i) {
-        fprintf(file, "Log entry %d\n", i);
+        fprintf(file, "Log entry %d\nLogHHHHH", i);
         fflush(file); // 确保输出立即写入文件
-        sleep(1); // 模拟日志生成间隔
+        usleep(50000); // 模拟日志生成间隔
     }
 
     pthread_join(thread, NULL);
+    fflush(file); // 再次确保所有缓冲区内容被写入文件
     fclose(file); // 关闭文件
 
     return 0;
