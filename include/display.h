@@ -8,6 +8,7 @@
 #include "uart_sim.h"
 
 #define STACK_SIZE 32
+
 typedef struct {
     CPU *cpu;
     Memory *memory;
@@ -19,6 +20,5 @@ typedef struct {
 
 
 void *update_display(void *arg);
-void *update_screen(void *arg);
 
 #endif // DISPLAY_H

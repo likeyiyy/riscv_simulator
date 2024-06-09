@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "s_inst.h"
 #include "uart_sim.h"
+#include "display.h"
+#include "mfprintf.h"
 
 // S-type指令处理函数
 void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
@@ -53,7 +55,7 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
 
         default:
             // 未知指令处理
-            printf("Unknown S-type instruction with funct3: 0x%x\n", funct3);
+            mfprintf("Unknown S-type instruction with funct3: 0x%x\n", funct3);
             break;
     }
 }

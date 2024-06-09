@@ -156,3 +156,4 @@ void *update_display(void *arg) {
         }
     }
 }
+

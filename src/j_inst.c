@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "j_inst.h"
+#include "display.h"
+#include "mfprintf.h"
 
 void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t rd = (instruction >> 7) & 0x1F;
@@ -26,6 +28,6 @@ void execute_j_type_instruction(CPU *cpu, uint32_t instruction) {
         }
         cpu->pc = (cpu->registers[rs1] + imm) & ~1;  // 确保跳转地址是对齐的
     } else {
-        printf("Unknown J-type instruction with opcode: 0x%x\n", instruction & 0x7F);
+        mfprintf("Unknown J-type instruction with opcode: 0x%x\n", instruction & 0x7F);
     }
 }

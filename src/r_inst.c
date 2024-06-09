@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "r_inst.h"
 #include "m_extension.h"
+#include "display.h"
+#include "mfprintf.h"
 
 // R-type指令处理函数
 void execute_r_type_instruction(CPU *cpu, uint32_t instruction) {
@@ -60,7 +62,7 @@ void execute_r_type_instruction(CPU *cpu, uint32_t instruction) {
             if (funct7 == FUNCT7_M) {
                 execute_m_extension_instruction(cpu, instruction);
             } else {
-                printf("Unknown R-type instruction with funct3: 0x%x\n", funct3);
+                mfprintf("Unknown R-type instruction with funct3: 0x%x\n", funct3);
             }
             break;
     }

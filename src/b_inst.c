@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "b_inst.h"
+#include "mfprintf.h"
+#include "display.h"
 
 void execute_b_type_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t rs1 = (instruction >> 15) & 0x1F;
@@ -57,7 +59,7 @@ void execute_b_type_instruction(CPU *cpu, uint32_t instruction) {
             }
             break;
         default:
-            printf("Unknown B-type instruction with funct3: 0x%x\n", funct3);
+            mfprintf("Unknown B-type instruction with funct3: 0x%x\n", funct3);
     }
     cpu->pc += 4;  // 如果没有跳转，则PC增加4
 }

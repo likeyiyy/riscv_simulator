@@ -16,6 +16,8 @@
 #include "clint.h"
 #include "plic.h"
 #include "i_64_inst.h"
+#include "display.h"
+#include "mfprintf.h"
 
 
 void cpu_init(CPU *cpu, Memory *memory, UART *uart) {
@@ -184,7 +186,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             execute_f_extension_instruction(cpu, instruction);
             break;
         default:
-            printf("Unknown instruction with opcode: 0x%x\n", opcode);
+            mfprintf("Unknown instruction with opcode: 0x%x\n", opcode);
     }
     if(!pc_updated) {
         cpu->pc += 4;

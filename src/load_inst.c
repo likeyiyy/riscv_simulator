@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "load_inst.h"
+#include "display.h"
+#include "mfprintf.h"
 
 
 // Load指令处理函数
@@ -66,7 +68,7 @@ void execute_load_instruction(CPU *cpu, uint32_t instruction) {
 
         default:
             // 未知指令处理
-            printf("Unknown load instruction with funct3: 0x%x\n", funct3);
+            mfprintf("Unknown load instruction with funct3: 0x%x\n", funct3);
             break;
     }
 }
