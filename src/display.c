@@ -66,11 +66,16 @@ void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
     box(win, 0, 0);
     char buffer[100];
     mvwprintw(win, 0, 1, "Source (0x%016llx):", pc);
+    uint64_t start_pc = pc - 64;
     for (int i = 0; i < 32; i++) {
-        uint64_t address = pc + i * 4;
+        uint64_t address = start_pc + i * 4;
         uint32_t instruction = memory_load_word(memory, address);
         disassemble(address, instruction, buffer, sizeof(buffer));
-        mvwprintw(win, i + 1, 1, "0x%08x: 0x%08x  %s", address, instruction, &buffer);
+        if (address == pc) {
+            mvwprintw(win, i + 1, 1, "0x%08x>: 0x%08x  %s", address, instruction, &buffer);
+        } else {
+            mvwprintw(win, i + 1, 1, "0x%08x : 0x%08x  %s", address, instruction, &buffer);
+        }
     }
     wrefresh(win);
 }
