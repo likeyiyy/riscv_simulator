@@ -70,7 +70,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
         case OPCODE_AUIPC:
             // AUIPC指令：rd = pc + imm
             // 提取高20位的立即数部分
-            imm = (int32_t)instruction >> 12;
+            imm = (int32_t)((instruction >> 12) << 12) >> 12;  // 符号扩展立即数
             // 左移12位，进行符号扩展
             offset = (int64_t)imm << 12;
             // 计算目标地址
