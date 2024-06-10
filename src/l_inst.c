@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "load_inst.h"
+#include "l_inst.h"
 #include "display.h"
 #include "mfprintf.h"
 #include "exception.h"

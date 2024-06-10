@@ -9,7 +9,7 @@
 #include "r_inst.h"
 #include "i_inst.h"
 #include "s_inst.h"
-#include "load_inst.h"
+#include "l_inst.h"
 #include "b_inst.h"
 #include "j_inst.h"
 #include "csr.h"
