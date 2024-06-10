@@ -3,25 +3,30 @@
 #include <stdlib.h>
 #include "plic.h"
 
-static PLIC plic;
+static PLIC global_plic;
 
-void plic_init() {
-    memset(&plic, 0, sizeof(PLIC));
+void plic_init(PLIC *plic) {
+    memset(plic, 0, sizeof(PLIC));
 }
 
-uint32_t plic_read(uint32_t address) {
+PLIC* get_plic(void) {
+    return &global_plic;
+}
+
+uint64_t plic_read(uint64_t address, uint32_t size) {
+    PLIC *plic = get_plic();
     uint32_t offset = address - PLIC_BASE_ADDR;
-    if (offset >= PLIC_PRIORITY_OFFSET && offset < PLIC_PRIORITY_OFFSET + sizeof(plic.priority)) {
-        return plic.priority[(offset - PLIC_PRIORITY_OFFSET) / 4];
-    } else if (offset >= PLIC_PENDING_OFFSET && offset < PLIC_PENDING_OFFSET + sizeof(plic.pending)) {
-        return plic.pending[(offset - PLIC_PENDING_OFFSET) / 4];
-    } else if (offset >= PLIC_ENABLE_OFFSET && offset < PLIC_ENABLE_OFFSET + sizeof(plic.enable)) {
-        return plic.enable[(offset - PLIC_ENABLE_OFFSET) / 4];
+    if (offset >= PLIC_PRIORITY_OFFSET && offset < PLIC_PRIORITY_OFFSET + sizeof(plic->priority)) {
+        return plic->priority[(offset - PLIC_PRIORITY_OFFSET) / 4];
+    } else if (offset >= PLIC_PENDING_OFFSET && offset < PLIC_PENDING_OFFSET + sizeof(plic->pending)) {
+        return plic->pending[(offset - PLIC_PENDING_OFFSET) / 4];
+    } else if (offset >= PLIC_ENABLE_OFFSET && offset < PLIC_ENABLE_OFFSET + sizeof(plic->enable)) {
+        return plic->enable[(offset - PLIC_ENABLE_OFFSET) / 4];
     } else if (offset == PLIC_THRESHOLD_OFFSET) {
-        return plic.threshold;
+        return plic->threshold;
     } else if (offset == PLIC_CLAIM_OFFSET) {
-        int interrupt_id = plic.claim_complete;
-        plic.claim_complete = -1;
+        int interrupt_id = plic->claim_complete;
+        plic->claim_complete = -1;
         return interrupt_id;
     } else {
         // 无效地址，返回0
@@ -29,18 +34,19 @@ uint32_t plic_read(uint32_t address) {
     }
 }
 
-void plic_write(uint32_t address, uint32_t value) {
+void plic_write(uint64_t address, uint64_t value, uint32_t size) {
+    PLIC *plic = get_plic();
     uint32_t offset = address - PLIC_BASE_ADDR;
-    if (offset >= PLIC_PRIORITY_OFFSET && offset < PLIC_PRIORITY_OFFSET + sizeof(plic.priority)) {
-        plic.priority[(offset - PLIC_PRIORITY_OFFSET) / 4] = value;
-    } else if (offset >= PLIC_PENDING_OFFSET && offset < PLIC_PENDING_OFFSET + sizeof(plic.pending)) {
+    if (offset >= PLIC_PRIORITY_OFFSET && offset < PLIC_PRIORITY_OFFSET + sizeof(plic->priority)) {
+        plic->priority[(offset - PLIC_PRIORITY_OFFSET) / 4] = value;
+    } else if (offset >= PLIC_PENDING_OFFSET && offset < PLIC_PENDING_OFFSET + sizeof(plic->pending)) {
         // 挂起寄存器是只读的，不能写入
-    } else if (offset >= PLIC_ENABLE_OFFSET && offset < PLIC_ENABLE_OFFSET + sizeof(plic.enable)) {
-        plic.enable[(offset - PLIC_ENABLE_OFFSET) / 4] = value;
+    } else if (offset >= PLIC_ENABLE_OFFSET && offset < PLIC_ENABLE_OFFSET + sizeof(plic->enable)) {
+        plic->enable[(offset - PLIC_ENABLE_OFFSET) / 4] = value;
     } else if (offset == PLIC_THRESHOLD_OFFSET) {
-        plic.threshold = value;
+        plic->threshold = value;
     } else if (offset == PLIC_CLAIM_OFFSET) {
-        plic.claim_complete = value;
+        plic->claim_complete = value;
     }
 }
 
@@ -62,16 +68,4 @@ int claim_interrupt(PLIC *plic, int cpu_id) {
 void complete_interrupt(PLIC *plic, int interrupt_id) {
     // 中断处理完成后的操作
     plic->claim_complete = -1;
-}
-
-void* external_interrupt_simulator(void* arg) {
-    while (1) {
-        // 随机生成一个中断ID
-        int interrupt_id = rand() % MAX_INTERRUPTS;
-        printf("Triggering interrupt %d\n", interrupt_id);
-        trigger_interrupt(&plic, interrupt_id);
-        // 等待一段时间再生成下一个中断
-        sleep(1); // 可以根据需要调整
-    }
-    return NULL;
 }

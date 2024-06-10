@@ -27,8 +27,10 @@ typedef struct {
     uint8_t registers[8];
 } UART;
 
+
+UART* get_uart();
 void uart_init(UART *uart);
-void uart_write(UART *uart, uint64_t addr, uint8_t value);
-uint8_t uart_read(UART *uart, uint64_t addr);
+void uart_write(uint64_t addr, uint64_t value, uint32_t size);
+uint64_t uart_read(uint64_t addr, uint32_t size)
 
 #endif // RISCSIMULATOR_S_UART_H

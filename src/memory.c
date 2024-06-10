@@ -6,8 +6,8 @@
 
 MMIORegion mmio_regions[NUM_MMIO_REGIONS] = {
         { .base_addr = CLINT_BASE_ADDR, .size = 0x1000, .read = clint_read, .write = clint_write },
-        { .base_addr = PLIC_BASE_ADDR, .size = 0x1000, .read = clint_read, .write = clint_write },
-        { .base_addr = UART_BASE_ADDR, .size = 0x1000, .read = uart_read, .write = uart_write },
+        { .base_addr = PLIC_BASE_ADDR, .size = 0x1000, .read = plic_read, .write = plic_write },
+        { .base_addr = UART_BASE_ADDR, .size = 8, .read = uart_read, .write = uart_write },
         // 添加其他 MMIO 区域
 };
 
@@ -21,6 +21,12 @@ void memory_init(Memory *memory) {
     memory->mmio_regions = mmio_regions;
 }
 
+uint32_t load_inst(Memory *memory, uint64_t address) {
+    if (address >= MEMORY_SIZE) {
+        return 0;
+    }
+    return *((uint32_t *) (memory->data + address));
+}
 
 uint64_t memory_read(Memory *memory, uint64_t address, uint32_t size, bool is_signed) {
     for (size_t i = 0; i < NUM_MMIO_REGIONS; i++) {

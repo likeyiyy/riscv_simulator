@@ -80,10 +80,19 @@ int main(int argc, char *argv[]) {
 
     CPU cpu;
     Memory memory;
-    UART uart;
-    uart_init(&uart); // 初始化 UART
+
+    CLINT *clint = get_clint();
+    clint_init(clint);
+
+    PLIC *plic = get_plic();
+    plic_init(plic);
+
+    UART* uart = get_uart();
+    uart_init(uart); // 初始化 UART
+
+
     memory_init(&memory);
-    cpu_init(&cpu, &memory, &uart);
+    cpu_init(&cpu, &memory, uart);
     init_csr_names();
 
     load_file_to_memory(input_file, &memory, load_address);
@@ -114,7 +123,7 @@ int main(int argc, char *argv[]) {
         if (cpu.pc < 0x100 || cpu.pc >= MEMORY_SIZE) {
             raise_exception(&cpu, CAUSE_LOAD_ACCESS_FAULT);
         }
-        instruction = memory_load_word(&memory, cpu.pc);
+        instruction = load_inst(&memory, cpu.pc);
 
         // 判断指令是否全为0
 //        if (instruction == 0) {

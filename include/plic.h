@@ -28,13 +28,15 @@ typedef struct {
 } PLIC;
 
 // 初始化PLIC
-void plic_init(void);
+void plic_init(PLIC *plic);
+
+PLIC* get_plic(void);
 
 // 读取PLIC寄存器
-uint32_t plic_read(uint32_t address);
+uint64_t plic_read(uint64_t address, uint32_t size);
 
 // 写入PLIC寄存器
-void plic_write(uint32_t address, uint32_t value);
+void plic_write(uint64_t address, uint64_t value, uint32_t size);
 
 // 触发中断
 void trigger_interrupt(PLIC *plic, int interrupt_id);
@@ -45,7 +47,6 @@ int claim_interrupt(PLIC *plic, int cpu_id);
 // 完成中断
 void complete_interrupt(PLIC *plic, int interrupt_id);
 
-// 模拟外部中断生成
-void* external_interrupt_simulator(void* arg);
+
 
 #endif // PLIC_H

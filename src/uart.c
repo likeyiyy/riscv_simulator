@@ -2,12 +2,18 @@
 #include <string.h>
 #include "uart.h"
 
+static UART global_uart;
+UART* get_uart(void) {
+    return &global_uart;
+}
+
 void uart_init(UART *uart) {
     memset(uart->registers, 0, sizeof(uart->registers));
     uart->registers[LSR] = LSR_THRE; // Initialize LSR with THR empty
 }
 
-void uart_write(UART *uart, uint64_t addr, uint8_t value) {
+void uart_write(uint64_t addr, uint64_t value, uint32_t size) {
+    UART *uart = get_uart();
     uint64_t offset = addr - UART_BASE_ADDR;
 
     if (offset < sizeof(uart->registers)) {
@@ -23,7 +29,8 @@ void uart_write(UART *uart, uint64_t addr, uint8_t value) {
     }
 }
 
-uint8_t uart_read(UART *uart, uint64_t addr) {
+uint64_t uart_read(uint64_t addr, uint32_t size) {
+    UART *uart = get_uart();
     uint64_t offset = addr - UART_BASE_ADDR;
     if (offset < sizeof(uart->registers)) {
         return uart->registers[offset];
