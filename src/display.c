@@ -57,6 +57,7 @@ void display_registers(WINDOW *win, CPU *cpu) {
 }
 
 void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
+    PLIC * plic = get_plic();
     static uint64_t old_sp = 0;
     if (old_sp != 0 && old_sp == cpu->registers[2]) {
         return;
@@ -71,6 +72,11 @@ void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
         uint32_t stack_value = load_inst(memory, base_address + i * 4);
         mvwprintw(win, i + 1, 1, "0x%016llx: 0x%08lx", base_address + i * 4, stack_value);
     }
+    mvwprintw(win, 33, 1, "0: 0x%08x", plic->enable[0][0]);
+    mvwprintw(win, 34, 1, "0: 0x%08x", plic->enable[0][1]);
+    mvwprintw(win, 35, 1, "0: 0x%08x", plic->enable[0][2]);
+    mvwprintw(win, 36, 1, "0: 0x%08x", plic->enable[0][3]);
+
     wrefresh(win);
 }
 
@@ -158,7 +164,7 @@ void *update_display(void *arg) {
     WINDOW *screen_win = create_newwin(27, 80, 0, 30);
     WINDOW *reg_win = create_newwin(40, 30, 0, 0);
     WINDOW *source_win = create_newwin(34, 50, 0, 110);
-    WINDOW *stack_win = create_newwin(34, 33, 0, 161);
+    WINDOW *stack_win = create_newwin(40, 33, 0, 161);
     display_screen(screen_win, uart);
 
     display_registers(reg_win, cpu);
