@@ -66,7 +66,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             break;
         case OPCODE_AUIPC:
             // AUIPC指令：rd = pc + imm
-            cpu->registers[RD(instruction)] = cpu->pc + (instruction & 0xFFFFF000);
+            cpu->registers[RD(instruction)] = cpu->pc + (((int64_t)instruction >> 12) << 12);
             break;
         case OPCODE_LUI:
             // LUI指令：rd = imm
