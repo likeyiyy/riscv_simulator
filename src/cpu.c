@@ -49,6 +49,9 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
 
     bool pc_updated = false;
     cpu->registers[0] = 0;  // 确保x0始终为0
+    int32_t imm;
+    int64_t offset;
+    uint64_t result;
 
     switch (opcode) {
         case OPCODE_OP: // 处理R型指令
@@ -66,7 +69,13 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
             break;
         case OPCODE_AUIPC:
             // AUIPC指令：rd = pc + imm
-            cpu->registers[RD(instruction)] = cpu->pc + (((int64_t)instruction >> 12) << 12);
+            // 提取高20位的立即数部分
+            imm = (int32_t)instruction >> 12;
+            // 左移12位，进行符号扩展
+            offset = (int64_t)imm << 12;
+            // 计算目标地址
+            result = cpu->pc + offset;
+            cpu->registers[RD(instruction)] = result;
             break;
         case OPCODE_LUI:
             // LUI指令：rd = imm
