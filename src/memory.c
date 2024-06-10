@@ -53,7 +53,7 @@ void memory_write(Memory *memory, uint64_t address, uint64_t value, uint32_t siz
     for (int i = 0; i < NUM_MMIO_REGIONS; i++) {
         MMIORegion *region = &mmio_regions[i];
         if (address >= region->base_addr && address < (region->base_addr + region->size)) {
-            region->write(address - region->base_addr, value);
+            region->write(address - region->base_addr, value, size);
             return;
         }
     }
