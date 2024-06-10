@@ -19,7 +19,7 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
     imm = (imm << 20) >> 20;
     // 计算目标地址
     uint64_t addr = cpu->registers[rs1] + imm;
-    if (addr < 0x100) {
+    if (addr < 0x100 || addr >= MEMORY_SIZE) {
         raise_exception(cpu, CAUSE_LOAD_ACCESS_FAULT);
     }
 

@@ -15,6 +15,7 @@
 #include "helper.h"
 #include "mfprintf.h"
 #include "csr.h"
+#include "exception.h"
 
 // 获取当前的 TSC 值
 static inline uint64_t rdtsc() {
@@ -109,7 +110,10 @@ int main(int argc, char *argv[]) {
     // 获取开始时的 TSC 值
     uint64_t start_tsc;
 
-    while (cpu.pc < MEMORY_SIZE) {
+    while (1) {
+        if (cpu.pc < 0x100 || cpu.pc >= MEMORY_SIZE) {
+            raise_exception(&cpu, CAUSE_LOAD_ACCESS_FAULT);
+        }
         instruction = memory_load_word(&memory, cpu.pc);
 
         // 判断指令是否全为0
