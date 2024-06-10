@@ -25,7 +25,7 @@
 #define PLIC_THRESHOLD_OFFSET(hart) (0x200000 + (hart) * 0x1000)
 #define PLIC_CLAIM_OFFSET(hart) (0x200004 + (hart) * 0x1000)
 
-
+#define UART0_IRQ 10
 // PLIC数据结构
 typedef struct {
     // 每个中断源都有0-7的优先级，0表示禁用，7表示最高优先级，会和阈值寄存器比较
@@ -39,6 +39,7 @@ typedef struct {
 
     uint32_t claim_complete[MAX_HARTS]; // 每个hart有一个claim/complete寄存器
 } PLIC;
+
 
 // 初始化PLIC
 void plic_init(PLIC *plic);
