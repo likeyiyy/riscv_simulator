@@ -31,6 +31,7 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
         // 示例: sb x2, 0(x1)
         // 将 x2 寄存器的最低字节存储到 x1 寄存器地址加立即数偏移的内存中
         case FUNCT3_SB:
+            mfprintf("SB: address: 0x%16x, value: %0x16x\n", addr, cpu->registers[rs2]);
             size = 1;
             break;
         // SH - 存储半字

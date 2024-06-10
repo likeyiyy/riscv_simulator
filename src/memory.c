@@ -3,6 +3,7 @@
 #include <sys/mman.h>
 #include "memory.h"
 #include "exception.h"
+#include "mfprintf.h"
 
 MMIORegion mmio_regions[NUM_MMIO_REGIONS] = {
         { .base_addr = CLINT_BASE_ADDR, .size = 0x1000, .read = clint_read, .write = clint_write },
@@ -55,6 +56,8 @@ void memory_write(Memory *memory, uint64_t address, uint64_t value, uint32_t siz
         if (address >= region->base_addr && address < (region->base_addr + region->size)) {
             region->write(address - region->base_addr, value, size);
             return;
+        } else {
+            mfprintf("Not in MMIO region\n");
         }
     }
     switch (size) {
