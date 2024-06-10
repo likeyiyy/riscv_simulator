@@ -79,6 +79,7 @@ bool handle_interrupt(CPU *cpu) {
         if (interrupt_id != 0) {
             // claim 已经设置，pending已经清除，等待软件可以从claim寄存器中读取中断ID
             raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
+            mfprintf("External interrupt: %d\n", interrupt_id);
             plic_complete_interrupt(cpu->csr[CSR_MHARTID], interrupt_id);
             // 清除外部中断挂起位
             cpu->csr[CSR_MIP] &= ~MIP_MEIP;
