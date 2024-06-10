@@ -31,7 +31,7 @@ typedef struct {
 UART* get_uart(void);
 void uart_init(UART *uart);
 uint64_t uart_read(uint64_t addr, uint32_t size);
-void uart_write(uint64_t addr, uint64_t value, uint32_t size);
+void uart_write(uint64_t address, uint64_t value, uint32_t size);
 
 
 #endif // RISCSIMULATOR_S_UART_H
