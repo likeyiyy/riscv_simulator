@@ -30,51 +30,55 @@ uint32_t load_inst(Memory *memory, uint64_t address) {
 }
 
 uint64_t memory_read(Memory *memory, uint64_t address, uint32_t size, bool is_signed) {
-    for (size_t i = 0; i < NUM_MMIO_REGIONS; i++) {
-        MMIORegion *region = &memory->mmio_regions[i];
-        if (address >= region->base_addr && address < region->base_addr + region->size) {
-            return region->read(address, size);
+    if (!(address & 0x80000000)) {
+        for (int i = 0; i < NUM_MMIO_REGIONS; i++) {
+            MMIORegion *region = &memory->mmio_regions[i];
+            if (address >= region->base_addr && address < region->base_addr + region->size) {
+                return region->read(address, size);
+            }
         }
-    }
-    switch (size) {
-        case 1:
-            return is_signed ? (int8_t)memory->data[address] : memory->data[address];
-        case 2:
-            return is_signed ? (int16_t)*(uint16_t *)&memory->data[address] : *(uint16_t *)&memory->data[address];
-        case 4:
-            return is_signed ? (int32_t)*(uint32_t *)&memory->data[address] : *(uint32_t *)&memory->data[address];
-        case 8:
-            return is_signed ? (int64_t)*(uint64_t *)&memory->data[address] : *(uint64_t *)&memory->data[address];
-        default:
-            return 0;
+    } else {
+        switch (size) {
+            case 1:
+                return is_signed ? (int8_t)memory->data[address] : memory->data[address];
+            case 2:
+                return is_signed ? (int16_t)*(uint16_t *)&memory->data[address] : *(uint16_t *)&memory->data[address];
+            case 4:
+                return is_signed ? (int32_t)*(uint32_t *)&memory->data[address] : *(uint32_t *)&memory->data[address];
+            case 8:
+                return is_signed ? (int64_t)*(uint64_t *)&memory->data[address] : *(uint64_t *)&memory->data[address];
+            default:
+                return 0;
+        }
     }
 }
 
 void memory_write(Memory *memory, uint64_t address, uint64_t value, uint32_t size) {
-    for (int i = 0; i < NUM_MMIO_REGIONS; i++) {
-        MMIORegion *region = &mmio_regions[i];
-        if (address >= region->base_addr && address < (region->base_addr + region->size)) {
-            region->write(address - region->base_addr, value, size);
-            return;
-        } else {
-            mfprintf("Not in MMIO region\n");
+    if (!(address & 0x80000000)) {
+        for (int i = 0; i < NUM_MMIO_REGIONS; i++) {
+            MMIORegion *region = &mmio_regions[i];
+            if (address >= region->base_addr && address < (region->base_addr + region->size)) {
+                region->write(address - region->base_addr, value, size);
+                return;
+            }
         }
-    }
-    switch (size) {
-        case 1:
-            memory->data[address] = value & 0xFF;
-            break;
-        case 2:
-            *(uint16_t *)&memory->data[address] = value & 0xFFFF;
-            break;
-        case 4:
-            *(uint32_t *)&memory->data[address] = value & 0xFFFFFFFF;
-            break;
-        case 8:
-            *(uint64_t *)&memory->data[address] = value;
-            break;
-        default:
-            // impossible
-            break;
+    } else {
+        switch (size) {
+            case 1:
+                memory->data[address] = value & 0xFF;
+                break;
+            case 2:
+                *(uint16_t *)&memory->data[address] = value & 0xFFFF;
+                break;
+            case 4:
+                *(uint32_t *)&memory->data[address] = value & 0xFFFFFFFF;
+                break;
+            case 8:
+                *(uint64_t *)&memory->data[address] = value;
+                break;
+            default:
+                // impossible
+                break;
+        }
     }
 }
