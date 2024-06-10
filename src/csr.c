@@ -113,6 +113,7 @@ void execute_mret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_MEPC];
     // 重置当前处理的中断优先级
     cpu->current_priority = 0;
+    cpu->trap_occurred = true;
 }
 
 // SRET 指令实现 - 目的是：Supervisor-mode Return
@@ -142,6 +143,7 @@ void execute_sret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_SEPC];
     // 重置当前处理的中断优先级
     cpu->current_priority = 0;
+    cpu->trap_occurred = true;
 }
 
 
