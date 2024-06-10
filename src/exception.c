@@ -83,6 +83,9 @@ bool handle_interrupt(CPU *cpu) {
             cpu->csr[CSR_MIP] &= ~MIP_MEIP;
             return true;
         }
+    } else {
+        // 没有外部中断
+         mfprintf("No external interrupt\n");
     }
 
     // 检查并处理中优先级中断
