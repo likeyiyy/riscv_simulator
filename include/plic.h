@@ -50,7 +50,6 @@ uint64_t plic_read(uint64_t address, uint32_t size);
 
 // 写入PLIC寄存器
 void plic_write(uint64_t address, uint64_t value, uint32_t size);
-
 uint32_t plic_claim_interrupt(uint32_t hart_id);
 void plic_complete_interrupt(uint32_t hart_id, int irq);
 

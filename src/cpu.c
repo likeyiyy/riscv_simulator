@@ -41,6 +41,12 @@ void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
 
 
 
+void trigger_interrupt(CPU * cpu, int interrupt_id) {
+    PLIC *plic = get_plic();
+    plic->pending[interrupt_id / 32] |= (1 << (interrupt_id % 32));
+    cpu->csr[CSR_MIP] |= MIP_MEIP;
+}
+
 
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码

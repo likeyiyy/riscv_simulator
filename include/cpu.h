@@ -38,5 +38,6 @@ typedef struct {
 
 void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart);
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);
+void trigger_interrupt(CPU * cpu, int interrupt_id);
 
 #endif // CPU_H

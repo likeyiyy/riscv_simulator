@@ -68,6 +68,9 @@ void plic_write(uint64_t address, uint64_t value, uint32_t size) {
     }
 }
 
+
+
+
 uint32_t plic_claim_interrupt(uint32_t hart_id) {
     PLIC *plic = get_plic();
     for (int i = 0; i < MAX_INTERRUPTS; i++) {
