@@ -1,5 +1,6 @@
 #include <unistd.h> // for usleep
 #include <pthread.h>
+#include <sys/time.h>
 #include "disassemble.h"
 #include "csr.h"
 #include "display.h"
@@ -43,9 +44,11 @@ void display_registers(WINDOW *win, CPU *cpu) {
     for (int i = 0; i < 32; i++) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
+    // cpu->csr[CSR_MTVEC]
+    mvwprintw(win, 33, 1, "mtvec:   0x%016llx", cpu->csr[CSR_MTVEC]);
     // display cpu.csr[CSR_MINSTRET] at the end of the win
-    mvwprintw(win, 33, 1, "count:    %016llu", cpu->csr[CSR_MINSTRET]);
-    mvwprintw(win, 34, 1, "frequency: %.6fMhz", frequency);
+    mvwprintw(win, 34, 1, "count:    %016llu", cpu->csr[CSR_MINSTRET]);
+    mvwprintw(win, 35, 1, "frequency: %.6fMhz", frequency);
     wrefresh(win);
 }
 
@@ -149,7 +152,7 @@ void *update_display(void *arg) {
     init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
     WINDOW *screen_win = create_newwin(27, 80, 0, 30);
-    WINDOW *reg_win = create_newwin(35, 30, 0, 0);
+    WINDOW *reg_win = create_newwin(40, 30, 0, 0);
     WINDOW *source_win = create_newwin(34, 50, 0, 110);
     WINDOW *stack_win = create_newwin(34, 33, 0, 161);
     display_screen(screen_win, uart);
