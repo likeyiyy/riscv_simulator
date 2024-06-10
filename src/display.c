@@ -184,6 +184,7 @@ void *update_display(void *arg) {
                 uart->registers[0] = (uint8_t)ch; // 将字符写入 UART 数据寄存器
                 uart->registers[LSR] |= 0x01; // 设置数据准备好标志
                 trigger_interrupt(cpu, UART0_IRQ);
+                mfprintf("UART0_IRQ should be happened\n")
             }
         } else {
             sem_wait(sem_refresh); // Wait for CPU thread to signal refresh
