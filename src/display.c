@@ -178,6 +178,13 @@ void *update_display(void *arg) {
             sem_post(sem_continue); // Signal main thread to proceed
 
             usleep(10); // Adjust the refresh rate as needed
+            // 处理用户输入
+            int ch = getch();
+            if (ch != ERR) {
+                uart->registers[0] = (uint8_t)ch; // 将字符写入 UART 数据寄存器
+                uart->registers[LSR] |= 0x01; // 设置数据准备好标志
+                trigger_interrupt(cpu, UART0_IRQ);
+            }
         } else {
             sem_wait(sem_refresh); // Wait for CPU thread to signal refresh
             display_screen(screen_win, uart);
@@ -186,13 +193,7 @@ void *update_display(void *arg) {
             display_source(source_win, memory, data->pc);
             sem_post(sem_continue); // Signal main thread to proceed
         }
-        // 处理用户输入
-        int ch = getch();
-        if (ch != ERR) {
-            uart->registers[0] = (uint8_t)ch; // 将字符写入 UART 数据寄存器
-            uart->registers[LSR] |= 0x01; // 设置数据准备好标志
-            trigger_interrupt(cpu, UART0_IRQ);
-        }
+
     }
 }
 
