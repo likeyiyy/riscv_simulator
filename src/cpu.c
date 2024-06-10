@@ -111,7 +111,7 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
         default:
             mfprintf("Unknown instruction with opcode: 0x%x\n", opcode);
     }
-    if(!pc_updated) {
+    if(!pc_updated && !cpu->trap_occurred) {
         cpu->pc += 4;
     }
     cpu->registers[0] = 0;  // 确保x0始终为0

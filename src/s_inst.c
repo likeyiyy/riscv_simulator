@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include "s_inst.h"
 #include "uart_sim.h"
-#include "display.h"
 #include "mfprintf.h"
 #include "exception.h"
 #include "csr.h"
@@ -21,6 +20,8 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
     uint64_t addr = cpu->registers[rs1] + imm;
     if (addr < 0x100 || addr >= MEMORY_SIZE) {
         raise_exception(cpu, CAUSE_LOAD_ACCESS_FAULT);
+        cpu->trap_occurred = true;
+        return;
     }
 
     switch (funct3) {

@@ -27,6 +27,7 @@ typedef struct {
     uint64_t reserved_address; // 保留地址
     Memory *memory;
     MMU mmu;                 // 内存管理单元
+    bool trap_occurred;      // 是否发生陷阱
     bool interrupt_pending;
     bool fast_mode;
     CLINT clint;             // 核心本地中断
