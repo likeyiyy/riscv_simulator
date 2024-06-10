@@ -62,7 +62,6 @@ bool handle_interrupt(CPU *cpu) {
 
     if (cpu->priv == PRV_M && (status & MSTATUS_MIE) == 0) {
         // 如果中断未使能，直接返回
-        mfprintf("Interrupt is disabled\n");
         return false;
     }
 
@@ -71,7 +70,6 @@ bool handle_interrupt(CPU *cpu) {
     // 如果一个挂起位被设置，并且相应的中断使能位也被设置，那么处理器会触发中断处理流程。
     // (ie & MIE_MEIE) : 处理器是否允许外部中断
     // (ip & MIP_MEIP) : 是否有外部中断挂起
-    mfprintf("ie: 0x%016llx, ip: 0x%016llx, current: %d\n", ie, ip, cpu->current_priority);
     if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
 
         // 处理外部中断
@@ -80,7 +78,6 @@ bool handle_interrupt(CPU *cpu) {
             cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
             // claim 已经设置，pending已经清除，等待软件可以从claim寄存器中读取中断ID
             raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
-            mfprintf("External interrupt: %d\n", interrupt_id);
             plic_complete_interrupt(cpu->csr[CSR_MHARTID], interrupt_id);
             // 清除外部中断挂起位
             cpu->csr[CSR_MIP] &= ~MIP_MEIP;
@@ -88,7 +85,6 @@ bool handle_interrupt(CPU *cpu) {
         }
     } else {
         // 没有外部中断
-         mfprintf("No external interrupt\n");
     }
 
     // 检查并处理中优先级中断
