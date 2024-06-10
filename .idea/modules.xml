@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/riscv-simulator.iml" filepath="$PROJECT_DIR$/.idea/riscv-simulator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/riscv_simulator.iml" filepath="$PROJECT_DIR$/.idea/riscv_simulator.iml" />
     </modules>
   </component>
 </project>

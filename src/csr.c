@@ -91,17 +91,58 @@ void execute_csrrci(CPU *cpu, uint32_t instruction) {
 
 // MRET 指令实现 - 目的是：Machine-mode Return
 void execute_mret(CPU *cpu) {
+    uint64_t mstatus = read_csr(cpu, CSR_MSTATUS);
+    // MRET first determiner what the new privilege mode will be according to the values of MPP
+    cpu->priv = (mstatus >> 11) & 0x3;
+
+    // MPP = 0
+    mstatus &= ~MSTATUS_MPP;  // 清除 MPP 字段
+
+    // MIE = MPIE
+    if ((mstatus >> 7) & 0x1) {
+        mstatus |= MSTATUS_MIE;  // 恢复 MIE 位
+    } else {
+        mstatus &= ~MSTATUS_MIE;  // 清除 MIE 位
+    }
+
+    // MPIE = 1
+    mstatus |= MSTATUS_MPIE;  // 清除 MPIE 字段
+    write_csr(cpu, CSR_MSTATUS, mstatus);
+
     cpu->pc = cpu->csr[CSR_MEPC];
-    cpu->priv = (cpu->csr[CSR_MSTATUS] >> 11) & 0x3;
+    // 重置当前处理的中断优先级
     cpu->current_priority = 0;
 }
 
 // SRET 指令实现 - 目的是：Supervisor-mode Return
 void execute_sret(CPU *cpu) {
+    // 读取 sstatus
+    uint64_t sstatus = read_csr(cpu, CSR_SSTATUS);
+
+    // 恢复特权级别
+    cpu->priv = (sstatus >> 8) & 0x1;  // 提取 SPP 字段
+
+    // SIE = SPIE
+    if ((sstatus >> 5) & 0x1) {
+        sstatus |= (1 << 1);  // 恢复 SIE 位
+    } else {
+        sstatus &= ~(1 << 1);  // 清除 SIE 位
+    }
+
+    // SPP = 0
+    sstatus &= ~SSTATUS_SPP;  // 清除 SPP 字段
+
+    // SPIE = 1
+    sstatus |= SSTATUS_SPIE;  // 清除 SPIE 字段
+
+    // 更新 SSTATUS 寄存器
+    write_csr(cpu, CSR_SSTATUS, sstatus);
+    // 恢复程序计数器
     cpu->pc = cpu->csr[CSR_SEPC];
-    cpu->priv = (cpu->csr[CSR_SSTATUS] >> 8) & 0x1;
+    // 重置当前处理的中断优先级
     cpu->current_priority = 0;
 }
+
 
 // URET 指令实现 - 目的是：User-mode Return
 void execute_uret(CPU *cpu) {

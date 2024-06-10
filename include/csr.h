@@ -135,6 +135,13 @@
 #define PRIORITY_MACHINE_TIMER_INTERRUPT 2
 #define PRIORITY_MACHINE_EXTERNAL_INTERRUPT 3
 
+#define MSTATUS_MPP (3 << 11)
+#define MSTATUS_MPIE (1 << 7)
+
+#define SSTATUS_SPIE (1 << 5)
+#define SSTATUS_SPP (1 << 8)
+
+
 // MIP 寄存器中的中断挂起位
 #define MIP_MSIP (1 << 3)  // Machine Software Interrupt Pending
 #define MIP_MTIP (1 << 7)  // Machine Timer Interrupt Pending

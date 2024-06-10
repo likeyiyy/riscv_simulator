@@ -44,9 +44,13 @@ void raise_exception(CPU *cpu, uint64_t cause) {
     switch (cpu->priv) {
         case PRV_U:
             // 垂直陷入到超级模式
-            cpu->csr[CSR_UEPC] = cpu->pc;
-            cpu->csr[CSR_UCAUSE] = cause;
+            cpu->csr[CSR_SEPC] = cpu->pc;
+            cpu->csr[CSR_SCAUSE] = cause;
             cpu->pc = cpu->csr[CSR_STVEC];
+            // save cpu->priv first
+            cpu->csr[CSR_SSTATUS] = (cpu->csr[CSR_SSTATUS] & ~MSTATUS_MPP) | (cpu->priv << 11);
+            // save interrupt enable first
+            cpu->csr[CSR_SSTATUS] = (cpu->csr[CSR_SSTATUS] & ~SSTATUS_SPIE) | ((cpu->csr[CSR_SSTATUS] >> 5) & 0x1);
             cpu->priv = PRV_S; // 切换到超级模式
             break;
         case PRV_S:
