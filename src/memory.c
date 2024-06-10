@@ -7,7 +7,7 @@
 
 MMIORegion mmio_regions[NUM_MMIO_REGIONS] = {
         { .base_addr = CLINT_BASE_ADDR, .size = 0x1000, .read = clint_read, .write = clint_write },
-        { .base_addr = PLIC_BASE_ADDR, .size = 0x1000, .read = plic_read, .write = plic_write },
+        { .base_addr = PLIC_BASE_ADDR, .size = PLIC_SIZE, .read = plic_read, .write = plic_write },
         { .base_addr = UART_BASE_ADDR, .size = 8, .read = uart_read, .write = uart_write },
         // 添加其他 MMIO 区域
 };
