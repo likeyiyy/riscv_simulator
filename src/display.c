@@ -23,12 +23,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx) {
 }
 
 void display_registers(WINDOW *win, CPU *cpu) {
-    static uint64_t old_pc = 0;
-    if (old_pc != 0 && old_pc == cpu->pc) {
-        return;
-    } else {
-        old_pc = cpu->pc;
-    }
+    static uint64_t old_minstret;
     wclear(win);
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "pc:0x%016llx", cpu->pc);
@@ -36,7 +31,9 @@ void display_registers(WINDOW *win, CPU *cpu) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
     // display cpu.csr[CSR_MINSTRET] at the end of the win
-    mvwprintw(win, 33, 1, "minstret: %lld", cpu->csr[CSR_MINSTRET]);
+    float frequency = (cpu->csr[CSR_MINSTRET] - old_minstret) * 20.0 / 1024 / 1024 / 1024;
+    mvwprintw(win, 33, 1, "frequency: %fGhz", frequency);
+    old_minstret = cpu->csr[CSR_MINSTRET];
     wrefresh(win);
 }
 
