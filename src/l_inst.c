@@ -25,27 +25,33 @@ void execute_load_instruction(CPU *cpu, uint32_t instruction) {
     switch (funct3) {
         case FUNCT3_LB:
             size = 1;
+            cpu->registers[rd] = (int8_t)memory_read(cpu->memory, address, size, is_signed);
             break;
         case FUNCT3_LH:
             size = 2;
+            cpu->registers[rd] = (int16_t)memory_read(cpu->memory, address, size, is_signed);
             break;
         case FUNCT3_LW:
             size = 4;
+            cpu->registers[rd] = (int32_t)memory_read(cpu->memory, address, size, is_signed);
             break;
         case FUNCT3_LD:
             size = 8;
+            cpu->registers[rd] = (int64_t)memory_read(cpu->memory, address, size, is_signed);
             break;
         case FUNCT3_LBU:
             size = 1;
             is_signed = false;
+            cpu->registers[rd] = (uint8_t)memory_read(cpu->memory, address, size, is_signed);
             break;
         case FUNCT3_LHU:
             size = 2;
             is_signed = false;
+            cpu->registers[rd] = (uint16_t)memory_read(cpu->memory, address, size, is_signed);
             break;
         default:
             raise_exception(cpu, CAUSE_ILLEGAL_INSTRUCTION);
     }
 
-    cpu->registers[rd] = memory_read(cpu->memory, address, size, is_signed);
+
 }
