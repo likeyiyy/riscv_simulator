@@ -21,9 +21,9 @@
 #define MAX_INTERRUPTS 128
 #define MAX_HARTS 8 // 假设最多有8个hart
 
-#define PLIC_ENABLE(hart) (PLIC_BASE_ADDR + PLIC_ENABLE_BASE + (hart) * 0x80)
-#define PLIC_THRESHOLD_OFFSET(hart) (0x200000 + (hart) * 0x1000)
-#define PLIC_CLAIM_OFFSET(hart) (0x200004 + (hart) * 0x1000)
+#define PLIC_ENABLE(hart) (PLIC_ENABLE_BASE + (hart) * 0x80)
+#define PLIC_THRESHOLD_OFFSET(hart) (PLIC_THRESHOLD_BASE + (hart) * 0x1000)
+#define PLIC_CLAIM_OFFSET(hart) (PLIC_CLAIM_BASE + (hart) * 0x1000)
 
 #define UART0_IRQ 10
 // PLIC数据结构
