@@ -29,20 +29,6 @@ void raise_exception(CPU *cpu, uint64_t cause) {
     }
 }
 
-uint32_t plic_claim_interrupt(uint32_t hart_id) {
-    PLIC *plic = get_plic();
-    for (int i = 0; i < MAX_INTERRUPTS; i++) {
-        if ((plic->pending[i / 32] & (1 << (i % 32))) && (plic->enable[hart_id][i / 32] & (1 << (i % 32)))) {
-            if (plic->priority[i] > plic->threshold[hart_id]) {
-                plic->pending[i / 32] &= ~(1 << (i % 32)); // 清除挂起状态
-                plic->claim_complete[hart_id] = i;
-                return i;
-            }
-        }
-    }
-    return 0; // 没有挂起的中断
-}
-
 
 
 bool handle_interrupt(CPU *cpu) {
