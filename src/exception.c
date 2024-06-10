@@ -68,7 +68,7 @@ void handle_interrupt(CPU *cpu) {
     if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
         cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
         // 处理外部中断
-        uint32_t interrupt_id = claim_interrupt(&cpu->plic, cpu->cpu_id);
+        uint32_t interrupt_id = claim_interrupt(&cpu->plic, cpu->csr[CSR_MHARTID]);
         if (interrupt_id != 0) {
             raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
             complete_interrupt(&cpu->plic, interrupt_id);
@@ -76,7 +76,7 @@ void handle_interrupt(CPU *cpu) {
     }
 
     // 检查并处理中优先级中断
-    if ((ie & MIE_MTIE) && (cpu->clint.mtime >= cpu->clint.mtimecmp[cpu->cpu_id]) && cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
+    if ((ie & MIE_MTIE) && (cpu->clint.mtime >= cpu->clint.mtimecmp[cpu->csr[CSR_MHARTID]]) && cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
         cpu->current_priority = PRIORITY_MACHINE_TIMER_INTERRUPT;
         // 处理定时器中断
         raise_exception(cpu, CAUSE_MACHINE_TIMER_INTERRUPT);
