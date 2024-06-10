@@ -37,7 +37,5 @@ typedef struct {
 
 void cpu_init(CPU *cpu, Memory *memory, UART *uart);
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);
-void raise_exception(CPU *cpu, uint64_t cause);
-void handle_interrupt(CPU *cpu);
 
 #endif // CPU_H

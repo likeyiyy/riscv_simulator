@@ -5,6 +5,7 @@
 #include "cpu.h"
 #include "mmu.h"
 #include "plic.h"
+#include "exception.h"
 
 // 读取 CSR 寄存器的值
 uint64_t read_csr(CPU *cpu, uint32_t csr) {

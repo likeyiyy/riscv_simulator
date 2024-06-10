@@ -3,6 +3,8 @@
 #include "uart_sim.h"
 #include "display.h"
 #include "mfprintf.h"
+#include "exception.h"
+#include "csr.h"
 
 // S-type指令处理函数
 void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
@@ -17,6 +19,9 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
     imm = (imm << 20) >> 20;
     // 计算目标地址
     uint64_t addr = cpu->registers[rs1] + imm;
+    if (addr < 0x100) {
+        raise_exception(cpu, CAUSE_LOAD_ACCESS_FAULT);
+    }
 
     switch (funct3) {
         case FUNCT3_SB:

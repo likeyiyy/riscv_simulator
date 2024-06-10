@@ -1,5 +1,6 @@
 #include "i_64_inst.h"
 #include "csr.h"
+#include "exception.h"
 
 static inline void execute_addiw(CPU *cpu, uint32_t instruction) {
     uint32_t rd = (instruction >> 7) & 0x1F;

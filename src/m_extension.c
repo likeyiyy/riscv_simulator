@@ -1,5 +1,6 @@
 #include "m_extension.h"
 #include "csr.h"
+#include "exception.h"
 
 // M 扩展指令实现
 inline void execute_mul(CPU *cpu, uint32_t rd, uint32_t rs1, uint32_t rs2) {
