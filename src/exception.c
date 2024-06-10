@@ -75,7 +75,7 @@ bool handle_interrupt(CPU *cpu) {
     // (ie & MIE_MEIE) : 处理器是否允许外部中断
     // (ip & MIP_MEIP) : 是否有外部中断挂起
     mfprintf("handle_interrupt: ie=%lx, ip=%lx, current_priority=%d\n", ie, ip, cpu->current_priority);
-    if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
+    if ((ie & MIE_MEIE) && (ip & MIP_MEIP)) {
 
         // 处理外部中断
         uint32_t interrupt_id = plic_claim_interrupt((uint32_t)cpu->csr[CSR_MHARTID]);
