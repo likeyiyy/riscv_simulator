@@ -20,7 +20,7 @@
 #include "mfprintf.h"
 
 
-void cpu_init(CPU *cpu, Memory *memory, UART *uart) {
+void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
     for (int i = 0; i < 32; i++) {
         cpu->registers[i] = 0;
     }
@@ -32,6 +32,8 @@ void cpu_init(CPU *cpu, Memory *memory, UART *uart) {
     init_mmu(&cpu->mmu);
     // 初始化中断优先级
     cpu->current_priority = 0;
+    cpu->clint = clint;
+    cpu->plic = plic;
     cpu->uart = uart;
 }
 

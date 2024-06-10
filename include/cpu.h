@@ -29,13 +29,14 @@ typedef struct {
     bool trap_occurred;      // 是否发生陷阱
     bool interrupt_pending;
     bool fast_mode;
-    CLINT clint;             // 核心本地中断
-    PLIC plic;               // 平台级中断控制器
+    CLINT * clint;             // 核心本地中断
+    PLIC * plic;               // 平台级中断控制器
+    UART * uart;              // 串口
     int current_priority;    // 当前处理中断的优先级
-    UART *uart;              // 串口
+
 } CPU;
 
-void cpu_init(CPU *cpu, Memory *memory, UART *uart);
+void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart);
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);
 
 #endif // CPU_H
