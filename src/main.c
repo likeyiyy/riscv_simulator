@@ -5,6 +5,7 @@
 #include <unistd.h> // for usleep
 #include <fcntl.h>
 #include <getopt.h>
+#include <sys/time.h>
 
 #include "cpu.h"
 #include "memory.h"
@@ -110,12 +111,10 @@ int main(int argc, char *argv[]) {
 
     while (cpu.pc < MEMORY_SIZE) {
         instruction = memory_load_word(&memory, cpu.pc);
-//        mfprintf("Address: 0x%016lx, Instruction: %08x\n", cpu.pc, instruction);
-
 
         // 判断指令是否全为0
         if (instruction == 0) {
-            mvprintw(32, 0, "All instructions are zero, exiting.\n");
+            mvprintw(38, 0, "All instructions are zero, exiting.\n");
             break;
         }
 
@@ -132,8 +131,8 @@ int main(int argc, char *argv[]) {
                 cpu.fast_mode = true;  // Fast mode
                 sem_post(&sem_refresh);
                 nodelay(stdscr, TRUE); // Set back to non-blocking mode
-    		start_tsc = rdtsc();
-    		gettimeofday(&start, NULL);
+                start_tsc = rdtsc();
+                gettimeofday(&start, NULL);
             }
             cpu_execute(&cpu, &memory, instruction);
             cpu.csr[CSR_MINSTRET] += 1;
@@ -142,20 +141,20 @@ int main(int argc, char *argv[]) {
             if (cpu.pc == end_address) {
                 cpu.fast_mode = false;
                 sem_post(&sem_refresh);
-    		// 获取结束时间
-    		gettimeofday(&end, NULL);
+                // 获取结束时间
+                gettimeofday(&end, NULL);
 
-    		// 计算执行时间
-    		seconds = end.tv_sec - start.tv_sec;
-    		useconds = end.tv_usec - start.tv_usec;
-    		elapsed = seconds + useconds / 1000000.0;
-		// 获取结束时的 TSC 值
-    		uint64_t end_tsc = rdtsc();
-		// 计算执行的时钟周期数
-    		uint64_t cycles = end_tsc - start_tsc;
-    		mvprintw(35, 1, "Elapsed CPU cycles: %llu\n", cycles);
+                // 计算执行时间
+                seconds = end.tv_sec - start.tv_sec;
+                useconds = end.tv_usec - start.tv_usec;
+                elapsed = seconds + useconds / 1000000.0;
+                // 获取结束时的 TSC 值
+                uint64_t end_tsc = rdtsc();
+                // 计算执行的时钟周期数
+                uint64_t cycles = end_tsc - start_tsc;
+                mvprintw(35, 1, "Elapsed CPU cycles: %llu\n", cycles);
 
-    		mvprintw(36, 1, " %.6fs\n", elapsed);
+                mvprintw(36, 1, " %.6fs\n", elapsed);
             } else {
                 cpu_execute(&cpu, &memory, instruction);
                 cpu.csr[CSR_MINSTRET] += 1;
