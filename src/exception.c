@@ -1,5 +1,6 @@
 #include "csr.h"
 #include "exception.h"
+#include "mfprintf.h"
 
 void raise_exception(CPU *cpu, uint64_t cause) {
     switch (cpu->priv) {
@@ -61,6 +62,7 @@ bool handle_interrupt(CPU *cpu) {
 
     if (cpu->priv == PRV_M && (status & MSTATUS_MIE) == 0) {
         // 如果中断未使能，直接返回
+        mfprintf("Interrupt is disabled\n");
         return false;
     }
 
