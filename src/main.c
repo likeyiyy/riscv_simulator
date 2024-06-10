@@ -159,9 +159,9 @@ int main(int argc, char *argv[]) {
                 uint64_t end_tsc = rdtsc();
                 // 计算执行的时钟周期数
                 uint64_t cycles = end_tsc - start_tsc;
-                mvprintw(35, 1, "Elapsed CPU cycles: %llu\n", cycles);
+                mvprintw(39, 1, "Elapsed CPU cycles: %llu\n", cycles);
 
-                mvprintw(36, 1, " %.6fs\n", elapsed);
+                mvprintw(40, 1, " %.6fs\n", elapsed);
             } else {
                 cpu_execute(&cpu, &memory, instruction);
                 cpu.csr[CSR_MINSTRET] += 1;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
 
 
     // Wait for user input before exiting
-    mvprintw(35, 0, "Simulation complete. Press 'q' to exit.");
+    mvprintw(41, 0, "Simulation complete. Press 'q' to exit.");
     refresh();
     while ((ch = getch()) != 'q') {
         // Wait for user to press 'q' to quit

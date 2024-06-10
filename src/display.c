@@ -47,9 +47,12 @@ void display_registers(WINDOW *win, CPU *cpu) {
     }
     // cpu->csr[CSR_MTVEC]
     mvwprintw(win, 33, 1, "mtvec:   0x%016llx", cpu->csr[CSR_MTVEC]);
+    mvwprintw(win, 34, 1, "mstatus:   0x%016llx", cpu->csr[CSR_MSTATUS]);
+    mvwprintw(win, 35, 1, "mie:   0x%016llx", cpu->csr[CSR_MIE]);
+    mvwprintw(win, 36, 1, "mip:   0x%016llx", cpu->csr[CSR_MIP]);
     // display cpu.csr[CSR_MINSTRET] at the end of the win
-    mvwprintw(win, 34, 1, "count:    %016llu", cpu->csr[CSR_MINSTRET]);
-    mvwprintw(win, 35, 1, "frequency: %.6fMhz", frequency);
+    mvwprintw(win, 37, 1, "count:    %016llu", cpu->csr[CSR_MINSTRET]);
+    mvwprintw(win, 38, 1, "frequency: %.6fMhz", frequency);
     wrefresh(win);
 }
 
