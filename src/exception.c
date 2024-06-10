@@ -26,6 +26,10 @@ void raise_exception(CPU *cpu, uint64_t cause) {
             cpu->csr[CSR_MEPC] = cpu->pc;
             cpu->csr[CSR_MCAUSE] = cause;
             cpu->pc = cpu->csr[CSR_MTVEC];
+            // save cpu->priv first
+            cpu->csr[CSR_MSTATUS] = (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPP) | (cpu->priv << 11);
+            // save interrupt enable first
+            cpu->csr[CSR_MSTATUS] = (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPIE) | ((cpu->csr[CSR_MSTATUS] >> 7) & 0x1);
             break;
     }
 }
