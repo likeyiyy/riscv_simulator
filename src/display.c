@@ -64,7 +64,7 @@ void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
     mvwprintw(win, 0, 1, "Stack (0x%016llx):", cpu->registers[2]);
     uint64_t base_address = cpu->registers[2] - STACK_SIZE;
     for (int i = 0; i < STACK_SIZE; i++) {
-        uint32_t stack_value = memory_load_word(memory, base_address + i * 4);
+        uint32_t stack_value = load_inst(memory, base_address + i * 4);
         mvwprintw(win, i + 1, 1, "0x%016llx: 0x%08lx", base_address + i * 4, stack_value);
     }
     wrefresh(win);
@@ -84,7 +84,7 @@ void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
     uint64_t start_pc = pc - 64;
     for (int i = 0; i < 32; i++) {
         uint64_t address = start_pc + i * 4;
-        uint32_t instruction = memory_load_word(memory, address);
+        uint32_t instruction = load_inst(memory, address);
         disassemble(address, instruction, buffer, sizeof(buffer));
         if (address == pc) {
             // 启用颜色对1
