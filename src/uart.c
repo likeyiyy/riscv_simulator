@@ -30,8 +30,9 @@ void uart_write(uint64_t offset, uint64_t value, uint32_t size) {
     }
 }
 
-uint64_t uart_read(uint64_t offset, uint32_t size) {
+uint64_t uart_read(uint64_t addr, uint32_t size) {
     UART *uart = get_uart();
+    uint64_t offset = addr - UART_BASE_ADDR;
     if (offset < sizeof(uart->registers)) {
         return uart->registers[offset];
     }
