@@ -16,8 +16,6 @@ void uart_init(UART *uart) {
 void uart_write(uint64_t address, uint64_t value, uint32_t size) {
     UART *uart = get_uart();
     uint64_t offset = address - UART_BASE_ADDR;
-    mfprintf("UART write: address: 0x%x, value: 0x%x, offset: 0x%x\n", address, value, offset);
-
     if (offset < sizeof(uart->registers)) {
         if (uart->registers[LCR] & 0x80 && (offset == DLL || offset == DLM)) {
             return;
