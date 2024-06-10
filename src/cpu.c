@@ -50,11 +50,15 @@ void trigger_interrupt(CPU * cpu, int interrupt_id) {
 
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
+    cpu->registers[0] = 0;  // 确保x0始终为0
     // 检查并处理中断
-    handle_interrupt(cpu);
+    bool is_interrupt = handle_interrupt(cpu);
+    if (is_interrupt) {
+        return;
+    }
 
     bool pc_updated = false;
-    cpu->registers[0] = 0;  // 确保x0始终为0
+
     int32_t imm;
     int64_t offset;
     uint64_t result;
