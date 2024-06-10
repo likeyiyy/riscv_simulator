@@ -2,6 +2,7 @@
 #include <printf.h>
 #include <stdlib.h>
 #include "plic.h"
+#include "mfprintf.h"
 
 static PLIC global_plic;
 
@@ -78,6 +79,7 @@ uint32_t plic_claim_interrupt(uint32_t hart_id) {
             if (plic->priority[i] > plic->threshold[hart_id]) {
                 plic->pending[i / 32] &= ~(1 << (i % 32)); // 清除挂起状态
                 plic->claim_complete[hart_id] = i;
+                mfprintf("Claimed interrupt %d\n", i);
                 return i;
             }
         }

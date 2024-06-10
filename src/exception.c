@@ -73,10 +73,11 @@ bool handle_interrupt(CPU *cpu) {
     // (ip & MIP_MEIP) : 是否有外部中断挂起
     mfprintf("ie: 0x%016llx, ip: 0x%016llx, current: %d\n", ie, ip, cpu->current_priority);
     if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
-        cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
+
         // 处理外部中断
         uint32_t interrupt_id = plic_claim_interrupt((uint32_t)cpu->csr[CSR_MHARTID]);
         if (interrupt_id != 0) {
+            cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
             // claim 已经设置，pending已经清除，等待软件可以从claim寄存器中读取中断ID
             raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
             mfprintf("External interrupt: %d\n", interrupt_id);
