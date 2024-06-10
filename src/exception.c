@@ -68,10 +68,11 @@ void handle_interrupt(CPU *cpu) {
     if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
         cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
         // 处理外部中断
-        uint32_t interrupt_id = claim_interrupt(&cpu->plic, cpu->csr[CSR_MHARTID]);
+        uint32_t interrupt_id = plic_claim_interrupt((uint32_t)cpu->csr[CSR_MHARTID]);
         if (interrupt_id != 0) {
+            // claim 已经设置，pending已经清除，等待软件可以从claim寄存器中读取中断ID
             raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
-            complete_interrupt(&cpu->plic, interrupt_id);
+            plic_complete_interrupt(cpu->csr[CSR_MHARTID], interrupt_id);
         }
     }
 

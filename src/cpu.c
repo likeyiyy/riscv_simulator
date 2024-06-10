@@ -18,6 +18,7 @@
 #include "i_64_inst.h"
 #include "display.h"
 #include "mfprintf.h"
+#include "exception.h"
 
 
 void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
@@ -44,7 +45,7 @@ void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
     // 检查并处理中断
-    // handle_interrupt(cpu);
+    handle_interrupt(cpu);
 
     bool pc_updated = false;
     cpu->registers[0] = 0;  // 确保x0始终为0
