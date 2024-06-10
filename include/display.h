@@ -15,7 +15,6 @@ typedef struct {
     uint32_t pc;
     sem_t *sem_refresh;   // 信号量，用于通知 display 线程刷新
     sem_t *sem_continue;  // 信号量，用于通知 CPU 线程继续执行
-    UART *uart; // 新增：UART结构体指针
 } DisplayData;
 
 

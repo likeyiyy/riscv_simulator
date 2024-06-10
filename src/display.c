@@ -5,6 +5,7 @@
 #include "csr.h"
 #include "display.h"
 #include "uart.h"
+#include "mfprintf.h"
 
 static struct timeval start;
 
@@ -103,6 +104,7 @@ void display_screen(WINDOW *win, UART *uart) {
     static int col = 1; // Start from column 1 to leave space for the box
     if (uart->registers[LSR] & 0x01) { // Check if data is ready
         uint8_t value = uart->registers[RHR];
+        mfprintf("UART: 0x%02x\n", value);
         char buffer[2] = {value, '\0'};
 
         if (value == '\n') { // Handle newline character
@@ -136,7 +138,7 @@ void *update_display(void *arg) {
     Memory *memory = data->memory;
     sem_t *sem_refresh = data->sem_refresh;
     sem_t *sem_continue = data->sem_continue;
-    UART *uart = data->uart;
+    UART *uart = cpu->uart;
 
     initscr();
     noecho();

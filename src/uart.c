@@ -16,7 +16,7 @@ void uart_init(UART *uart) {
 void uart_write(uint64_t addr, uint64_t value, uint32_t size) {
     UART *uart = get_uart();
     uint64_t offset = addr - UART_BASE_ADDR;
-    mfprintf("UART write: addr: 0x%16x, value: 0x%16x\n", addr, value);
+
 
     if (offset < sizeof(uart->registers)) {
         if (uart->registers[LCR] & 0x80 && (offset == DLL || offset == DLM)) {
@@ -26,6 +26,7 @@ void uart_write(uint64_t addr, uint64_t value, uint32_t size) {
     }
 
     if (offset == THR) {
+        mfprintf("UART write: addr: 0x%16x, value: 0x%16x\n", addr, value);
         uart->registers[LSR] &= ~LSR_THRE; // Clear THR empty bit
         uart->registers[LSR] |= 0x01; // Set Data Ready
     }

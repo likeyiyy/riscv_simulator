@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
     sem_init(&sem_continue, 0, 0);
 
     // Initialize ncurses display thread
-    DisplayData data = {&cpu, &memory, cpu.pc, &sem_refresh, &sem_continue, uart};
+    DisplayData data = {&cpu, &memory, cpu.pc, &sem_refresh, &sem_continue};
     pthread_t display_thread;
     pthread_create(&display_thread, NULL, update_display, &data);
 
