@@ -15,6 +15,16 @@
 #include "mfprintf.h"
 #include "csr.h"
 
+// 获取当前的 TSC 值
+static inline uint64_t rdtsc() {
+    uint32_t lo, hi;
+    __asm__ __volatile__ (
+        "rdtsc"
+        : "=a" (lo), "=d" (hi)
+    );
+    return ((uint64_t)hi << 32) | lo;
+}
+
 
 void load_file_to_memory(const char *filename, Memory *memory, size_t address) {
     FILE *file = fopen(filename, "rb");
@@ -92,6 +102,11 @@ int main(int argc, char *argv[]) {
     // Simulate instruction execution
     int ch;
     uint32_t instruction;
+    struct timeval start, end;
+    long seconds, useconds;
+    double elapsed;
+    // 获取开始时的 TSC 值
+    uint64_t start_tsc;
 
     while (cpu.pc < MEMORY_SIZE) {
         instruction = memory_load_word(&memory, cpu.pc);
@@ -117,6 +132,8 @@ int main(int argc, char *argv[]) {
                 cpu.fast_mode = true;  // Fast mode
                 sem_post(&sem_refresh);
                 nodelay(stdscr, TRUE); // Set back to non-blocking mode
+    		start_tsc = rdtsc();
+    		gettimeofday(&start, NULL);
             }
             cpu_execute(&cpu, &memory, instruction);
             cpu.csr[CSR_MINSTRET] += 1;
@@ -125,6 +142,20 @@ int main(int argc, char *argv[]) {
             if (cpu.pc == end_address) {
                 cpu.fast_mode = false;
                 sem_post(&sem_refresh);
+    		// 获取结束时间
+    		gettimeofday(&end, NULL);
+
+    		// 计算执行时间
+    		seconds = end.tv_sec - start.tv_sec;
+    		useconds = end.tv_usec - start.tv_usec;
+    		elapsed = seconds + useconds / 1000000.0;
+		// 获取结束时的 TSC 值
+    		uint64_t end_tsc = rdtsc();
+		// 计算执行的时钟周期数
+    		uint64_t cycles = end_tsc - start_tsc;
+    		mvprintw(35, 1, "Elapsed CPU cycles: %llu\n", cycles);
+
+    		mvprintw(36, 1, " %.6fs\n", elapsed);
             } else {
                 cpu_execute(&cpu, &memory, instruction);
                 cpu.csr[CSR_MINSTRET] += 1;
@@ -135,7 +166,7 @@ int main(int argc, char *argv[]) {
 
 
     // Wait for user input before exiting
-    mvprintw(34, 0, "Simulation complete. Press 'q' to exit.");
+    mvprintw(35, 0, "Simulation complete. Press 'q' to exit.");
     refresh();
     while ((ch = getch()) != 'q') {
         // Wait for user to press 'q' to quit

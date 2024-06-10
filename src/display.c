@@ -5,6 +5,7 @@
 #include "display.h"
 #include "uart_sim.h"
 
+static struct timeval start;
 
 const char *reg_names2[32] = {
         "zro", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -24,6 +25,18 @@ WINDOW *create_newwin(int height, int width, int starty, int startx) {
 
 void display_registers(WINDOW *win, CPU *cpu) {
     static uint64_t old_minstret;
+    struct timeval end;
+    long seconds, useconds;
+    // 获取结束时间
+    gettimeofday(&end, NULL);
+
+    // 计算执行时间
+    seconds = end.tv_sec - start.tv_sec;
+    useconds = end.tv_usec - start.tv_usec;
+    double elapsed = seconds * 1000.0 + useconds / 1000.0;
+    start = end;
+    float frequency = (cpu->csr[CSR_MINSTRET] - old_minstret) / elapsed * 1000.0 / 1024 / 1024;
+    old_minstret = cpu->csr[CSR_MINSTRET];
     wclear(win);
     box(win, 0, 0);
     mvwprintw(win, 0, 1, "pc:0x%016llx", cpu->pc);
@@ -31,9 +44,8 @@ void display_registers(WINDOW *win, CPU *cpu) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
     // display cpu.csr[CSR_MINSTRET] at the end of the win
-    float frequency = (cpu->csr[CSR_MINSTRET] - old_minstret) * 20.0 / 1024 / 1024 / 1024;
-    mvwprintw(win, 33, 1, "frequency: %fGhz", frequency);
-    old_minstret = cpu->csr[CSR_MINSTRET];
+    mvwprintw(win, 33, 1, "count:    %016llu", cpu->csr[CSR_MINSTRET]);
+    mvwprintw(win, 34, 1, "frequency: %.6fMhz", frequency);
     wrefresh(win);
 }
 
@@ -131,12 +143,13 @@ void *update_display(void *arg) {
     clear();
     refresh();
     start_color();        // 启用颜色功能
+    gettimeofday(&start, NULL);
 
     // 初始化颜色对 (前景色，背景色)
     init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
     WINDOW *screen_win = create_newwin(27, 80, 0, 30);
-    WINDOW *reg_win = create_newwin(34, 30, 0, 0);
+    WINDOW *reg_win = create_newwin(35, 30, 0, 0);
     WINDOW *source_win = create_newwin(34, 50, 0, 110);
     WINDOW *stack_win = create_newwin(34, 33, 0, 161);
     display_screen(screen_win, uart);
