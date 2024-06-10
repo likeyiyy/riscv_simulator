@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 
 
     memory_init(&memory);
-    cpu_init(&cpu, &memory, uart);
+    cpu_init(&cpu, &memory, clint, plic, uart);
     init_csr_names();
 
     load_file_to_memory(input_file, &memory, load_address);
