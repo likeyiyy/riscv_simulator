@@ -159,9 +159,9 @@ int main(int argc, char *argv[]) {
                 uint64_t end_tsc = rdtsc();
                 // 计算执行的时钟周期数
                 uint64_t cycles = end_tsc - start_tsc;
-                mvprintw(39, 1, "Elapsed CPU cycles: %llu\n", cycles);
+                mvprintw(40, 1, "Elapsed CPU cycles: %llu\n", cycles);
 
-                mvprintw(40, 1, " %.6fs\n", elapsed);
+                mvprintw(41, 1, " %.6fs\n", elapsed);
             } else {
                 cpu_execute(&cpu, &memory, instruction);
                 cpu.csr[CSR_MINSTRET] += 1;
