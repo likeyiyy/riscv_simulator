@@ -280,14 +280,9 @@ void execute_system_instruction(CPU *cpu, uint32_t instruction) {
                 // 在这里，我们使用一个简单的循环来模拟等待中断。
                 while (true) {
                     // 先检查并处理中断
-                    handle_interrupt(cpu);
-
-                    // 检查是否有挂起的中断
-                    if (cpu->interrupt_pending ||
-                        (*cpu->clint->msip & 0x1) ||
-                        (cpu->clint->mtime >= cpu->clint->mtimecmp[cpu->csr[CSR_MHARTID]]) ||
-                        (claim_interrupt(cpu->plic, (int)cpu->csr[CSR_MHARTID]) != 0)) {
-                        break;  // 如果有中断挂起，退出循环
+                    bool result = handle_interrupt(cpu);
+                    if (result) {
+                        break;
                     }
                     usleep(1000);
                 }

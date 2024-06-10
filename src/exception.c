@@ -29,7 +29,7 @@ void raise_exception(CPU *cpu, uint64_t cause) {
     }
 }
 
-void handle_interrupt(CPU *cpu) {
+bool handle_interrupt(CPU *cpu) {
     uint64_t status;
     uint64_t ie;  // Interrupt Enable register
     uint64_t ip;  // Interrupt Pending register
@@ -54,17 +54,19 @@ void handle_interrupt(CPU *cpu) {
             break;
         default:
             // 未知的特权级别，直接返回
-            return;
+            return false;
     }
 
     if (cpu->priv == PRV_M && (status & MSTATUS_MIE) == 0) {
         // 如果中断未使能，直接返回
-        return;
+        return false;
     }
 
     // 检查并处理高优先级中断
     // 处理器在每个时钟周期都会检查 CSR_MIP 寄存器的状态，以决定是否有中断需要处理。
     // 如果一个挂起位被设置，并且相应的中断使能位也被设置，那么处理器会触发中断处理流程。
+    // (ie & MIE_MEIE) : 处理器是否允许外部中断
+    // (ip & MIP_MEIP) : 是否有外部中断挂起
     if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_EXTERNAL_INTERRUPT) {
         cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
         // 处理外部中断
@@ -73,6 +75,9 @@ void handle_interrupt(CPU *cpu) {
             // claim 已经设置，pending已经清除，等待软件可以从claim寄存器中读取中断ID
             raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
             plic_complete_interrupt(cpu->csr[CSR_MHARTID], interrupt_id);
+            // 清除外部中断挂起位
+            cpu->csr[CSR_MIP] &= ~MIP_MEIP;
+            return true;
         }
     }
 
@@ -81,6 +86,7 @@ void handle_interrupt(CPU *cpu) {
         cpu->current_priority = PRIORITY_MACHINE_TIMER_INTERRUPT;
         // 处理定时器中断
         raise_exception(cpu, CAUSE_MACHINE_TIMER_INTERRUPT);
+        return true;
     }
 
     // 检查并处理低优先级中断
@@ -90,5 +96,8 @@ void handle_interrupt(CPU *cpu) {
         cpu->csr[CSR_MIP] &= ~MIP_MSIP;
         // 处理软件中断
         raise_exception(cpu, CAUSE_MACHINE_SOFTWARE_INTERRUPT);
+        return true;
     }
+    return false;
 }
+
