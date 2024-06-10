@@ -11,7 +11,7 @@
 #include "memory.h"
 #include "disassemble.h"
 #include "display.h"
-#include "uart_sim.h"
+#include "uart.h"
 #include "helper.h"
 #include "mfprintf.h"
 #include "csr.h"

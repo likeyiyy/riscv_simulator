@@ -1,68 +1,77 @@
+#include <unistd.h>
+#include <printf.h>
+#include <stdlib.h>
 #include "plic.h"
 
-// 初始化 PLIC
-void init_plic(PLIC *plic) {
-    for (int i = 0; i < PLIC_MAX_INTERRUPTS; i++) {
-        plic->priority[i] = 0;
-        if (i < PLIC_MAX_INTERRUPTS / 32) {
-            plic->pending[i] = 0;
-            plic->enable[i] = 0;
-        }
-    }
-    plic->threshold = 0;
-    plic->claim = 0;
+static PLIC plic;
+
+void plic_init() {
+    memset(&plic, 0, sizeof(PLIC));
 }
 
-// 设置中断优先级
-void set_interrupt_priority(PLIC *plic, uint32_t interrupt_id, uint32_t priority) {
-    if (interrupt_id < PLIC_MAX_INTERRUPTS) {
-        plic->priority[interrupt_id] = priority;
-    }
-}
-
-// 使能中断
-void enable_interrupt(PLIC *plic, uint32_t interrupt_id) {
-    if (interrupt_id < PLIC_MAX_INTERRUPTS) {
-        plic->enable[interrupt_id / 32] |= (1 << (interrupt_id % 32));
-    }
-}
-
-// 禁用中断
-void disable_interrupt(PLIC *plic, uint32_t interrupt_id) {
-    if (interrupt_id < PLIC_MAX_INTERRUPTS) {
-        plic->enable[interrupt_id / 32] &= ~(1 << (interrupt_id % 32));
+uint32_t plic_read(uint32_t address) {
+    uint32_t offset = address - PLIC_BASE_ADDR;
+    if (offset >= PLIC_PRIORITY_OFFSET && offset < PLIC_PRIORITY_OFFSET + sizeof(plic.priority)) {
+        return plic.priority[(offset - PLIC_PRIORITY_OFFSET) / 4];
+    } else if (offset >= PLIC_PENDING_OFFSET && offset < PLIC_PENDING_OFFSET + sizeof(plic.pending)) {
+        return plic.pending[(offset - PLIC_PENDING_OFFSET) / 4];
+    } else if (offset >= PLIC_ENABLE_OFFSET && offset < PLIC_ENABLE_OFFSET + sizeof(plic.enable)) {
+        return plic.enable[(offset - PLIC_ENABLE_OFFSET) / 4];
+    } else if (offset == PLIC_THRESHOLD_OFFSET) {
+        return plic.threshold;
+    } else if (offset == PLIC_CLAIM_OFFSET) {
+        int interrupt_id = plic.claim_complete;
+        plic.claim_complete = -1;
+        return interrupt_id;
+    } else {
+        // 无效地址，返回0
+        return 0;
     }
 }
 
-// 设置中断挂起
-void set_pending_interrupt(PLIC *plic, uint32_t interrupt_id) {
-    if (interrupt_id < PLIC_MAX_INTERRUPTS) {
-        plic->pending[interrupt_id / 32] |= (1 << (interrupt_id % 32));
+void plic_write(uint32_t address, uint32_t value) {
+    uint32_t offset = address - PLIC_BASE_ADDR;
+    if (offset >= PLIC_PRIORITY_OFFSET && offset < PLIC_PRIORITY_OFFSET + sizeof(plic.priority)) {
+        plic.priority[(offset - PLIC_PRIORITY_OFFSET) / 4] = value;
+    } else if (offset >= PLIC_PENDING_OFFSET && offset < PLIC_PENDING_OFFSET + sizeof(plic.pending)) {
+        // 挂起寄存器是只读的，不能写入
+    } else if (offset >= PLIC_ENABLE_OFFSET && offset < PLIC_ENABLE_OFFSET + sizeof(plic.enable)) {
+        plic.enable[(offset - PLIC_ENABLE_OFFSET) / 4] = value;
+    } else if (offset == PLIC_THRESHOLD_OFFSET) {
+        plic.threshold = value;
+    } else if (offset == PLIC_CLAIM_OFFSET) {
+        plic.claim_complete = value;
     }
 }
 
-// 清除中断挂起
-void clear_pending_interrupt(PLIC *plic, uint32_t interrupt_id) {
-    if (interrupt_id < PLIC_MAX_INTERRUPTS) {
-        plic->pending[interrupt_id / 32] &= ~(1 << (interrupt_id % 32));
-    }
+void trigger_interrupt(PLIC *plic, int interrupt_id) {
+    plic->pending[interrupt_id / 32] |= (1 << (interrupt_id % 32));
 }
 
-// 索取中断
-uint32_t claim_interrupt(PLIC *plic) {
-    for (int i = 0; i < PLIC_MAX_INTERRUPTS; i++) {
-        if ((plic->pending[i / 32] & (1 << (i % 32))) &&
-            (plic->enable[i / 32] & (1 << (i % 32))) &&
-            (plic->priority[i] > plic->threshold)) {
-            plic->claim = i;
+int claim_interrupt(PLIC *plic, int cpu_id) {
+    for (int i = 0; i < MAX_INTERRUPTS; i++) {
+        if ((plic->pending[i / 32] & (1 << (i % 32))) && (plic->enable[i / 32] & (1 << (i % 32)))) {
+            plic->pending[i / 32] &= ~(1 << (i % 32)); // 清除挂起状态
+            plic->claim_complete = i;
             return i;
         }
     }
-    return 0; // 无中断挂起
+    return -1; // 没有挂起的中断
 }
 
-// 完成中断
-void complete_interrupt(PLIC *plic, uint32_t interrupt_id) {
-    clear_pending_interrupt(plic, interrupt_id);
-    plic->claim = 0;
+void complete_interrupt(PLIC *plic, int interrupt_id) {
+    // 中断处理完成后的操作
+    plic->claim_complete = -1;
+}
+
+void* external_interrupt_simulator(void* arg) {
+    while (1) {
+        // 随机生成一个中断ID
+        int interrupt_id = rand() % MAX_INTERRUPTS;
+        printf("Triggering interrupt %d\n", interrupt_id);
+        trigger_interrupt(&plic, interrupt_id);
+        // 等待一段时间再生成下一个中断
+        sleep(1); // 可以根据需要调整
+    }
+    return NULL;
 }

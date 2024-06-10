@@ -8,7 +8,7 @@
 #include "memory.h" // 包含指令定义和宏
 #include "mmu.h"
 #include "plic.h"
-#include "uart_sim.h"
+#include "uart.h"
 
 #define CLINT_BASE 0x2000000
 #define CLINT_MSIP(hartid) (CLINT_BASE + 8 * (hartid))

@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include "uart_sim.h"
+#include "uart.h"
 
 void uart_init(UART *uart) {
     memset(uart->registers, 0, sizeof(uart->registers));

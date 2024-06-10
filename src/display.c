@@ -4,7 +4,7 @@
 #include "disassemble.h"
 #include "csr.h"
 #include "display.h"
-#include "uart_sim.h"
+#include "uart.h"
 
 static struct timeval start;
 

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "s_inst.h"
-#include "uart_sim.h"
+#include "uart.h"
 #include "mfprintf.h"
 #include "exception.h"
 #include "csr.h"
@@ -24,44 +24,37 @@ void execute_s_type_instruction(CPU *cpu, uint32_t instruction) {
         return;
     }
 
+    uint32_t size = 0;
+
     switch (funct3) {
+        // SB - 存储字节
+        // 示例: sb x2, 0(x1)
+        // 将 x2 寄存器的最低字节存储到 x1 寄存器地址加立即数偏移的内存中
         case FUNCT3_SB:
-            // SB - 存储字节
-            // 示例: sb x2, 0(x1)
-            // 将 x2 寄存器的最低字节存储到 x1 寄存器地址加立即数偏移的内存中
-
-            // SB - 存储字节
-            if (addr >= UART_BASE_ADDR && addr < UART_BASE_ADDR + 8) {
-                uart_write(cpu->uart, addr, cpu->registers[rs2] & 0xFF);
-            } else {
-                cpu->memory->data[addr] = cpu->registers[rs2] & 0xFF;
-            }
+            size = 1;
             break;
-
+        // SH - 存储半字
+        // 示例: sh x2, 4(x1)
+        // 将 x2 寄存器的最低 2 字节存储到 x1 寄存器地址加立即数偏移的内存中
         case FUNCT3_SH:
-            // SH - 存储半字
-            // 示例: sh x2, 4(x1)
-            // 将 x2 寄存器的最低 2 字节存储到 x1 寄存器地址加立即数偏移的内存中
-            *(uint16_t *)&cpu->memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2] & 0xFFFF;
+            size = 2;
             break;
-
+        // SW - 存储字
+        // 示例: sw x2, 8(x1)
+        // 将 x2 寄存器的值存储到 x1 寄存器地址加立即数偏移的内存中
         case FUNCT3_SW:
-            // SW - 存储字
-            // 示例: sw x2, 8(x1)
-            // 将 x2 寄存器的值存储到 x1 寄存器地址加立即数偏移的内存中
-            *(uint32_t *)&cpu->memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2];
+            size = 4;
             break;
-
+        // SD - 存储双字（64位系统下使用）
+        // 示例: sd x2, 16(x1)
+        // 将 x2 寄存器的值存储到 x1 寄存器地址加立即数偏移的内存中
         case FUNCT3_SD:
-            // SD - 存储双字（64位系统下使用）
-            // 示例: sd x2, 16(x1)
-            // 将 x2 寄存器的值存储到 x1 寄存器地址加立即数偏移的内存中
-            *(uint64_t *)&cpu->memory->data[cpu->registers[rs1] + imm] = cpu->registers[rs2];
+            size = 8;
             break;
-
         default:
-            // 未知指令处理
-            mfprintf("Unknown S-type instruction with funct3: 0x%x\n", funct3);
-            break;
+            raise_exception(cpu, CAUSE_ILLEGAL_INSTRUCTION);
     }
+
+    memory_write(cpu->memory, addr, cpu->registers[rs2], size);
+
 }
