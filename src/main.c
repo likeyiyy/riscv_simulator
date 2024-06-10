@@ -117,10 +117,10 @@ int main(int argc, char *argv[]) {
         instruction = memory_load_word(&memory, cpu.pc);
 
         // 判断指令是否全为0
-        if (instruction == 0) {
-            mvprintw(38, 0, "All instructions are zero, exiting.\n");
-            break;
-        }
+//        if (instruction == 0) {
+//            mvprintw(38, 0, "All instructions are zero, exiting.\n");
+//            break;
+//        }
 
         if (!cpu.fast_mode) {
             sem_wait(&sem_continue); // Wait for display thread to finish updating
