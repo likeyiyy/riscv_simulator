@@ -113,6 +113,8 @@ void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
     }
     if(!pc_updated && !cpu->trap_occurred) {
         cpu->pc += 4;
+    } else if (cpu->trap_occurred) {
+        cpu->trap_occurred = false;
     }
     cpu->registers[0] = 0;  // 确保x0始终为0
 }
