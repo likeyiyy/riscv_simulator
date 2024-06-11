@@ -145,32 +145,26 @@ void *update_display(void *arg) {
     CPU *cpu = data->cpu;
     Memory *memory = data->memory;
     sem_t *sem_refresh = data->sem_refresh;
-    sem_t *sem_continue = data->sem_continue;
     UART *uart = cpu->uart;
 
     initscr();
-    noecho();
-    cbreak();
-    keypad(stdscr, TRUE); // Enable special keys input
-    // Clear the screen
-    clear();
-    refresh();
     start_color();        // 启用颜色功能
     gettimeofday(&start, NULL);
 
     // 初始化颜色对 (前景色，背景色)
     init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
-    WINDOW *screen_win = create_newwin(27, 80, 0, 30);
-    WINDOW *reg_win = create_newwin(40, 30, 0, 0);
-    WINDOW *source_win = create_newwin(34, 50, 0, 110);
-    WINDOW *stack_win = create_newwin(40, 33, 0, 161);
+    WINDOW *reg_win = create_newwin(REG_WIN_HEIGHT, REG_WIN_WIDTH, 0, REG_WIN_START_X);
+    WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, 0, SCREEN_WIN_START_X);
+    WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
+    WINDOW *stack_win = create_newwin(STACK_WIN_HEIGHT, STACK_WIN_WIDTH, 0, STACK_WIN_START_X);
+
     display_screen(screen_win, uart);
 
     display_registers(reg_win, cpu);
     display_stack(stack_win, cpu, memory);
-    display_source(source_win, memory, data->pc);
-    sem_post(sem_continue); // Signal main thread to proceed
+    display_source(source_win, memory, data->cpu->pc);
+
     int i = 0;
     while (1) {
         if (cpu->fast_mode) {
@@ -179,28 +173,17 @@ void *update_display(void *arg) {
             if (i++ % 5000 == 0) {
                 display_registers(reg_win, cpu);
                 display_stack(stack_win, cpu, memory);
-                display_source(source_win, memory, data->pc);
+                display_source(source_win, memory, data->cpu->pc);
             }
-            sem_post(sem_continue); // Signal main thread to proceed
+            usleep(100000); // Adjust the refresh rate as needed
 
-            usleep(10); // Adjust the refresh rate as needed
-            // 处理用户输入
-            int ch = getch();
-            if (ch != ERR) {
-                uart->registers[0] = (uint8_t)ch; // 将字符写入 UART 数据寄存器
-                uart->registers[LSR] |= 0x01; // 设置数据准备好标志
-                trigger_interrupt(cpu, UART0_IRQ);
-                mfprintf("UART0_IRQ should be happened\n");
-            }
         } else {
             sem_wait(sem_refresh); // Wait for CPU thread to signal refresh
             display_screen(screen_win, uart);
             display_registers(reg_win, cpu);
             display_stack(stack_win, cpu, memory);
-            display_source(source_win, memory, data->pc);
-            sem_post(sem_continue); // Signal main thread to proceed
+            display_source(source_win, memory, data->cpu->pc);
         }
-
     }
 }
 

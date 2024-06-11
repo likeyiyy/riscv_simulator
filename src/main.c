@@ -16,6 +16,7 @@
 #include "mfprintf.h"
 #include "csr.h"
 #include "exception.h"
+#include "keyboard.h"
 
 // 获取当前的 TSC 值
 static inline uint64_t rdtsc() {
@@ -105,9 +106,12 @@ int main(int argc, char *argv[]) {
     sem_init(&sem_continue, 0, 0);
 
     // Initialize ncurses display thread
-    DisplayData data = {&cpu, &memory, cpu.pc, &sem_refresh, &sem_continue};
+    DisplayData data = {&cpu, &memory, cpu.pc, &sem_refresh};
+    KeyBoardData keyboard_data = {&cpu,-1, &sem_continue};
     pthread_t display_thread;
+    pthread_t keyboard_thread;
     pthread_create(&display_thread, NULL, update_display, &data);
+    pthread_create(&keyboard_thread, NULL, keyboard_input, &keyboard_data);
 
 
     // Simulate instruction execution
@@ -127,22 +131,22 @@ int main(int argc, char *argv[]) {
 
         if (!cpu.fast_mode) {
             sem_wait(&sem_continue); // Wait for display thread to finish updating
-            nodelay(stdscr, FALSE); // Set blocking mode for step mode
-            ch = getch(); // Wait for user input in step mode
+            ch = keyboard_data.key; // Wait for user input in step mode
             if (ch == 'q') break; // Quit the program
             if (ch == 's') {
-                cpu.fast_mode = false; // Step mode
+                cpu_execute(&cpu, &memory, instruction);
+                cpu.csr[CSR_MINSTRET] += 1;
                 sem_post(&sem_refresh); // Notify display thread to refresh
             }
-            if (ch == 'f' || ch == 'c') {
+            if (ch == 'c') {
                 cpu.fast_mode = true;  // Fast mode
+                cpu_execute(&cpu, &memory, instruction);
+                cpu.csr[CSR_MINSTRET] += 1;
                 sem_post(&sem_refresh);
-                nodelay(stdscr, TRUE); // Set back to non-blocking mode
+
                 start_tsc = rdtsc();
                 gettimeofday(&start, NULL);
             }
-            cpu_execute(&cpu, &memory, instruction);
-            cpu.csr[CSR_MINSTRET] += 1;
 
         } else {
             if (cpu.pc == end_address) {
@@ -167,22 +171,15 @@ int main(int argc, char *argv[]) {
                 cpu.csr[CSR_MINSTRET] += 1;
             }
         }
-        data.pc = cpu.pc;
     }
-
 
     // Wait for user input before exiting
     mvprintw(41, 0, "Simulation complete. Press 'q' to exit.");
-    refresh();
-    while ((ch = getch()) != 'q') {
-        // Wait for user to press 'q' to quit
-    }
+    pthread_join(display_thread, NULL);
+    pthread_join(keyboard_thread, NULL);
 
     // End ncurses mode
     endwin();
-    // Cancel the display thread
-    pthread_cancel(display_thread);
-    pthread_join(display_thread, NULL);
     sem_destroy(&sem_continue);
     sem_destroy(&sem_refresh);
 
