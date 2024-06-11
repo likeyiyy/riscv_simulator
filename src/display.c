@@ -59,7 +59,7 @@ void display_registers(WINDOW *win, CPU *cpu) {
 void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
     PLIC * plic = get_plic();
     static uint64_t old_sp = 0;
-    if (old_sp != 0 && old_sp == cpu->registers[2]) {
+    if (old_sp == cpu->registers[2]) {
         return;
     } else {
         old_sp = cpu->registers[2];
@@ -175,7 +175,7 @@ void *update_display(void *arg) {
                 display_stack(stack_win, cpu, memory);
                 display_source(source_win, memory, data->cpu->pc);
             }
-            usleep(100000); // Adjust the refresh rate as needed
+            usleep(10); // Adjust the refresh rate as needed
 
         } else {
             sem_wait(sem_refresh);
