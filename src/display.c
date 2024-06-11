@@ -59,7 +59,7 @@ void display_registers(WINDOW *win, CPU *cpu) {
 void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
     PLIC * plic = get_plic();
     static uint64_t old_sp = 0;
-    if (old_sp == cpu->registers[2]) {
+    if (old_sp != 0 && old_sp == cpu->registers[2]) {
         return;
     } else {
         old_sp = cpu->registers[2];

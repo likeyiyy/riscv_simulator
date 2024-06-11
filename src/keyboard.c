@@ -39,7 +39,7 @@ void process_uart_input(KeyBoardData *data) {
         switch_mode(CPU_MODE);
     } else {
         // 处理 UART 输入
-        int ch = getch();
+        int ch = data->key;
         if (ch != ERR) {
             data->cpu->uart->registers[0] = (uint8_t)ch; // 将字符写入 UART 数据寄存器
             data->cpu->uart->registers[LSR] |= 0x01; // 设置数据准备好标志
