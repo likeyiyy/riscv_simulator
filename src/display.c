@@ -6,6 +6,7 @@
 #include "display.h"
 #include "uart.h"
 #include "mfprintf.h"
+#include "keyboard.h"
 
 static struct timeval start;
 
@@ -108,6 +109,20 @@ void display_source(WINDOW *win, Memory *memory, uint64_t pc) {
     wrefresh(win);
 }
 
+void display_keyboard_mode(WINDOW *win) {
+    static Mode old_mode = NONE_MODE;
+    Mode mode = get_mode();
+    if (old_mode == mode) {
+        return;
+    } else {
+        old_mode = mode;
+    }
+    wclear(win);
+    box(win, 0, 0);
+    mvwprintw(win, 0, 1, "KeyBoard Mode: %s", mode == CPU_MODE ? "CPU Mode" : "UART Mode");
+    wrefresh(win);
+}
+
 void display_screen(WINDOW *win, UART *uart) {
     static int line = 1;
     static int col = 1; // Start from column 1 to leave space for the box
@@ -140,6 +155,8 @@ void display_screen(WINDOW *win, UART *uart) {
     }
 }
 
+
+
 void *update_display(void *arg) {
     DisplayData *data = (DisplayData *) arg;
     CPU *cpu = data->cpu;
@@ -155,13 +172,15 @@ void *update_display(void *arg) {
     init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
     WINDOW *reg_win = create_newwin(REG_WIN_HEIGHT, REG_WIN_WIDTH, 0, REG_WIN_START_X);
-    WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, 0, SCREEN_WIN_START_X);
+    WINDOW *status_win = create_newwin(STATUS_WIN_HEIGHT, SCREEN_WIN_WIDTH, 0, SCREEN_WIN_START_X);
+    WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
     WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
     WINDOW *stack_win = create_newwin(STACK_WIN_HEIGHT, STACK_WIN_WIDTH, 0, STACK_WIN_START_X);
 
-    display_screen(screen_win, uart);
 
     display_registers(reg_win, cpu);
+    display_screen(screen_win, uart);
+    display_keyboard_mode(status_win);
     display_stack(stack_win, cpu, memory);
     display_source(source_win, memory, data->cpu->pc);
 
@@ -172,6 +191,7 @@ void *update_display(void *arg) {
 
             if (i++ % 5000 == 0) {
                 display_registers(reg_win, cpu);
+                display_keyboard_mode(status_win);
                 display_stack(stack_win, cpu, memory);
                 display_source(source_win, memory, data->cpu->pc);
             }
@@ -179,8 +199,9 @@ void *update_display(void *arg) {
 
         } else {
             sem_wait(sem_refresh);
-            display_screen(screen_win, uart);
             display_registers(reg_win, cpu);
+            display_keyboard_mode(status_win);
+            display_screen(screen_win, uart);
             display_stack(stack_win, cpu, memory);
             display_source(source_win, memory, data->cpu->pc);
         }

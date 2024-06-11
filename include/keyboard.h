@@ -6,6 +6,7 @@
 
 // 定义模式
 typedef enum {
+    NONE_MODE,
     CPU_MODE,
     UART_MODE
 } Mode;
