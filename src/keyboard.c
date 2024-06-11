@@ -25,6 +25,7 @@ Mode get_mode(void) {
 }
 
 void process_cpu_input(KeyBoardData *data) {
+    printf("key: %d\n", data->key);
     sem_post(data->sem_continue); // 通知 CPU 线程继续执行
     if (data->key == 'c') {
         // 切换到 UART 模式
@@ -62,8 +63,11 @@ void* keyboard_input(void *arg) {
     while (1) {
         int ret = poll(fds, 1, -1);
         if (ret > 0 && (fds[0].revents & POLLIN)) {
-            read(STDIN_FILENO, &data->key, 1); // 读取键盘输入
+            char ch;
+            read(STDIN_FILENO, &ch, 1); // 读取键盘输入
+            data->key = ch;
             Mode mode = get_mode();
+
             if (mode == CPU_MODE) {
                 process_cpu_input(data);
             } else if (mode == UART_MODE) {

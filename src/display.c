@@ -178,7 +178,7 @@ void *update_display(void *arg) {
             usleep(100000); // Adjust the refresh rate as needed
 
         } else {
-            sem_wait(sem_refresh); // Wait for CPU thread to signal refresh
+            sem_wait(sem_refresh);
             display_screen(screen_win, uart);
             display_registers(reg_win, cpu);
             display_stack(stack_win, cpu, memory);
