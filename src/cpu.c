@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "cpu.h"
 #include "memory.h"
 #include "fence_inst.h"
@@ -16,20 +17,19 @@
 #include "clint.h"
 #include "plic.h"
 #include "i_64_inst.h"
-#include "display.h"
 #include "mfprintf.h"
 #include "exception.h"
 
 
 void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
-    for (int i = 0; i < 32; i++) {
-        cpu->registers[i] = 0;
-    }
     cpu->pc = 0;
     cpu->priv = PRV_M;
     cpu->memory = memory;
     cpu->interrupt_pending = false;
     cpu->fast_mode = false;
+    memset(cpu->registers, 0, sizeof(cpu->registers));
+    memset(cpu->fregisters, 0, sizeof(cpu->fregisters));
+    memset(cpu->csr, 0, sizeof(cpu->csr));
     init_mmu(&cpu->mmu);
     // 初始化中断优先级
     cpu->current_priority = 0;

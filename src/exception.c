@@ -74,9 +74,7 @@ bool handle_interrupt(CPU *cpu) {
     // 如果一个挂起位被设置，并且相应的中断使能位也被设置，那么处理器会触发中断处理流程。
     // (ie & MIE_MEIE) : 处理器是否允许外部中断
     // (ip & MIP_MEIP) : 是否有外部中断挂起
-    mfprintf("handle_interrupt: ie=%lx, ip=%lx, current_priority=%d\n", ie, ip, cpu->current_priority);
     if ((ie & MIE_MEIE) && (ip & MIP_MEIP)) {
-
         // 处理外部中断
         uint32_t interrupt_id = plic_claim_interrupt((uint32_t)cpu->csr[CSR_MHARTID]);
         if (interrupt_id != 0) {

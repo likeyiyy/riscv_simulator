@@ -33,8 +33,9 @@ typedef struct {
     PLIC * plic;               // 平台级中断控制器
     UART * uart;              // 串口
     int current_priority;    // 当前处理中断的优先级
-
 } CPU;
+
+
 
 void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart);
 void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction);

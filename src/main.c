@@ -17,16 +17,7 @@
 #include "csr.h"
 #include "exception.h"
 #include "keyboard.h"
-
-// 获取当前的 TSC 值
-static inline uint64_t rdtsc() {
-    uint32_t lo, hi;
-    __asm__ __volatile__ (
-        "rdtsc"
-        : "=a" (lo), "=d" (hi)
-    );
-    return ((uint64_t)hi << 32) | lo;
-}
+#include "simulator.h"
 
 
 void load_file_to_memory(const char *filename, Memory *memory, size_t address) {
@@ -64,11 +55,6 @@ int main(int argc, char *argv[]) {
     const char *input_file = NULL;
     uint64_t load_address = 0;
     uint64_t end_address = MEMORY_SIZE;
-    // print argc and argv
-    printf("argc: %d\n", argc);
-    for (int i = 0; i < argc; i++) {
-        printf("argv[%d]: %s\n", i, argv[i]);
-    }
 
     if (parse_arguments(argc, argv, &input_file, &load_address, &end_address) != 0) {
         print_usage(argv[0]);
@@ -105,78 +91,22 @@ int main(int argc, char *argv[]) {
     sem_init(&sem_refresh, 0, 0);
     sem_init(&sem_continue, 0, 0);
 
+    pthread_t display_thread;
+    pthread_t keyboard_thread;
+    pthread_t simulator_thread;
+
     // Initialize ncurses display thread
     DisplayData data = {&cpu, &memory, cpu.pc, &sem_refresh};
     KeyBoardData keyboard_data = {&cpu,-1, &sem_continue};
-    pthread_t display_thread;
-    pthread_t keyboard_thread;
+    Simulator simulator = {&cpu, &memory, &data, &keyboard_data, &sem_continue, &sem_refresh, end_address};
+
     pthread_create(&display_thread, NULL, update_display, &data);
     pthread_create(&keyboard_thread, NULL, keyboard_input, &keyboard_data);
+    pthread_create(&simulator_thread, NULL, cpu_simulator, &simulator);
 
-
-    // Simulate instruction execution
-    int ch;
-    uint32_t instruction;
-    struct timeval start, end;
-    long seconds, useconds;
-    double elapsed;
-    // 获取开始时的 TSC 值
-    uint64_t start_tsc;
-
-    while (1) {
-        if (cpu.pc < 0x100 || cpu.pc >= MEMORY_SIZE) {
-            raise_exception(&cpu, CAUSE_LOAD_ACCESS_FAULT);
-        }
-        instruction = load_inst(&memory, cpu.pc);
-
-        if (!cpu.fast_mode) {
-            sem_wait(&sem_continue); // Wait for display thread to finish updating
-            ch = keyboard_data.key; // Wait for user input in step mode
-            if (ch == 'q') break; // Quit the program
-            if (ch == 's') {
-                cpu_execute(&cpu, &memory, instruction);
-                cpu.csr[CSR_MINSTRET] += 1;
-                sem_post(&sem_refresh); // Notify display thread to refresh
-            }
-            if (ch == 'c') {
-                cpu.fast_mode = true;  // Fast mode
-                cpu_execute(&cpu, &memory, instruction);
-                cpu.csr[CSR_MINSTRET] += 1;
-                sem_post(&sem_refresh);
-
-                start_tsc = rdtsc();
-                gettimeofday(&start, NULL);
-            }
-
-        } else {
-            if (cpu.pc == end_address) {
-                cpu.fast_mode = false;
-                sem_post(&sem_refresh);
-                // 获取结束时间
-                gettimeofday(&end, NULL);
-
-                // 计算执行时间
-                seconds = end.tv_sec - start.tv_sec;
-                useconds = end.tv_usec - start.tv_usec;
-                elapsed = seconds + useconds / 1000000.0;
-                // 获取结束时的 TSC 值
-                uint64_t end_tsc = rdtsc();
-                // 计算执行的时钟周期数
-                uint64_t cycles = end_tsc - start_tsc;
-                mvprintw(40, 1, "Elapsed CPU cycles: %llu\n", cycles);
-
-                mvprintw(41, 1, " %.6fs\n", elapsed);
-            } else {
-                cpu_execute(&cpu, &memory, instruction);
-                cpu.csr[CSR_MINSTRET] += 1;
-            }
-        }
-    }
-
-    // Wait for user input before exiting
-    mvprintw(41, 0, "Simulation complete. Press 'q' to exit.");
     pthread_join(display_thread, NULL);
     pthread_join(keyboard_thread, NULL);
+    pthread_join(simulator_thread, NULL);
 
     // End ncurses mode
     endwin();

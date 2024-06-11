@@ -54,6 +54,7 @@ void display_registers(WINDOW *win, CPU *cpu) {
     // display cpu.csr[CSR_MINSTRET] at the end of the win
     mvwprintw(win, 37, 1, "count:    %016llu", cpu->csr[CSR_MINSTRET]);
     mvwprintw(win, 38, 1, "frequency: %.6fMhz", frequency);
+    mvwprintw(win, 39, 1, "mhartid: 0x%016llx", cpu->csr[CSR_MHARTID]);
     wrefresh(win);
 }
 
@@ -119,7 +120,13 @@ void display_keyboard_mode(WINDOW *win) {
     }
     wclear(win);
     box(win, 0, 0);
-    mvwprintw(win, 0, 1, "KeyBoard Mode: %s", mode == CPU_MODE ? "CPU Mode" : "UART Mode");
+    if (mode == CPU_MODE) {
+        mvwprintw(win, 0, 1, "KeyBoard Mode: CPU Mode");
+        mvwprintw(win, 1, 1, "s: step, c: continue, b: break, r: reset, q: quit");
+    } else {
+        mvwprintw(win, 0, 1, "KeyBoard Mode: UART Mode");
+        mvwprintw(win, 1, 1, "Ctrl+G: switch to CPU mode");
+    }
     wrefresh(win);
 }
 
