@@ -13,15 +13,8 @@
 #include "display.h"
 #include "uart.h"
 #include "helper.h"
-#include "mfprintf.h"
-#include "csr.h"
-#include "exception.h"
 #include "keyboard.h"
 #include "simulator.h"
-
-
-
-
 
 
 int main(int argc, char *argv[]) {
@@ -47,7 +40,7 @@ int main(int argc, char *argv[]) {
 
     CLINT *clint = get_clint();
     PLIC *plic = get_plic();
-    UART* uart = get_uart();
+    UART *uart = get_uart();
 
 
     clint_init(clint);

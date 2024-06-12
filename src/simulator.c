@@ -60,10 +60,6 @@ void reset_system(Simulator *simulator) {
     load_file_to_memory(simulator->input_file, simulator->cpu->memory, simulator->load_address);
     simulator->cpu->pc = simulator->load_address;
 
-    sem_destroy(simulator->sem_refresh);
-    sem_destroy(simulator->sem_continue);
-    sem_init(simulator->sem_refresh, 0, 0);
-    sem_init(simulator->sem_continue, 0, 0);
     simulator->display->line = 1;
     simulator->display->col = 1;
     wclear(simulator->display->screen_win);
@@ -95,13 +91,11 @@ void* cpu_simulator(void *arg) {
         if (!cpu->fast_mode) {
             sem_wait(simulator->sem_continue); // Wait for display thread to finish updating
             ch = keyboard_data->key; // Wait for user input in step mode
-            if (ch == 'q') break; // Quit the program
             if (ch == 's') {
                 cpu_execute(cpu, instruction);
                 cpu->csr[CSR_MINSTRET] += 1;
                 sem_post(simulator->sem_refresh); // Notify display thread to refresh
-            }
-            if (ch == 'c') {
+            } else if (ch == 'c') {
                 cpu->fast_mode = true;  // Fast mode
                 cpu_execute(cpu, instruction);
                 cpu->csr[CSR_MINSTRET] += 1;
@@ -109,6 +103,15 @@ void* cpu_simulator(void *arg) {
 
                 start_tsc = rdtsc();
                 gettimeofday(&start, NULL);
+            } else if (ch == 'r') {
+                cpu->fast_mode = false;
+                reset_system(simulator);
+                sem_post(simulator->sem_refresh);
+            } else if (ch == 'b') {
+                cpu->fast_mode = false;
+                sem_post(simulator->sem_refresh);
+            } else if (ch == 'q') {
+                exit(0);
             }
 
         } else {
@@ -129,7 +132,7 @@ void* cpu_simulator(void *arg) {
                     sem_post(simulator->sem_refresh);
                     continue;
                 } else if (ch == 'q') {
-                    break;
+                    exit(0);
                 }
             }
             if (cpu->pc == simulator->end_address) {

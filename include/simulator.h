@@ -20,5 +20,6 @@ typedef struct {
 } Simulator;
 
 void* cpu_simulator(void *arg);
+void load_file_to_memory(const char *filename, Memory *memory, size_t address);
 
 #endif // RISCV_SIMULATOR_H
