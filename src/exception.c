@@ -37,35 +37,16 @@ void raise_exception(CPU *cpu, uint64_t cause) {
 }
 
 
-bool handle_interrupt(CPU *cpu) {
-    static uint64_t i = 0;
+inline bool handle_interrupt(CPU *cpu) {
     uint64_t status;
     uint64_t ie;  // Interrupt Enable register
     uint64_t ip;  // Interrupt Pending register
 
-    // 根据当前特权级别选择状态寄存器和中断使能寄存器
-    switch (cpu->priv) {
-        case PRV_M:
-            status = cpu->csr[CSR_MSTATUS];
-            ie = cpu->csr[CSR_MIE];
-            ip = cpu->csr[CSR_MIP];
-            break;
-        case PRV_S:
-            status = cpu->csr[CSR_SSTATUS];
-            ie = cpu->csr[CSR_SIE];
-            ip = cpu->csr[CSR_SIP];
-            break;
-        case PRV_U:
-            status = cpu->csr[CSR_USTATUS];
-            ie = cpu->csr[CSR_UIE];
-            ip = cpu->csr[CSR_UIP];
-            break;
-        default:
-            // 未知的特权级别，直接返回
-            return false;
-    }
+    status = cpu->csr[CSR_MSTATUS];
+    ie = cpu->csr[CSR_MIE];
+    ip = cpu->csr[CSR_MIP];
 
-    if (cpu->priv == PRV_M && (status & MSTATUS_MIE) == 0) {
+    if ((status & MSTATUS_MIE) == 0) {
         // 如果中断未使能，直接返回
         return false;
     }

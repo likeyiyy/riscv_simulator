@@ -42,7 +42,7 @@ void display_registers(WINDOW *win, CPU *cpu) {
     old_minstret = cpu->csr[CSR_MINSTRET];
     wclear(win);
     box(win, 0, 0);
-    mvwprintw(win, 0, 1, "pc:0x%016lx", cpu->pc);
+    mvwprintw(win, 0, 1, "PC:0x%016lx", cpu->pc);
     for (int i = 0; i < 32; i++) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016lx", i, reg_names2[i], cpu->registers[i]);
     }
