@@ -1,5 +1,4 @@
 #include <unistd.h>
-#include <printf.h>
 #include <stdlib.h>
 #include "plic.h"
 #include "mfprintf.h"

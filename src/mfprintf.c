@@ -17,7 +17,6 @@ int mfprintf(const char *format, ...) {
 
     // 清理 va_list
     va_end(args);
-    fflush(file);
     // 关闭文件
     fclose(file);
 

@@ -74,11 +74,6 @@ void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
         uint32_t stack_value = load_inst(memory, base_address + i * 4);
         mvwprintw(win, i + 1, 1, "0x%016llx: 0x%08lx", base_address + i * 4, stack_value);
     }
-    mvwprintw(win, 33, 1, "0: 0x%08x", plic->enable[0][0]);
-    mvwprintw(win, 34, 1, "0: 0x%08x", plic->enable[0][1]);
-    mvwprintw(win, 35, 1, "0: 0x%08x", plic->enable[0][2]);
-    mvwprintw(win, 36, 1, "0: 0x%08x", plic->enable[0][3]);
-
     wrefresh(win);
 }
 
@@ -133,6 +128,7 @@ void display_keyboard_mode(WINDOW *win) {
 void display_screen(WINDOW *win, UART *uart) {
     static int line = 1;
     static int col = 1; // Start from column 1 to leave space for the box
+    mvwprintw(win, 0, 1, "Screen(80*25)");
     if (uart->registers[LSR] & 0x01) { // Check if data is ready
         uint8_t value = uart->registers[RHR];
         char buffer[2] = {value, '\0'};
@@ -158,8 +154,34 @@ void display_screen(WINDOW *win, UART *uart) {
         uart->registers[LSR] &= ~0x01; // Clear Data Ready
         uart->registers[LSR] |= LSR_THRE; // Set Transmitter Holding Register Empty
         uart->registers[THR] = 0;
-        wrefresh(win);
     }
+    wrefresh(win);
+}
+
+void display_uart(WINDOW *win, UART *uart) {
+    werase(win);
+    box(win, 0, 0);
+    mvwprintw(win, 0, 1, "UART Registers");
+
+    // 寄存器名称数组
+    const char *register_names[] = {
+        "RHR/THR",    // 0
+        "IER",        // 1
+        "FCR/ISR",    // 2
+        "LCR",        // 3
+        "MCR",        // 4
+        "LSR",        // 5
+        "MSR",        // 6
+        "SPR"         // 7
+    };
+
+    // 显示 UART 寄存器的值，分成4行2列，并对齐
+    for (int i = 0; i < 4; ++i) {
+        mvwprintw(win, i + 1, 1, "%-8s: 0x%02x", register_names[i], uart->registers[i]);
+        mvwprintw(win, i + 1, 18, "%-8s: 0x%02x", register_names[i + 4], uart->registers[i + 4]);
+    }
+
+    wrefresh(win);
 }
 
 
@@ -181,12 +203,14 @@ void *update_display(void *arg) {
     WINDOW *reg_win = create_newwin(REG_WIN_HEIGHT, REG_WIN_WIDTH, 0, REG_WIN_START_X);
     WINDOW *status_win = create_newwin(STATUS_WIN_HEIGHT, SCREEN_WIN_WIDTH, 0, SCREEN_WIN_START_X);
     WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
+    WINDOW *uart_win = create_newwin(6, 40, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X);
     WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
     WINDOW *stack_win = create_newwin(STACK_WIN_HEIGHT, STACK_WIN_WIDTH, 0, STACK_WIN_START_X);
 
 
     display_registers(reg_win, cpu);
     display_screen(screen_win, uart);
+    display_uart(uart_win, uart);
     display_keyboard_mode(status_win);
     display_stack(stack_win, cpu, memory);
     display_source(source_win, memory, data->cpu->pc);

@@ -280,14 +280,14 @@ void execute_system_instruction(CPU *cpu, uint32_t instruction) {
                 // 模拟处理器等待中断
                 // 在实际的模拟器中，这里可能需要实现一个事件循环或等待条件变量。
                 // 在这里，我们使用一个简单的循环来模拟等待中断。
-                while (true) {
-                    // 先检查并处理中断
-                    bool result = handle_interrupt(cpu);
-                    if (result) {
-                        break;
-                    }
-                    usleep(1000);
-                }
+//                while (true) {
+//                    // 先检查并处理中断
+//                    bool result = handle_interrupt(cpu);
+//                    if (result) {
+//                        break;
+//                    }
+//                    usleep(1000);
+//                }
                 break;
             default:
                 raise_exception(cpu, CAUSE_ILLEGAL_INSTRUCTION);
