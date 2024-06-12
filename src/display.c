@@ -212,6 +212,16 @@ void display_plic(WINDOW *win, PLIC *plic) {
     wrefresh(win);
 }
 
+void display_clint(WINDOW *win, CLINT *clint) {
+
+    mvwprintw(win, 0, 1, "Clint Registers (hart0)");
+    mvwprintw(win, 1, 1, "mtime:       %u", clint->mtime);
+    mvwprintw(win, 2, 1, "mtimecmp[0]: 0x%016x", clint->mtimecmp[0]);
+    mvwprintw(win, 3, 1, "msip[0]:     0x%016x", clint->msip[0]);
+
+    wrefresh(win);
+}
+
 
 void *update_display(void *arg) {
     DisplayData *display = (DisplayData *) arg;
@@ -232,6 +242,8 @@ void *update_display(void *arg) {
     WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
     WINDOW *uart_win = create_newwin(UART_WIN_HEIGHT, UART_WIN_WIDTH, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT,
                                      SCREEN_WIN_START_X);
+    WINDOW *clint_win = create_newwin(CLINT_WIN_HEIGHT, CLINT_WIN_WIDTH, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT + UART_WIN_HEIGHT,
+                                     SCREEN_WIN_START_X);
     WINDOW *plic_win = create_newwin(PLIC_WIN_HEIGHT, PLIC_WIN_WIDTH, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT,
                                      SCREEN_WIN_START_X + UART_WIN_WIDTH);
     WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
@@ -243,6 +255,7 @@ void *update_display(void *arg) {
     display_registers(reg_win, cpu);
     display_screen(display, screen_win, uart);
     display_uart(uart_win, uart);
+    display_clint(clint_win, cpu->clint);
     display_plic(plic_win, cpu->plic);
     display_keyboard_mode(status_win);
     display_stack(stack_win, cpu, memory);
@@ -254,6 +267,7 @@ void *update_display(void *arg) {
             display_screen(display, screen_win, uart);
             if (i % 500 == 0) {
                 display_uart(uart_win, uart);
+                display_clint(clint_win, cpu->clint);
                 display_plic(plic_win, cpu->plic);
             }
 
@@ -271,6 +285,7 @@ void *update_display(void *arg) {
             display_keyboard_mode(status_win);
             display_screen(display, screen_win, uart);
             display_uart(uart_win, uart);
+            display_clint(clint_win, cpu->clint);
             display_plic(plic_win, cpu->plic);
             display_stack(stack_win, cpu, memory);
             display_source(source_win, memory, display->cpu->pc);

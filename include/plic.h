@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include "riscv_defs.h"
 
 // 定义PLIC的MMIO基地址和大小
 #define PLIC_BASE_ADDR 0x0C000000
@@ -19,7 +20,7 @@
 #define PLIC_CLAIM_STRIDE 0x1000
 
 #define MAX_INTERRUPTS 128
-#define MAX_HARTS 8 // 假设最多有8个hart
+
 
 #define PLIC_ENABLE(hart) (PLIC_ENABLE_BASE + (hart) * 0x80)
 #define PLIC_THRESHOLD_OFFSET(hart) (PLIC_THRESHOLD_BASE + (hart) * 0x1000)

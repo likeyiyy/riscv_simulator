@@ -155,4 +155,7 @@
 #define FUNCT3_REM    0x6
 #define FUNCT3_REMU   0x7
 
+
+#define MAX_HARTS 8 // 假设最多有8个hart
+
 #endif // RISCV_DEFS_H

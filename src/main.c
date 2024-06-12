@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
 
     pthread_t display_thread;
     pthread_t keyboard_thread;
+    pthread_t timer_thread;
     pthread_t simulator_thread;
 
     // Initialize ncurses display thread
@@ -77,10 +78,12 @@ int main(int argc, char *argv[]) {
     pthread_create(&display_thread, NULL, update_display, &display_data);
     pthread_create(&keyboard_thread, NULL, keyboard_input, &keyboard_data);
     pthread_create(&simulator_thread, NULL, cpu_simulator, &simulator);
+    pthread_create(&timer_thread, NULL, timer_loop, &cpu);
 
     pthread_join(display_thread, NULL);
     pthread_join(keyboard_thread, NULL);
     pthread_join(simulator_thread, NULL);
+    pthread_join(timer_thread, NULL);
 
     // End ncurses mode
     endwin();
