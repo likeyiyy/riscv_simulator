@@ -130,28 +130,26 @@ void display_keyboard_mode(WINDOW *win) {
     wrefresh(win);
 }
 
-void display_screen(WINDOW *win, UART *uart) {
-    static int line = 1;
-    static int col = 1; // Start from column 1 to leave space for the box
+void display_screen(DisplayData* display_data, WINDOW *win, UART *uart) {
     mvwprintw(win, 0, 1, "Screen(80*25)");
     if ((uart->LSR & LSR_TX_IDLE) == 0) { // Check if is idle, if not idle, mean that data is ok
         uint8_t value = uart->THR;
         char buffer[2] = {value, '\0'};
 
         if (value == '\n') { // Handle newline character
-            line++;
-            col = 1; // Reset to the first column
+            display_data->line++;
+            display_data->col = 1; // Reset to the first column
         } else {
-            mvwprintw(win, line, col++, "%s", buffer);
-            if (col >= getmaxx(win) - 1) { // Move to the next line if end of line is reached
-                line++;
-                col = 1; // Reset to the first column
+            mvwprintw(win, display_data->line, display_data->col++, "%s", buffer);
+            if (display_data->col >= getmaxx(win) - 1) { // Move to the next line if end of line is reached
+                display_data->line++;
+                display_data->col = 1; // Reset to the first column
             }
         }
 
-        if (line >= getmaxy(win) - 1) { // Clear the window if the end is reached
-            line = 1;
-            col = 1; // Reset to the first column
+        if (display_data->line >= getmaxy(win) - 1) { // Clear the window if the end is reached
+            display_data->line = 1;
+            display_data->col = 1; // Reset to the first column
             wclear(win);
             box(win, 0, 0);
         }
@@ -189,6 +187,7 @@ void display_uart(WINDOW *win, UART *uart) {
 }
 
 void display_plic(WINDOW *win, PLIC *plic) {
+
     mvwprintw(win, 0, 1, "PLIC Registers (hart0)");
 
     // 显示 priority id=10 的优先级
@@ -215,10 +214,10 @@ void display_plic(WINDOW *win, PLIC *plic) {
 
 
 void *update_display(void *arg) {
-    DisplayData *data = (DisplayData *) arg;
-    CPU *cpu = data->cpu;
-    Memory *memory = data->memory;
-    sem_t *sem_refresh = data->sem_refresh;
+    DisplayData *display = (DisplayData *) arg;
+    CPU *cpu = display->cpu;
+    Memory *memory = display->memory;
+    sem_t *sem_refresh = display->sem_refresh;
     UART *uart = cpu->uart;
 
     initscr();
@@ -237,20 +236,22 @@ void *update_display(void *arg) {
                                      SCREEN_WIN_START_X + UART_WIN_WIDTH);
     WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
     WINDOW *stack_win = create_newwin(STACK_WIN_HEIGHT, STACK_WIN_WIDTH, 0, STACK_WIN_START_X);
-
+    display->screen_win = screen_win;
+    display->line = 1;
+    display->col = 1;
 
     display_registers(reg_win, cpu);
-    display_screen(screen_win, uart);
+    display_screen(display, screen_win, uart);
     display_uart(uart_win, uart);
     display_plic(plic_win, cpu->plic);
     display_keyboard_mode(status_win);
     display_stack(stack_win, cpu, memory);
-    display_source(source_win, memory, data->cpu->pc);
+    display_source(source_win, memory, display->cpu->pc);
 
     int i = 0;
     while (1) {
         if (cpu->fast_mode) {
-            display_screen(screen_win, uart);
+            display_screen(display, screen_win, uart);
             if (i % 500 == 0) {
                 display_uart(uart_win, uart);
                 display_plic(plic_win, cpu->plic);
@@ -260,7 +261,7 @@ void *update_display(void *arg) {
                 display_registers(reg_win, cpu);
                 display_keyboard_mode(status_win);
                 display_stack(stack_win, cpu, memory);
-                display_source(source_win, memory, data->cpu->pc);
+                display_source(source_win, memory, display->cpu->pc);
             }
             usleep(10); // Adjust the refresh rate as needed
 
@@ -268,11 +269,11 @@ void *update_display(void *arg) {
             sem_wait(sem_refresh);
             display_registers(reg_win, cpu);
             display_keyboard_mode(status_win);
-            display_screen(screen_win, uart);
+            display_screen(display, screen_win, uart);
             display_uart(uart_win, uart);
             display_plic(plic_win, cpu->plic);
             display_stack(stack_win, cpu, memory);
-            display_source(source_win, memory, data->cpu->pc);
+            display_source(source_win, memory, display->cpu->pc);
             usleep(100000); // Adjust the refresh rate as needed
         }
     }

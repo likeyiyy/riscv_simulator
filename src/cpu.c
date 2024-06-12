@@ -21,7 +21,7 @@
 #include "exception.h"
 
 
-void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
+void cpu_init(CPU *cpu, Memory *memory, CLINT *clint, PLIC *plic, UART *uart) {
     cpu->pc = 0;
     cpu->priv = PRV_M;
     cpu->memory = memory;
@@ -39,9 +39,7 @@ void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
 }
 
 
-
-
-void trigger_interrupt(CPU * cpu, int interrupt_id) {
+void trigger_interrupt(CPU *cpu, int interrupt_id) {
     PLIC *plic = get_plic();
     mfprintf("Keyboard Trigger\n");
     plic->pending[interrupt_id / 32] |= (1 << (interrupt_id % 32));
@@ -50,7 +48,7 @@ void trigger_interrupt(CPU * cpu, int interrupt_id) {
              interrupt_id,
              cpu->csr[CSR_MIP],
              plic->pending[interrupt_id / 32]
-             );
+    );
 }
 
 
@@ -86,9 +84,9 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
         case OPCODE_AUIPC:
             // AUIPC指令：rd = pc + imm
             // 提取高20位的立即数部分
-            imm = (int32_t)((instruction >> 12) << 12) >> 12;  // 符号扩展立即数
+            imm = (int32_t) ((instruction >> 12) << 12) >> 12;  // 符号扩展立即数
             // 左移12位，进行符号扩展
-            offset = (int64_t)imm << 12;
+            offset = (int64_t) imm << 12;
             // 计算目标地址
             result = cpu->pc + offset;
             cpu->registers[RD(instruction)] = result;
@@ -127,7 +125,7 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
         default:
             mfprintf("Unknown instruction with opcode: 0x%x\n", opcode);
     }
-    if(!pc_updated && !cpu->trap_occurred) {
+    if (!pc_updated && !cpu->trap_occurred) {
         cpu->pc += 4;
     } else if (cpu->trap_occurred) {
         cpu->trap_occurred = false;

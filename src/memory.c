@@ -22,6 +22,14 @@ void memory_init(Memory *memory) {
     memory->mmio_regions = mmio_regions;
 }
 
+void memory_free(Memory *memory) {
+    if (memory->data != NULL) {
+        free(memory->data);
+        memory->data = NULL;
+    }
+    // 如果有其他需要释放的资源，可以在这里处理
+}
+
 uint32_t load_inst(Memory *memory, uint64_t address) {
     if (address >= MEMORY_SIZE) {
         return 0;
@@ -51,6 +59,7 @@ uint64_t memory_read(Memory *memory, uint64_t address, uint32_t size, bool is_si
                 return 0;
         }
     }
+    return 0;
 }
 
 void memory_write(Memory *memory, uint64_t address, uint64_t value, uint32_t size) {

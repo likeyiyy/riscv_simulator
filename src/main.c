@@ -20,35 +20,8 @@
 #include "simulator.h"
 
 
-void load_file_to_memory(const char *filename, Memory *memory, size_t address) {
-    FILE *file = fopen(filename, "rb");
-    if (!file) {
-        perror("Failed to open file");
-        exit(EXIT_FAILURE);
-    }
 
-    // 获取文件大小
-    fseek(file, 0, SEEK_END);
-    size_t file_size = ftell(file);
-    fseek(file, 0, SEEK_SET);
 
-    // 确保内存大小足够，并且检查地址的合法性
-    if (file_size + address > MEMORY_SIZE) {
-        fprintf(stderr, "File size exceeds memory size or invalid address\n");
-        fclose(file);
-        exit(EXIT_FAILURE);
-    }
-
-    // 读取文件内容到内存
-    size_t bytes_read = fread(memory->data + address, 1, file_size, file);
-    if (bytes_read != file_size) {
-        perror("Failed to read complete file");
-        fclose(file);
-        exit(EXIT_FAILURE);
-    }
-
-    fclose(file);
-}
 
 
 int main(int argc, char *argv[]) {
@@ -64,29 +37,27 @@ int main(int argc, char *argv[]) {
         printf("Load address: 0x%lx\n", load_address);
         printf("End address: 0x%lx\n", end_address);
     }
+    init_csr_names();
 
     CPU cpu;
     Memory memory;
 
+    sem_t sem_refresh;
+    sem_t sem_continue;
+
     CLINT *clint = get_clint();
-    clint_init(clint);
-
     PLIC *plic = get_plic();
-    plic_init(plic);
-
     UART* uart = get_uart();
+
+
+    clint_init(clint);
+    plic_init(plic);
     uart_init(uart); // 初始化 UART
-
-
     memory_init(&memory);
     cpu_init(&cpu, &memory, clint, plic, uart);
-    init_csr_names();
 
     load_file_to_memory(input_file, &memory, load_address);
     cpu.pc = load_address;
-
-    sem_t sem_refresh;
-    sem_t sem_continue;
 
     sem_init(&sem_refresh, 0, 0);
     sem_init(&sem_continue, 0, 0);
@@ -96,11 +67,21 @@ int main(int argc, char *argv[]) {
     pthread_t simulator_thread;
 
     // Initialize ncurses display thread
-    DisplayData data = {&cpu, &memory, &sem_refresh};
+    DisplayData display_data = {&cpu, &memory, &sem_refresh};
     KeyBoardData keyboard_data = {&cpu, -1, &sem_continue, &sem_refresh};
-    Simulator simulator = {&cpu, &memory, &data, &keyboard_data, &sem_continue, &sem_refresh, end_address};
+    Simulator simulator = {
+            &cpu,
+            &memory,
+            &display_data,
+            &keyboard_data,
+            &sem_continue,
+            &sem_refresh,
+            input_file,
+            load_address,
+            end_address
+    };
 
-    pthread_create(&display_thread, NULL, update_display, &data);
+    pthread_create(&display_thread, NULL, update_display, &display_data);
     pthread_create(&keyboard_thread, NULL, keyboard_input, &keyboard_data);
     pthread_create(&simulator_thread, NULL, cpu_simulator, &simulator);
 

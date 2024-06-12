@@ -14,6 +14,8 @@ typedef struct {
     KeyBoardData* keyboard;
     sem_t *sem_continue;  // 信号量，用于通知 CPU 线程继续执行
     sem_t *sem_refresh;   // 信号量，用于通知 display 线程刷新
+    const char *input_file; // 输入文件
+    uint64_t load_address; // 开始地址
     uint64_t end_address; // 结束地址
 } Simulator;
 

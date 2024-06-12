@@ -33,6 +33,9 @@ typedef struct {
     CPU *cpu;
     Memory *memory;
     sem_t *sem_refresh;   // 信号量，用于通知 display 线程刷新
+    WINDOW *screen_win;
+    int line;
+    int col;
 } DisplayData;
 
 

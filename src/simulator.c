@@ -18,6 +18,59 @@ static inline uint64_t rdtsc(void) {
     return ((uint64_t)hi << 32) | lo;
 }
 
+void load_file_to_memory(const char *filename, Memory *memory, size_t address) {
+    FILE *file = fopen(filename, "rb");
+    if (!file) {
+        perror("Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+
+    // 获取文件大小
+    fseek(file, 0, SEEK_END);
+    size_t file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    // 确保内存大小足够，并且检查地址的合法性
+    if (file_size + address > MEMORY_SIZE) {
+        fprintf(stderr, "File size exceeds memory size or invalid address\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    // 读取文件内容到内存
+    size_t bytes_read = fread(memory->data + address, 1, file_size, file);
+    if (bytes_read != file_size) {
+        perror("Failed to read complete file");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    fclose(file);
+}
+
+
+void reset_system(Simulator *simulator) {
+    clint_init(simulator->cpu->clint);
+    plic_init(simulator->cpu->plic);
+    uart_init(simulator->cpu->uart); // 初始化 UART
+    memory_free(simulator->cpu->memory);
+    memory_init(simulator->cpu->memory);
+    cpu_init(simulator->cpu, simulator->cpu->memory, simulator->cpu->clint, simulator->cpu->plic, simulator->cpu->uart);
+
+    load_file_to_memory(simulator->input_file, simulator->cpu->memory, simulator->load_address);
+    simulator->cpu->pc = simulator->load_address;
+
+    sem_destroy(simulator->sem_refresh);
+    sem_destroy(simulator->sem_continue);
+    sem_init(simulator->sem_refresh, 0, 0);
+    sem_init(simulator->sem_continue, 0, 0);
+    simulator->display->line = 1;
+    simulator->display->col = 1;
+    wclear(simulator->display->screen_win);
+    box(simulator->display->screen_win, 0, 0);
+    wrefresh(simulator->display->screen_win);
+}
+
 void* cpu_simulator(void *arg) {
     Simulator *simulator = (Simulator *)arg;
     CPU *cpu = simulator->cpu;
@@ -66,6 +119,17 @@ void* cpu_simulator(void *arg) {
                     cpu->fast_mode = false;
                     sem_post(simulator->sem_refresh);
                     continue;
+                } else if (ch == 'r') {
+                    cpu->fast_mode = false;
+                    reset_system(simulator);
+                    sem_post(simulator->sem_refresh);
+                    continue;
+                } else if (ch == 'b') {
+                    cpu->fast_mode = false;
+                    sem_post(simulator->sem_refresh);
+                    continue;
+                } else if (ch == 'q') {
+                    break;
                 }
             }
             if (cpu->pc == simulator->end_address) {
