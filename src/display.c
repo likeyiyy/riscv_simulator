@@ -160,6 +160,26 @@ void display_screen(WINDOW *win, UART *uart) {
 void display_uart(WINDOW *win, UART *uart) {
     mvwprintw(win, 0, 1, "UART Registers");
 
+    // 寄存器名称数组
+    const char *register_names[] = {
+        "THR", "RBR", "IER", "IIR",
+        "FCR", "LCR", "MCR", "LSR",
+        "MSR", "SCR", "DLL", "DLM"
+    };
+
+    // 寄存器值数组
+    uint32_t register_values[] = {
+        uart->THR, uart->RBR, uart->IER, uart->IIR,
+        uart->FCR, uart->LCR, uart->MCR, uart->LSR,
+        uart->MSR, uart->SCR, uart->DLL, uart->DLM
+    };
+
+    // 显示 UART 寄存器的值，分成两列
+    for (int i = 0; i < 6; ++i) {
+        mvwprintw(win, i + 1, 1, "%-4s: 0x%02x", register_names[i], register_values[i]);
+        mvwprintw(win, i + 1, 18, "%-4s: 0x%02x", register_names[i + 6], register_values[i + 6]);
+    }
+
     wrefresh(win);
 }
 
@@ -206,12 +226,12 @@ void *update_display(void *arg) {
     init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
     WINDOW *reg_win = create_newwin(REG_WIN_HEIGHT, REG_WIN_WIDTH, 0, REG_WIN_START_X);
-    WINDOW *status_win = create_newwin(STATUS_WIN_HEIGHT, SCREEN_WIN_WIDTH, 0, SCREEN_WIN_START_X);
-    WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
-    WINDOW *uart_win = create_newwin(6, 40, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X);
-    WINDOW *plic_win = create_newwin(15, 50, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT + 6, SCREEN_WIN_START_X);
-    WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
-    WINDOW *stack_win = create_newwin(STACK_WIN_HEIGHT, STACK_WIN_WIDTH, 0, STACK_WIN_START_X);
+    WINDOW *status_win 	= create_newwin(STATUS_WIN_HEIGHT, 	SCREEN_WIN_WIDTH, 	0, SCREEN_WIN_START_X);
+    WINDOW *screen_win 	= create_newwin(SCREEN_WIN_HEIGHT, 	SCREEN_WIN_WIDTH, 	STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
+    WINDOW *uart_win 	= create_newwin(UART_WIN_HEIGHT, 	UART_WIN_WIDTH, 	STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X);
+    WINDOW *plic_win 	= create_newwin(PLIC_WIN_HEIGHT, 	PLIC_WIN_WIDTH, 	STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT + UART_WIN_HEIGHT, SCREEN_WIN_START_X);
+    WINDOW *source_win 	= create_newwin(SOURCE_WIN_HEIGHT, 	SOURCE_WIN_WIDTH, 	0, SOURCE_WIN_START_X);
+    WINDOW *stack_win 	= create_newwin(STACK_WIN_HEIGHT, 	STACK_WIN_WIDTH, 	0, STACK_WIN_START_X);
 
 
     display_registers(reg_win, cpu);

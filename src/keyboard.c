@@ -40,7 +40,6 @@ void process_uart_input(KeyBoardData *data) {
     } else {
         // 处理 UART 输入
         if (data->key != ERR) {
-	    mfprintf("GOT KEY board char: %d\n", data->key);
             data->cpu->uart->RBR = data->key; // 将字符写入 UART 数据寄存器
             data->cpu->uart->LSR |= LSR_RX_READY; // 设置数据准备好标志
             trigger_interrupt(data->cpu, UART0_IRQ); // 触发 UART 中断
