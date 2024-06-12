@@ -47,14 +47,15 @@ void display_registers(WINDOW *win, CPU *cpu) {
         mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
     }
     // cpu->csr[CSR_MTVEC]
-    mvwprintw(win, 33, 1, "mtvec:   0x%016llx", cpu->csr[CSR_MTVEC]);
-    mvwprintw(win, 34, 1, "mstatus: 0x%016llx", cpu->csr[CSR_MSTATUS]);
-    mvwprintw(win, 35, 1, "mie:   0x%016llx", cpu->csr[CSR_MIE]);
-    mvwprintw(win, 36, 1, "mip:   0x%016llx", cpu->csr[CSR_MIP]);
+    mvwprintw(win, 33, 1, "mtvec:    0x%016llx", cpu->csr[CSR_MTVEC]);
+    mvwprintw(win, 34, 1, "mstatus:  0x%016llx", cpu->csr[CSR_MSTATUS]);
+    mvwprintw(win, 35, 1, "mie:      0x%016llx", cpu->csr[CSR_MIE]);
+    mvwprintw(win, 36, 1, "mip:      0x%016llx", cpu->csr[CSR_MIP]);
     // display cpu.csr[CSR_MINSTRET] at the end of the win
-    mvwprintw(win, 37, 1, "count:    %016llu", cpu->csr[CSR_MINSTRET]);
+    mvwprintw(win, 37, 1, "minstret: 0x%016llu", cpu->csr[CSR_MINSTRET]);
     mvwprintw(win, 38, 1, "frequency: %.6fMhz", frequency);
-    mvwprintw(win, 39, 1, "mhartid: 0x%016llx", cpu->csr[CSR_MHARTID]);
+    mvwprintw(win, 39, 1, "mhartid:  0x%016llx", cpu->csr[CSR_MHARTID]);
+    mvwprintw(win, 40, 1, "cpu mode:  0x%0x", cpu->priv);
     wrefresh(win);
 }
 
@@ -129,7 +130,7 @@ void display_screen(WINDOW *win, UART *uart) {
     static int line = 1;
     static int col = 1; // Start from column 1 to leave space for the box
     mvwprintw(win, 0, 1, "Screen(80*25)");
-    if ((uart->LSR & LSR_TX_IDLE) == 0) { // Check if data is ready
+    if ((uart->LSR & LSR_TX_IDLE) == 0) { // Check if is idle, if not idle, mean that data is ok
         uint8_t value = uart->THR;
         char buffer[2] = {value, '\0'};
 
@@ -203,7 +204,7 @@ void display_plic(WINDOW *win, PLIC *plic) {
     }
 
     // 显示 hart0 的 claim/complete 寄存器的值
-    mvwprintw(win, 11, 1, "Claim/Complete [hart0]: %u", plic->claim_complete[0]);
+    mvwprintw(win, 11, 1, "Claim/Complete [hart0]: 0x%08x", plic->claim_complete[0]);
 
     wrefresh(win);
 }
@@ -229,7 +230,7 @@ void *update_display(void *arg) {
     WINDOW *status_win 	= create_newwin(STATUS_WIN_HEIGHT, 	SCREEN_WIN_WIDTH, 	0, SCREEN_WIN_START_X);
     WINDOW *screen_win 	= create_newwin(SCREEN_WIN_HEIGHT, 	SCREEN_WIN_WIDTH, 	STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
     WINDOW *uart_win 	= create_newwin(UART_WIN_HEIGHT, 	UART_WIN_WIDTH, 	STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X);
-    WINDOW *plic_win 	= create_newwin(PLIC_WIN_HEIGHT, 	PLIC_WIN_WIDTH, 	STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT + UART_WIN_HEIGHT, SCREEN_WIN_START_X);
+    WINDOW *plic_win 	= create_newwin(PLIC_WIN_HEIGHT, 	PLIC_WIN_WIDTH, 	STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X + UART_WIN_WIDTH);
     WINDOW *source_win 	= create_newwin(SOURCE_WIN_HEIGHT, 	SOURCE_WIN_WIDTH, 	0, SOURCE_WIN_START_X);
     WINDOW *stack_win 	= create_newwin(STACK_WIN_HEIGHT, 	STACK_WIN_WIDTH, 	0, STACK_WIN_START_X);
 

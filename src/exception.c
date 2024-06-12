@@ -29,14 +29,16 @@ void raise_exception(CPU *cpu, uint64_t cause) {
             // save cpu->priv first
             cpu->csr[CSR_MSTATUS] = (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPP) | (cpu->priv << 11);
             // save interrupt enable first
-            cpu->csr[CSR_MSTATUS] = (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPIE) | ((cpu->csr[CSR_MSTATUS] >> 7) & 0x1);
+            cpu->csr[CSR_MSTATUS] =
+                    (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPIE) | (((cpu->csr[CSR_MSTATUS] >> 3) & 0x1) << 7);
+
             break;
     }
 }
 
 
-
 bool handle_interrupt(CPU *cpu) {
+    static uint64_t i = 0;
     uint64_t status;
     uint64_t ie;  // Interrupt Enable register
     uint64_t ip;  // Interrupt Pending register
@@ -74,11 +76,11 @@ bool handle_interrupt(CPU *cpu) {
     // 如果一个挂起位被设置，并且相应的中断使能位也被设置，那么处理器会触发中断处理流程。
     // (ie & MIE_MEIE) : 处理器是否允许外部中断
     // (ip & MIP_MEIP) : 是否有外部中断挂起
-    if ((ie & MIE_MEIE) && (ip & MIP_MEIP)) {
+    if ((ie & MIE_MEIE) && (ip & MIP_MEIP) && cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
         // 处理外部中断
-        bool is_interrupt_occured = plic_check_interrupt(cpu->plic, (uint32_t)cpu->csr[CSR_MHARTID]);
+        bool is_interrupt_occured = plic_check_interrupt(cpu->plic, (uint32_t) cpu->csr[CSR_MHARTID]);
         if (is_interrupt_occured) {
-	    mfprintf("interrupt is occured!\n");
+            mfprintf("CAUSE_MACHINE_EXTERNAL_INTERRUPT occur!!!\n");
             cpu->current_priority = PRIORITY_MACHINE_EXTERNAL_INTERRUPT;
             // claim 已经设置，pending已经清除，等待软件可以从claim寄存器中读取中断ID
             raise_exception(cpu, CAUSE_MACHINE_EXTERNAL_INTERRUPT);
@@ -91,7 +93,8 @@ bool handle_interrupt(CPU *cpu) {
     }
 
     // 检查并处理中优先级中断
-    if ((ie & MIE_MTIE) && (cpu->clint->mtime >= cpu->clint->mtimecmp[cpu->csr[CSR_MHARTID]]) && cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
+    if ((ie & MIE_MTIE) && (cpu->clint->mtime >= cpu->clint->mtimecmp[cpu->csr[CSR_MHARTID]]) &&
+        cpu->current_priority < PRIORITY_MACHINE_TIMER_INTERRUPT) {
         cpu->current_priority = PRIORITY_MACHINE_TIMER_INTERRUPT;
         // 处理定时器中断
         raise_exception(cpu, CAUSE_MACHINE_TIMER_INTERRUPT);

@@ -50,16 +50,12 @@ void plic_write(uint64_t address, uint64_t value, uint32_t size) {
         uint32_t hart_id = (offset - PLIC_ENABLE_BASE) / sizeof(plic->enable[0]);
         uint32_t enable_offset = (offset - PLIC_ENABLE_BASE) % sizeof(plic->enable[0]);
         plic->enable[hart_id][enable_offset / 4] = (uint32_t) value;
-    } else if (offset >= PLIC_THRESHOLD_OFFSET(0) && offset < PLIC_THRESHOLD_OFFSET(MAX_HARTS)) {
+    } else if ((offset % PLIC_THRESHOLD_STRIDE) == 0 && offset >= PLIC_THRESHOLD_OFFSET(0) && offset < PLIC_THRESHOLD_OFFSET(MAX_HARTS)) {
         uint32_t hart_id = (offset - PLIC_THRESHOLD_BASE) / PLIC_THRESHOLD_STRIDE;
-        if ((offset % PLIC_THRESHOLD_STRIDE) == 0) {
-            plic->threshold[hart_id] = (uint32_t) value;
-        }
-    } else if (offset >= PLIC_CLAIM_OFFSET(0) && offset < PLIC_CLAIM_OFFSET(MAX_HARTS)) {
+        plic->threshold[hart_id] = (uint32_t) value;
+    } else if ((offset % PLIC_CLAIM_STRIDE) == 4 && offset >= PLIC_CLAIM_OFFSET(0) && offset < PLIC_CLAIM_OFFSET(MAX_HARTS)) {
         uint32_t hart_id = (offset - PLIC_CLAIM_BASE) / PLIC_CLAIM_STRIDE;
-        if ((offset % PLIC_CLAIM_STRIDE) == 4) {
-            plic_complete_interrupt(hart_id, (int) value);
-        }
+        plic_complete_interrupt(hart_id, (int) value);
     }
 }
 
