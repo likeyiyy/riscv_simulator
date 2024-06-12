@@ -56,6 +56,7 @@ void *timer_loop(void *arg) {
         usleep(TIMER_INTERVAL_MS * 1000); // 暂停一段时间（微秒）
 
         // 更新 mtime 寄存器
+        // cpu时钟1440MHz，每次暂停10ms，相当于cpu时钟走了14400个周期
         cpu->clint->mtime += TIMER_INTERVAL_MS * 7000;
 
         // 检查是否需要触发定时器中断
