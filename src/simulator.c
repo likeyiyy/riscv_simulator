@@ -25,7 +25,7 @@ void* cpu_simulator(void *arg) {
     Memory *memory = cpu->memory;
 
     // Simulate instruction execution
-    int ch;
+    char ch;
     uint32_t instruction;
     struct timeval start, end;
     long seconds, useconds;
@@ -44,13 +44,13 @@ void* cpu_simulator(void *arg) {
             ch = keyboard_data->key; // Wait for user input in step mode
             if (ch == 'q') break; // Quit the program
             if (ch == 's') {
-                cpu_execute(cpu, memory, instruction);
+                cpu_execute(cpu, instruction);
                 cpu->csr[CSR_MINSTRET] += 1;
                 sem_post(simulator->sem_refresh); // Notify display thread to refresh
             }
             if (ch == 'c') {
                 cpu->fast_mode = true;  // Fast mode
-                cpu_execute(cpu, memory, instruction);
+                cpu_execute(cpu, instruction);
                 cpu->csr[CSR_MINSTRET] += 1;
                 sem_post(simulator->sem_refresh);
 
@@ -59,6 +59,15 @@ void* cpu_simulator(void *arg) {
             }
 
         } else {
+            Mode mode = get_mode();
+            if (mode == CPU_MODE) {
+                ch = keyboard_data->key;
+                if (ch == 's') {
+                    cpu->fast_mode = false;
+                    sem_post(simulator->sem_refresh);
+                    continue;
+                }
+            }
             if (cpu->pc == simulator->end_address) {
                 cpu->fast_mode = false;
                 sem_post(simulator->sem_refresh);
@@ -77,7 +86,7 @@ void* cpu_simulator(void *arg) {
 
                 mvprintw(41, 1, " %.6fs\n", elapsed);
             } else {
-                cpu_execute(cpu, memory, instruction);
+                cpu_execute(cpu, instruction);
                 cpu->csr[CSR_MINSTRET] += 1;
             }
         }

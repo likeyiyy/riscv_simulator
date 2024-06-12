@@ -12,24 +12,24 @@ Mode current_mode = CPU_MODE;
 pthread_mutex_t mode_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void switch_mode(Mode new_mode) {
-    pthread_mutex_lock(&mode_mutex);
+//    pthread_mutex_lock(&mode_mutex);
     current_mode = new_mode;
-    pthread_mutex_unlock(&mode_mutex);
+//    pthread_mutex_unlock(&mode_mutex);
 }
 
 Mode get_mode(void) {
-    pthread_mutex_lock(&mode_mutex);
+//    pthread_mutex_lock(&mode_mutex);
     Mode mode = current_mode;
-    pthread_mutex_unlock(&mode_mutex);
+//    pthread_mutex_unlock(&mode_mutex);
     return mode;
 }
 
 void process_cpu_input(KeyBoardData *data) {
-    printf("key: %d\n", data->key);
     sem_post(data->sem_continue); // 通知 CPU 线程继续执行
-    if (data->key == 'c') {
+    if (data->key == 'c' || data->key == 7) {
         // 切换到 UART 模式
         switch_mode(UART_MODE);
+        sem_post(data->sem_refresh); // 通知显示线程刷新
     }
 }
 
@@ -37,7 +37,9 @@ void process_uart_input(KeyBoardData *data) {
     if (data->key == 7) { // Ctrl+G
         // 切换回 CPU 模式
         switch_mode(CPU_MODE);
+        sem_post(data->sem_refresh); // 通知显示线程刷新
     } else {
+        sem_post(data->sem_refresh); // 通知显示线程刷新
         // 处理 UART 输入
         if (data->key != ERR) {
             data->cpu->uart->RBR = data->key; // 将字符写入 UART 数据寄存器

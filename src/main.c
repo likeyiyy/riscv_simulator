@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     // Initialize ncurses display thread
     DisplayData data = {&cpu, &memory, &sem_refresh};
-    KeyBoardData keyboard_data = {&cpu, -1, &sem_continue};
+    KeyBoardData keyboard_data = {&cpu, -1, &sem_continue, &sem_refresh};
     Simulator simulator = {&cpu, &memory, &data, &keyboard_data, &sem_continue, &sem_refresh, end_address};
 
     pthread_create(&display_thread, NULL, update_display, &data);

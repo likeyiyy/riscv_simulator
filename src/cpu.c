@@ -54,7 +54,7 @@ void trigger_interrupt(CPU * cpu, int interrupt_id) {
 }
 
 
-void cpu_execute(CPU *cpu, Memory *memory, uint32_t instruction) {
+void cpu_execute(CPU *cpu, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
     cpu->registers[0] = 0;  // 确保x0始终为0
     // 检查并处理中断

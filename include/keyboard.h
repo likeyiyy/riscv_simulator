@@ -15,6 +15,7 @@ typedef struct {
     CPU *cpu;
     char key;  // 键值
     sem_t *sem_continue;  // 信号量，用于通知 CPU 线程继续执行
+    sem_t *sem_refresh;   // 信号量，用于通知 display 线程刷新
 } KeyBoardData;
 
 void switch_mode(Mode new_mode);

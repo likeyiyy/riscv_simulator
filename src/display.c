@@ -48,8 +48,8 @@ void display_registers(WINDOW *win, CPU *cpu) {
     }
     uint8_t csr_base_y_index = 33;
 
-    const char * CPU_MODES[] = {
-        "User", "Supervisor", "Reserved", "Machine"
+    const char *CPU_MODES[] = {
+            "User", "Supervisor", "Reserved", "Machine"
     };
     mvwprintw(win, csr_base_y_index++, 1, "cpu mode: %s", CPU_MODES[cpu->priv]);
     mvwprintw(win, csr_base_y_index++, 1, "mhartid:  0x%016lx", cpu->csr[CSR_MHARTID]);
@@ -65,7 +65,6 @@ void display_registers(WINDOW *win, CPU *cpu) {
 }
 
 void display_stack(WINDOW *win, CPU *cpu, Memory *memory) {
-    PLIC * plic = get_plic();
     static uint64_t old_sp = 0;
     if (old_sp != 0 && old_sp == cpu->registers[2]) {
         return;
@@ -168,16 +167,16 @@ void display_uart(WINDOW *win, UART *uart) {
 
     // 寄存器名称数组
     const char *register_names[] = {
-        "THR", "RBR", "IER", "IIR",
-        "FCR", "LCR", "MCR", "LSR",
-        "MSR", "SCR", "DLL", "DLM"
+            "THR", "RBR", "IER", "IIR",
+            "FCR", "LCR", "MCR", "LSR",
+            "MSR", "SCR", "DLL", "DLM"
     };
 
     // 寄存器值数组
     uint32_t register_values[] = {
-        uart->THR, uart->RBR, uart->IER, uart->IIR,
-        uart->FCR, uart->LCR, uart->MCR, uart->LSR,
-        uart->MSR, uart->SCR, uart->DLL, uart->DLM
+            uart->THR, uart->RBR, uart->IER, uart->IIR,
+            uart->FCR, uart->LCR, uart->MCR, uart->LSR,
+            uart->MSR, uart->SCR, uart->DLL, uart->DLM
     };
 
     // 显示 UART 寄存器的值，分成两列
@@ -215,8 +214,6 @@ void display_plic(WINDOW *win, PLIC *plic) {
 }
 
 
-
-
 void *update_display(void *arg) {
     DisplayData *data = (DisplayData *) arg;
     CPU *cpu = data->cpu;
@@ -232,12 +229,14 @@ void *update_display(void *arg) {
     init_pair(1, COLOR_RED, COLOR_BLACK);   // 颜色对1：红色文本，黑色背景
 
     WINDOW *reg_win = create_newwin(REG_WIN_HEIGHT, REG_WIN_WIDTH, 0, REG_WIN_START_X);
-    WINDOW *status_win 	= create_newwin(STATUS_WIN_HEIGHT, 	SCREEN_WIN_WIDTH, 	0, SCREEN_WIN_START_X);
-    WINDOW *screen_win 	= create_newwin(SCREEN_WIN_HEIGHT, 	SCREEN_WIN_WIDTH, 	STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
-    WINDOW *uart_win 	= create_newwin(UART_WIN_HEIGHT, 	UART_WIN_WIDTH, 	STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X);
-    WINDOW *plic_win 	= create_newwin(PLIC_WIN_HEIGHT, 	PLIC_WIN_WIDTH, 	STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X + UART_WIN_WIDTH);
-    WINDOW *source_win 	= create_newwin(SOURCE_WIN_HEIGHT, 	SOURCE_WIN_WIDTH, 	0, SOURCE_WIN_START_X);
-    WINDOW *stack_win 	= create_newwin(STACK_WIN_HEIGHT, 	STACK_WIN_WIDTH, 	0, STACK_WIN_START_X);
+    WINDOW *status_win = create_newwin(STATUS_WIN_HEIGHT, SCREEN_WIN_WIDTH, 0, SCREEN_WIN_START_X);
+    WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
+    WINDOW *uart_win = create_newwin(UART_WIN_HEIGHT, UART_WIN_WIDTH, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT,
+                                     SCREEN_WIN_START_X);
+    WINDOW *plic_win = create_newwin(PLIC_WIN_HEIGHT, PLIC_WIN_WIDTH, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT,
+                                     SCREEN_WIN_START_X + UART_WIN_WIDTH);
+    WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
+    WINDOW *stack_win = create_newwin(STACK_WIN_HEIGHT, STACK_WIN_WIDTH, 0, STACK_WIN_START_X);
 
 
     display_registers(reg_win, cpu);
@@ -252,10 +251,10 @@ void *update_display(void *arg) {
     while (1) {
         if (cpu->fast_mode) {
             display_screen(screen_win, uart);
-	    if (i % 500 == 0) {
-            	display_uart(uart_win, uart);
-    	    	display_plic(plic_win, cpu->plic);
-	    }
+            if (i % 500 == 0) {
+                display_uart(uart_win, uart);
+                display_plic(plic_win, cpu->plic);
+            }
 
             if (i++ % 5000 == 0) {
                 display_registers(reg_win, cpu);
@@ -271,7 +270,7 @@ void *update_display(void *arg) {
             display_keyboard_mode(status_win);
             display_screen(screen_win, uart);
             display_uart(uart_win, uart);
-    	    display_plic(plic_win, cpu->plic);
+            display_plic(plic_win, cpu->plic);
             display_stack(stack_win, cpu, memory);
             display_source(source_win, memory, data->cpu->pc);
             usleep(100000); // Adjust the refresh rate as needed
