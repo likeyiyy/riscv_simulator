@@ -42,20 +42,25 @@ void display_registers(WINDOW *win, CPU *cpu) {
     old_minstret = cpu->csr[CSR_MINSTRET];
     wclear(win);
     box(win, 0, 0);
-    mvwprintw(win, 0, 1, "pc:0x%016llx", cpu->pc);
+    mvwprintw(win, 0, 1, "pc:0x%016lx", cpu->pc);
     for (int i = 0; i < 32; i++) {
-        mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016llx", i, reg_names2[i], cpu->registers[i]);
+        mvwprintw(win, i + 1, 1, "x%-2d (%-3s):0x%016lx", i, reg_names2[i], cpu->registers[i]);
     }
-    // cpu->csr[CSR_MTVEC]
-    mvwprintw(win, 33, 1, "mtvec:    0x%016llx", cpu->csr[CSR_MTVEC]);
-    mvwprintw(win, 34, 1, "mstatus:  0x%016llx", cpu->csr[CSR_MSTATUS]);
-    mvwprintw(win, 35, 1, "mie:      0x%016llx", cpu->csr[CSR_MIE]);
-    mvwprintw(win, 36, 1, "mip:      0x%016llx", cpu->csr[CSR_MIP]);
-    // display cpu.csr[CSR_MINSTRET] at the end of the win
-    mvwprintw(win, 37, 1, "minstret: 0x%016llu", cpu->csr[CSR_MINSTRET]);
-    mvwprintw(win, 38, 1, "frequency: %.6fMhz", frequency);
-    mvwprintw(win, 39, 1, "mhartid:  0x%016llx", cpu->csr[CSR_MHARTID]);
-    mvwprintw(win, 40, 1, "cpu mode:  0x%0x", cpu->priv);
+    uint8_t csr_base_y_index = 33;
+
+    const char * CPU_MODES[] = {
+        "User", "Supervisor", "Reserved", "Machine"
+    };
+    mvwprintw(win, csr_base_y_index++, 1, "cpu mode: %s", CPU_MODES[cpu->priv]);
+    mvwprintw(win, csr_base_y_index++, 1, "mhartid:  0x%016lx", cpu->csr[CSR_MHARTID]);
+    mvwprintw(win, csr_base_y_index++, 1, "mtvec:    0x%016lx", cpu->csr[CSR_MTVEC]);
+    mvwprintw(win, csr_base_y_index++, 1, "mstatus:  0x%016lx", cpu->csr[CSR_MSTATUS]);
+    mvwprintw(win, csr_base_y_index++, 1, "mie:      0x%016lx", cpu->csr[CSR_MIE]);
+    mvwprintw(win, csr_base_y_index++, 1, "mcause:   0x%016lx", cpu->csr[CSR_MCAUSE]);
+    mvwprintw(win, csr_base_y_index++, 1, "mip:      0x%016lx", cpu->csr[CSR_MIP]);
+    mvwprintw(win, csr_base_y_index++, 1, "minstret: 0x%016lu", cpu->csr[CSR_MINSTRET]);
+    mvwprintw(win, csr_base_y_index++, 1, "freq:     %.2fMhz", frequency);
+
     wrefresh(win);
 }
 
