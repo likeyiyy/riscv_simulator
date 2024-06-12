@@ -25,7 +25,6 @@
 typedef struct {
     CPU *cpu;
     Memory *memory;
-    uint32_t pc;
     sem_t *sem_refresh;   // 信号量，用于通知 display 线程刷新
 } DisplayData;
 

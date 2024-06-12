@@ -129,8 +129,8 @@ void display_screen(WINDOW *win, UART *uart) {
     static int line = 1;
     static int col = 1; // Start from column 1 to leave space for the box
     mvwprintw(win, 0, 1, "Screen(80*25)");
-    if (uart->registers[LSR] & 0x01) { // Check if data is ready
-        uint8_t value = uart->registers[RHR];
+    if ((uart->LSR & LSR_TX_IDLE) == 0) { // Check if data is ready
+        uint8_t value = uart->THR;
         char buffer[2] = {value, '\0'};
 
         if (value == '\n') { // Handle newline character
@@ -151,38 +151,43 @@ void display_screen(WINDOW *win, UART *uart) {
             box(win, 0, 0);
         }
 
-        uart->registers[LSR] &= ~0x01; // Clear Data Ready
-        uart->registers[LSR] |= LSR_THRE; // Set Transmitter Holding Register Empty
-        uart->registers[THR] = 0;
+        uart->LSR |= LSR_THRE; // Set Transmitter Holding Register Empty
+        uart->THR = 0;
     }
     wrefresh(win);
 }
 
 void display_uart(WINDOW *win, UART *uart) {
-    werase(win);
-    box(win, 0, 0);
     mvwprintw(win, 0, 1, "UART Registers");
-
-    // 寄存器名称数组
-    const char *register_names[] = {
-        "RHR/THR",    // 0
-        "IER",        // 1
-        "FCR/ISR",    // 2
-        "LCR",        // 3
-        "MCR",        // 4
-        "LSR",        // 5
-        "MSR",        // 6
-        "SPR"         // 7
-    };
-
-    // 显示 UART 寄存器的值，分成4行2列，并对齐
-    for (int i = 0; i < 4; ++i) {
-        mvwprintw(win, i + 1, 1, "%-8s: 0x%02x", register_names[i], uart->registers[i]);
-        mvwprintw(win, i + 1, 18, "%-8s: 0x%02x", register_names[i + 4], uart->registers[i + 4]);
-    }
 
     wrefresh(win);
 }
+
+void display_plic(WINDOW *win, PLIC *plic) {
+    mvwprintw(win, 0, 1, "PLIC Registers (hart0)");
+
+    // 显示 priority id=10 的优先级
+    mvwprintw(win, 1, 1, "Priority [id=10]: %u", plic->priority[10]);
+
+    // 显示 pending 寄存器的值
+    for (int i = 0; i < MAX_INTERRUPTS / 32; ++i) {
+        mvwprintw(win, 2 + i, 1, "Pending [%d]: 0x%08x", i, plic->pending[i]);
+    }
+
+    // 显示 hart0 的 threshold 寄存器的值
+    mvwprintw(win, 6, 1, "Threshold [hart0]: %u", plic->threshold[0]);
+
+    // 显示 hart0 的 enable 位图
+    for (int i = 0; i < MAX_INTERRUPTS / 32; ++i) {
+        mvwprintw(win, 7 + i, 1, "Enable [hart0][%d]: 0x%08x", i, plic->enable[0][i]);
+    }
+
+    // 显示 hart0 的 claim/complete 寄存器的值
+    mvwprintw(win, 11, 1, "Claim/Complete [hart0]: %u", plic->claim_complete[0]);
+
+    wrefresh(win);
+}
+
 
 
 
@@ -204,6 +209,7 @@ void *update_display(void *arg) {
     WINDOW *status_win = create_newwin(STATUS_WIN_HEIGHT, SCREEN_WIN_WIDTH, 0, SCREEN_WIN_START_X);
     WINDOW *screen_win = create_newwin(SCREEN_WIN_HEIGHT, SCREEN_WIN_WIDTH, STATUS_WIN_HEIGHT, SCREEN_WIN_START_X);
     WINDOW *uart_win = create_newwin(6, 40, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT, SCREEN_WIN_START_X);
+    WINDOW *plic_win = create_newwin(15, 50, STATUS_WIN_HEIGHT + SCREEN_WIN_HEIGHT + 6, SCREEN_WIN_START_X);
     WINDOW *source_win = create_newwin(SOURCE_WIN_HEIGHT, SOURCE_WIN_WIDTH, 0, SOURCE_WIN_START_X);
     WINDOW *stack_win = create_newwin(STACK_WIN_HEIGHT, STACK_WIN_WIDTH, 0, STACK_WIN_START_X);
 
@@ -211,6 +217,7 @@ void *update_display(void *arg) {
     display_registers(reg_win, cpu);
     display_screen(screen_win, uart);
     display_uart(uart_win, uart);
+    display_plic(plic_win, cpu->plic);
     display_keyboard_mode(status_win);
     display_stack(stack_win, cpu, memory);
     display_source(source_win, memory, data->cpu->pc);
@@ -219,6 +226,10 @@ void *update_display(void *arg) {
     while (1) {
         if (cpu->fast_mode) {
             display_screen(screen_win, uart);
+	    if (i % 500 == 0) {
+            	display_uart(uart_win, uart);
+    	    	display_plic(plic_win, cpu->plic);
+	    }
 
             if (i++ % 5000 == 0) {
                 display_registers(reg_win, cpu);
@@ -233,8 +244,11 @@ void *update_display(void *arg) {
             display_registers(reg_win, cpu);
             display_keyboard_mode(status_win);
             display_screen(screen_win, uart);
+            display_uart(uart_win, uart);
+    	    display_plic(plic_win, cpu->plic);
             display_stack(stack_win, cpu, memory);
             display_source(source_win, memory, data->cpu->pc);
+            usleep(100000); // Adjust the refresh rate as needed
         }
     }
 }

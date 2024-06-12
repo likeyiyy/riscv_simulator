@@ -27,18 +27,13 @@ uint64_t plic_read(uint64_t address, uint32_t size) {
         uint32_t hart_id = (offset - PLIC_ENABLE_BASE) / sizeof(plic->enable[0]);
         uint32_t enable_offset = (offset - PLIC_ENABLE_BASE) % sizeof(plic->enable[0]);
         return plic->enable[hart_id][enable_offset / 4];
-    } else if (offset >= PLIC_THRESHOLD_OFFSET(0) && offset < PLIC_THRESHOLD_OFFSET(MAX_HARTS)) {
+    } else if ((offset % PLIC_THRESHOLD_STRIDE) == 0 && offset >= PLIC_THRESHOLD_OFFSET(0) && offset < PLIC_THRESHOLD_OFFSET(MAX_HARTS)) {
         uint32_t hart_id = (offset - PLIC_THRESHOLD_BASE) / PLIC_THRESHOLD_STRIDE;
-        if ((offset % PLIC_THRESHOLD_STRIDE) == 0) {
-            return plic->threshold[hart_id];
-        }
-    } else if (offset >= PLIC_CLAIM_OFFSET(0) && offset < PLIC_CLAIM_OFFSET(MAX_HARTS)) {
+        return plic->threshold[hart_id];
+    } else if ((offset % PLIC_CLAIM_STRIDE) == 4 && offset >= PLIC_CLAIM_OFFSET(0) && offset < PLIC_CLAIM_OFFSET(MAX_HARTS)) {
         uint32_t hart_id = (offset - PLIC_CLAIM_BASE) / PLIC_CLAIM_STRIDE;
-        if ((offset % PLIC_CLAIM_STRIDE) == 4) {
-            uint32_t interrupt_id = plic->claim_complete[hart_id];
-            plic->claim_complete[hart_id] = -1;
-            return interrupt_id;
-        }
+        uint32_t interrupt_id = plic_claim_interrupt(hart_id);
+        return interrupt_id;
     }
     return 0;
 }
@@ -92,4 +87,15 @@ void plic_complete_interrupt(uint32_t hart_id, int irq) {
         // 确保中断源已启用
         plic->claim_complete[hart_id] = -1; // 清除 claim_complete
     }
+}
+
+bool plic_check_interrupt(PLIC *plic, int hart_id) {
+    for (int i = 0; i < MAX_INTERRUPTS; i++) {
+        if ((plic->pending[i / 32] & (1 << (i % 32))) && (plic->enable[hart_id][i / 32] & (1 << (i % 32)))) {
+            if (plic->priority[i] > plic->threshold[hart_id]) {
+                return true; // 有中断可以触发
+            }
+        }
+    }
+    return false; // 没有中断可以触发
 }

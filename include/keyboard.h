@@ -13,7 +13,7 @@ typedef enum {
 
 typedef struct {
     CPU *cpu;
-    int key;  // 键值
+    char key;  // 键值
     sem_t *sem_continue;  // 信号量，用于通知 CPU 线程继续执行
 } KeyBoardData;
 

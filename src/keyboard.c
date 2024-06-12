@@ -39,10 +39,10 @@ void process_uart_input(KeyBoardData *data) {
         switch_mode(CPU_MODE);
     } else {
         // 处理 UART 输入
-        int ch = data->key;
-        if (ch != ERR) {
-            data->cpu->uart->registers[0] = (uint8_t)ch; // 将字符写入 UART 数据寄存器
-            data->cpu->uart->registers[LSR] |= 0x01; // 设置数据准备好标志
+        if (data->key != ERR) {
+	    mfprintf("GOT KEY board char: %d\n", data->key);
+            data->cpu->uart->RBR = data->key; // 将字符写入 UART 数据寄存器
+            data->cpu->uart->LSR |= LSR_RX_READY; // 设置数据准备好标志
             trigger_interrupt(data->cpu, UART0_IRQ); // 触发 UART 中断
         }
     }
@@ -63,11 +63,8 @@ void* keyboard_input(void *arg) {
     while (1) {
         int ret = poll(fds, 1, -1);
         if (ret > 0 && (fds[0].revents & POLLIN)) {
-            char ch;
-            read(STDIN_FILENO, &ch, 1); // 读取键盘输入
-            data->key = ch;
+            read(STDIN_FILENO, &data->key, 1); // 读取键盘输入
             Mode mode = get_mode();
-
             if (mode == CPU_MODE) {
                 process_cpu_input(data);
             } else if (mode == UART_MODE) {

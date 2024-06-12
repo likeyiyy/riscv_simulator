@@ -43,6 +43,7 @@ void cpu_init(CPU *cpu, Memory *memory,CLINT * clint, PLIC * plic, UART *uart) {
 
 void trigger_interrupt(CPU * cpu, int interrupt_id) {
     PLIC *plic = get_plic();
+    mfprintf("Keyboard Trigger\n");
     plic->pending[interrupt_id / 32] |= (1 << (interrupt_id % 32));
     cpu->csr[CSR_MIP] |= MIP_MEIP;
     __sync_synchronize(); // 内存屏障

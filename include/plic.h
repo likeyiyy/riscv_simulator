@@ -53,6 +53,7 @@ uint64_t plic_read(uint64_t address, uint32_t size);
 void plic_write(uint64_t address, uint64_t value, uint32_t size);
 uint32_t plic_claim_interrupt(uint32_t hart_id);
 void plic_complete_interrupt(uint32_t hart_id, int irq);
+bool plic_check_interrupt(PLIC *plic, int hart_id);
 
 
 
