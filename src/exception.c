@@ -42,7 +42,6 @@ bool handle_interrupt(CPU *cpu) {
     uint64_t status;
     uint64_t ie;  // Interrupt Enable register
     uint64_t ip;  // Interrupt Pending register
-    __sync_synchronize(); // 内存屏障
 
     // 根据当前特权级别选择状态寄存器和中断使能寄存器
     switch (cpu->priv) {
@@ -88,8 +87,6 @@ bool handle_interrupt(CPU *cpu) {
             cpu->csr[CSR_MIP] &= ~MIP_MEIP;
             return true;
         }
-    } else {
-        // 没有外部中断
     }
 
     // 检查并处理中优先级中断

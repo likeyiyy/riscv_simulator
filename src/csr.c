@@ -94,7 +94,7 @@ void execute_csrrci(CPU *cpu, uint32_t instruction) {
 void execute_mret(CPU *cpu) {
     uint64_t mstatus = read_csr(cpu, CSR_MSTATUS);
     // MRET first determiner what the new privilege mode will be according to the values of MPP
-    cpu->priv = 3;
+    cpu->priv = (mstatus >> 11) & 0x3;
 
     // MPP = 0
     mstatus &= ~MSTATUS_MPP;  // 清除 MPP 字段
