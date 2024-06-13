@@ -53,11 +53,12 @@ void display_registers(WINDOW *win, CPU *cpu) {
     };
     mvwprintw(win, csr_base_y_index++, 1, "cpu mode: %s", CPU_MODES[cpu->priv]);
     mvwprintw(win, csr_base_y_index++, 1, "mhartid:  0x%016lx", cpu->csr[CSR_MHARTID]);
-    mvwprintw(win, csr_base_y_index++, 1, "mtvec:    0x%016lx", cpu->csr[CSR_MTVEC]);
-    mvwprintw(win, csr_base_y_index++, 1, "mstatus:  0x%016lx", cpu->csr[CSR_MSTATUS]);
     mvwprintw(win, csr_base_y_index++, 1, "mie:      0x%016lx", cpu->csr[CSR_MIE]);
-    mvwprintw(win, csr_base_y_index++, 1, "mcause:   0x%016lx", cpu->csr[CSR_MCAUSE]);
+    mvwprintw(win, csr_base_y_index++, 1, "mtvec:    0x%016lx", cpu->csr[CSR_MTVEC]);
     mvwprintw(win, csr_base_y_index++, 1, "mip:      0x%016lx", cpu->csr[CSR_MIP]);
+    mvwprintw(win, csr_base_y_index++, 1, "mstatus:  0x%016lx", cpu->csr[CSR_MSTATUS]);
+    mvwprintw(win, csr_base_y_index++, 1, "mcause:   0x%016lx", cpu->csr[CSR_MCAUSE]);
+    mvwprintw(win, csr_base_y_index++, 1, "mepc:     0x%016lx", cpu->csr[CSR_MEPC]);
     mvwprintw(win, csr_base_y_index++, 1, "minstret: 0x%016lu", cpu->csr[CSR_MINSTRET]);
     mvwprintw(win, csr_base_y_index++, 1, "freq:     %.2fMhz", frequency);
 
