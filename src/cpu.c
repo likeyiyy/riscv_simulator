@@ -20,6 +20,11 @@
 #include "mfprintf.h"
 #include "exception.h"
 
+static CPU global_cpu;
+
+CPU *get_cpu(void) {
+    return &global_cpu;
+}
 
 void cpu_init(CPU *cpu, Memory *memory, CLINT *clint, PLIC *plic, UART *uart) {
     cpu->pc = 0;

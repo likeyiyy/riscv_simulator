@@ -38,10 +38,17 @@ uint64_t clint_read(uint64_t addr, uint32_t size) {
 
 void clint_write(uint64_t addr, uint64_t value, uint32_t size) {
     CLINT *clint = get_clint();
+    CPU *cpu = get_cpu();
     uint64_t offset = addr - CLINT_BASE_ADDR;
 
     if (offset < sizeof(clint->msip)) {
         clint->msip[offset / sizeof(uint64_t)] = value;
+        if (value != 0) {
+            cpu->csr[CSR_MIP] |= MIP_MSIP;
+        } else {
+            cpu->csr[CSR_MIP] &= ~MIP_MSIP;
+        }
+
     } else if (offset >= 0x4000 && offset < 0x4000 + sizeof(clint->mtimecmp)) {
         clint->mtimecmp[(offset - 0x4000) / sizeof(uint64_t)] = value;
     } else if (offset == 0xBFF8) {

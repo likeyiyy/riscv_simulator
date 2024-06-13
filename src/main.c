@@ -32,12 +32,12 @@ int main(int argc, char *argv[]) {
     }
     init_csr_names();
 
-    CPU cpu;
+
     Memory memory;
 
     sem_t sem_refresh;
     sem_t sem_continue;
-
+    CPU *cpu = get_cpu();
     CLINT *clint = get_clint();
     PLIC *plic = get_plic();
     UART *uart = get_uart();
@@ -47,10 +47,10 @@ int main(int argc, char *argv[]) {
     plic_init(plic);
     uart_init(uart); // 初始化 UART
     memory_init(&memory);
-    cpu_init(&cpu, &memory, clint, plic, uart);
+    cpu_init(cpu, &memory, clint, plic, uart);
 
     load_file_to_memory(input_file, &memory, load_address);
-    cpu.pc = load_address;
+    cpu->pc = load_address;
 
     sem_init(&sem_refresh, 0, 0);
     sem_init(&sem_continue, 0, 0);
@@ -61,10 +61,10 @@ int main(int argc, char *argv[]) {
     pthread_t simulator_thread;
 
     // Initialize ncurses display thread
-    DisplayData display_data = {&cpu, &memory, &sem_refresh};
-    KeyBoardData keyboard_data = {&cpu, -1, &sem_continue, &sem_refresh};
+    DisplayData display_data = {cpu, &memory, &sem_refresh, NULL, 1, 1};
+    KeyBoardData keyboard_data = {cpu, -1, &sem_continue, &sem_refresh};
     Simulator simulator = {
-            &cpu,
+            cpu,
             &memory,
             &display_data,
             &keyboard_data,
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&display_thread, NULL, update_display, &display_data);
     pthread_create(&keyboard_thread, NULL, keyboard_input, &keyboard_data);
     pthread_create(&simulator_thread, NULL, cpu_simulator, &simulator);
-    pthread_create(&timer_thread, NULL, timer_loop, &cpu);
+    pthread_create(&timer_thread, NULL, timer_loop, cpu);
 
     pthread_join(display_thread, NULL);
     pthread_join(keyboard_thread, NULL);
