@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include "mmio.h"
 
-#define MEMORY_SIZE  (3L * 1024 * 1024 * 1024)// 3GB内存
+#define MEMORY_BASE_ADDR 0x80000000
+#define MEMORY_SIZE  (128 * 1024 * 1024)
+#define MEMORY_END_ADDR (MEMORY_BASE_ADDR + MEMORY_SIZE)
 
 
 typedef struct {

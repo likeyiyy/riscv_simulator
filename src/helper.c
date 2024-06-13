@@ -54,11 +54,11 @@ int parse_arguments(int argc, char *argv[], const char **input_file, size_t *loa
     }
 
     if (*end_address == 0) {
-        *end_address = MEMORY_SIZE;
+        *end_address = MEMORY_END_ADDR;
     }
 
-    if (*load_address >= MEMORY_SIZE || (*end_address > MEMORY_SIZE) || (*load_address >= *end_address)) {
-        fprintf(stderr, "Invalid address range. Load address and end address must be within memory size (%ld bytes).\n", MEMORY_SIZE);
+    if (*load_address >= MEMORY_END_ADDR || (*end_address > MEMORY_END_ADDR) || (*load_address >= *end_address)) {
+        fprintf(stderr, "Invalid address range. Load address and end address must be within memory size (0x%llx bytes), load_address: 0x%llx, end_address: 0x%llx\n", MEMORY_END_ADDR, *load_address, *end_address);
         return 1;
     }
 

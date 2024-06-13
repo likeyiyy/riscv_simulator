@@ -31,11 +31,13 @@ void load_file_to_memory(const char *filename, Memory *memory, size_t address) {
     fseek(file, 0, SEEK_SET);
 
     // 确保内存大小足够，并且检查地址的合法性
-    if (file_size + address > MEMORY_SIZE) {
+    if (file_size + address > MEMORY_END_ADDR) {
         fprintf(stderr, "File size exceeds memory size or invalid address\n");
         fclose(file);
         exit(EXIT_FAILURE);
     }
+
+    address -= MEMORY_BASE_ADDR;
 
     // 读取文件内容到内存
     size_t bytes_read = fread(memory->data + address, 1, file_size, file);

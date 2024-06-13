@@ -31,9 +31,10 @@ void memory_free(Memory *memory) {
 }
 
 uint32_t load_inst(Memory *memory, uint64_t address) {
-    if (address >= MEMORY_SIZE) {
+    if (address >= MEMORY_END_ADDR) {
         return 0;
     }
+    uint64_t memory_addr = address - MEMORY_BASE_ADDR;
     return *((uint32_t *) (memory->data + address));
 }
 
@@ -46,6 +47,7 @@ uint64_t memory_read(Memory *memory, uint64_t address, uint32_t size, bool is_si
             }
         }
     } else {
+	address -= MEMORY_BASE_ADDR;
         switch (size) {
             case 1:
                 return is_signed ? (int8_t)memory->data[address] : memory->data[address];
@@ -72,6 +74,7 @@ void memory_write(Memory *memory, uint64_t address, uint64_t value, uint32_t siz
             }
         }
     } else {
+	address -= MEMORY_BASE_ADDR;
         switch (size) {
             case 1:
                 memory->data[address] = value & 0xFF;

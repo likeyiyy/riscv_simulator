@@ -277,7 +277,7 @@ void *update_display(void *arg) {
                 display_stack(stack_win, cpu, memory);
                 display_source(source_win, memory, display->cpu->pc);
             }
-            usleep(1000); // Adjust the refresh rate as needed
+            usleep(100); // Adjust the refresh rate as needed
 
         } else {
             sem_wait(sem_refresh);

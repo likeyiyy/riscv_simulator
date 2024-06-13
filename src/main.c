@@ -20,7 +20,7 @@
 int main(int argc, char *argv[]) {
     const char *input_file = NULL;
     uint64_t load_address = 0;
-    uint64_t end_address = MEMORY_SIZE;
+    uint64_t end_address = MEMORY_END_ADDR;
 
     if (parse_arguments(argc, argv, &input_file, &load_address, &end_address) != 0) {
         print_usage(argv[0]);
