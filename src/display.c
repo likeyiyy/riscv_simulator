@@ -141,6 +141,13 @@ void display_screen(DisplayData* display_data, WINDOW *win, UART *uart) {
         if (value == '\n') { // Handle newline character
             display_data->line++;
             display_data->col = 1; // Reset to the first column
+        } else if (value == 8) { // Handle backspace character
+            if (display_data->col > 1) {
+                display_data->col--;
+            } else if (display_data->line > 1) {
+                display_data->line--;
+                display_data->col = getmaxx(win) - 2;
+            }
         } else {
             mvwprintw(win, display_data->line, display_data->col++, "%s", buffer);
             if (display_data->col >= getmaxx(win) - 1) { // Move to the next line if end of line is reached
