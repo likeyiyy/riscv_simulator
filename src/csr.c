@@ -113,7 +113,7 @@ void execute_mret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_MEPC];
     // 重置当前处理的中断优先级
     cpu->current_priority = 0;
-    cpu->trap_occurred = true;
+    cpu->pc_updated = true;
 }
 
 // SRET 指令实现 - 目的是：Supervisor-mode Return
@@ -141,6 +141,7 @@ void execute_sret(CPU *cpu) {
     write_csr(cpu, CSR_SSTATUS, sstatus);
     // 恢复程序计数器
     cpu->pc = cpu->csr[CSR_SEPC];
+    cpu->pc_updated = true;
     // 重置当前处理的中断优先级
     cpu->current_priority = 0;
     cpu->trap_occurred = true;
@@ -150,6 +151,7 @@ void execute_sret(CPU *cpu) {
 // URET 指令实现 - 目的是：User-mode Return
 void execute_uret(CPU *cpu) {
     cpu->pc = cpu->csr[CSR_UEPC];
+    cpu->pc_updated = true;
     cpu->priv = (cpu->csr[CSR_USTATUS] >> 8) & 0x1;
     cpu->current_priority = 0;
 }

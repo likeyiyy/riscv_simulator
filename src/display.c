@@ -53,6 +53,7 @@ void display_registers(WINDOW *win, CPU *cpu) {
     };
     mvwprintw(win, csr_base_y_index++, 1, "cpu mode: %s", CPU_MODES[cpu->priv]);
     mvwprintw(win, csr_base_y_index++, 1, "mhartid:  0x%016lx", cpu->csr[CSR_MHARTID]);
+    mvwprintw(win, csr_base_y_index++, 1, "mscratch: 0x%016lx", cpu->csr[CSR_MSCRATCH]);
     mvwprintw(win, csr_base_y_index++, 1, "mie:      0x%016lx", cpu->csr[CSR_MIE]);
     mvwprintw(win, csr_base_y_index++, 1, "mtvec:    0x%016lx", cpu->csr[CSR_MTVEC]);
     mvwprintw(win, csr_base_y_index++, 1, "mip:      0x%016lx", cpu->csr[CSR_MIP]);
@@ -214,10 +215,9 @@ void display_plic(WINDOW *win, PLIC *plic) {
 }
 
 void display_clint(WINDOW *win, CLINT *clint) {
-
     mvwprintw(win, 0, 1, "Clint Registers (hart0)");
-    mvwprintw(win, 1, 1, "mtime:       %u", clint->mtime);
-    mvwprintw(win, 2, 1, "mtimecmp[0]: 0x%016x", clint->mtimecmp[0]);
+    mvwprintw(win, 1, 1, "mtime:       %020llu", clint->mtime);
+    mvwprintw(win, 2, 1, "mtimecmp[0]: %020llu", clint->mtimecmp[0]);
     mvwprintw(win, 3, 1, "msip[0]:     0x%016x", clint->msip[0]);
 
     wrefresh(win);

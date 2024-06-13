@@ -23,6 +23,7 @@ typedef struct {
     uint64_t csr[4096]; // 4096个CSR寄存器
     uint64_t pc;            // 程序计数器
     uint8_t priv;            // 当前特权级
+    bool pc_updated;        // 程序计数器是否更新
     uint64_t reserved_address; // 保留地址
     Memory *memory;
     MMU mmu;                 // 内存管理单元

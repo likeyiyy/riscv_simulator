@@ -6,14 +6,16 @@ void raise_exception(CPU *cpu, uint64_t cause) {
     switch (cpu->priv) {
         case PRV_U:
             // 垂直陷入到超级模式
-            cpu->csr[CSR_SEPC] = cpu->pc;
-            cpu->csr[CSR_SCAUSE] = cause;
-            cpu->pc = cpu->csr[CSR_STVEC];
+            cpu->csr[CSR_MEPC] = cpu->pc;
+            cpu->csr[CSR_MCAUSE] = cause;
+            cpu->pc = cpu->csr[CSR_MTVEC];
             // save cpu->priv first
-            cpu->csr[CSR_SSTATUS] = (cpu->csr[CSR_SSTATUS] & ~MSTATUS_MPP) | (cpu->priv << 11);
+            cpu->csr[CSR_MSTATUS] = (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPP) | (cpu->priv << 11);
             // save interrupt enable first
-            cpu->csr[CSR_SSTATUS] = (cpu->csr[CSR_SSTATUS] & ~SSTATUS_SPIE) | ((cpu->csr[CSR_SSTATUS] >> 5) & 0x1);
-            cpu->priv = PRV_S; // 切换到超级模式
+            cpu->csr[CSR_MSTATUS] =
+                    (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPIE) | (((cpu->csr[CSR_MSTATUS] >> 3) & 0x1) << 7);
+            cpu->priv = PRV_M; // 切换到超级模式
+            cpu->pc_updated = true;
             break;
         case PRV_S:
             // 水平陷入处理
@@ -31,6 +33,7 @@ void raise_exception(CPU *cpu, uint64_t cause) {
             // save interrupt enable first
             cpu->csr[CSR_MSTATUS] =
                     (cpu->csr[CSR_MSTATUS] & ~MSTATUS_MPIE) | (((cpu->csr[CSR_MSTATUS] >> 3) & 0x1) << 7);
+            cpu->pc_updated = true;
 
             break;
     }

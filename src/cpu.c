@@ -60,13 +60,9 @@ void trigger_interrupt(CPU *cpu, int interrupt_id) {
 void cpu_execute(CPU *cpu, uint32_t instruction) {
     uint32_t opcode = OPCODE(instruction); // 提取操作码
     cpu->registers[0] = 0;  // 确保x0始终为0
-    // 检查并处理中断
-    bool is_interrupt = handle_interrupt(cpu);
-    if (is_interrupt) {
-        return;
-    }
 
-    bool pc_updated = false;
+
+    cpu->pc_updated = false;
 
     int32_t imm;
     int64_t offset;
@@ -102,12 +98,12 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
             break;
         case OPCODE_BRANCH:
             execute_b_type_instruction(cpu, instruction);
-            pc_updated = true;  // B型指令已经更新PC
+            cpu->pc_updated = true;  // B型指令已经更新PC
             break;
         case OPCODE_JAL: // 处理JAL指令
         case OPCODE_JALR: // 处理JALR指令
             execute_j_type_instruction(cpu, instruction);
-            pc_updated = true;  // J型指令已经更新PC
+            cpu->pc_updated = true;  // J型指令已经更新PC
             break;
         case OPCODE_OP_IMM_32:
             execute_i_32_type_instruction(cpu, instruction);
@@ -130,11 +126,14 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
         default:
             mfprintf("Unknown instruction with opcode: 0x%x\n", opcode);
     }
-    if (!pc_updated && !cpu->trap_occurred) {
+    if (!cpu->pc_updated) {
         cpu->pc += 4;
-    } else if (cpu->trap_occurred) {
-        cpu->trap_occurred = false;
     }
     cpu->registers[0] = 0;  // 确保x0始终为0
+    // 检查并处理中断
+    bool is_interrupt = handle_interrupt(cpu);
+    if (is_interrupt) {
+        return;
+    }
 }
 
