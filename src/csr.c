@@ -232,6 +232,11 @@ void execute_system_instruction(CPU *cpu, uint32_t instruction) {
     uint32_t funct3 = (instruction >> 12) & 0x7;
     if (funct3 >= 0x1 && funct3 <= 0x7) {
         // CSR 操作指令处理
+        if (cpu->priv == PRV_U && funct3 != OPCODE_CSRRWI && funct3 != OPCODE_CSRRSI && funct3 != OPCODE_CSRRCI) {
+            // 用户模式下，只允许 CSRRWI, CSRRSI, CSRRCI 指令
+            raise_exception(cpu, CAUSE_ILLEGAL_INSTRUCTION);
+            return;
+        }
         switch (funct3) {
             case OPCODE_CSRRW: // CSRRW
                 execute_csrrw(cpu, instruction);
