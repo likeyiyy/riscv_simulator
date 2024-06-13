@@ -134,6 +134,8 @@ void display_keyboard_mode(WINDOW *win) {
 
 void display_screen(DisplayData* display_data, WINDOW *win, UART *uart) {
     mvwprintw(win, 0, 1, "Screen(80*25)");
+    static int should_view;
+    static int show_cursor;
     if ((uart->LSR & LSR_TX_IDLE) == 0) { // Check if is idle, if not idle, mean that data is ok
         uint8_t value = uart->THR;
         char buffer[2] = {value, '\0'};
@@ -165,6 +167,16 @@ void display_screen(DisplayData* display_data, WINDOW *win, UART *uart) {
 
         uart->LSR |= LSR_THRE; // Set Transmitter Holding Register Empty
         uart->THR = 0;
+    }
+    // 显示光标占位符
+    if (should_view++ % 5000 == 0) {
+        if (show_cursor) {
+            show_cursor = 0;
+            mvwprintw(win, display_data->line, display_data->col, "_");
+        } else {
+            show_cursor = 1;
+            mvwprintw(win, display_data->line, display_data->col, " ");
+        }
     }
     wrefresh(win);
 }
@@ -285,7 +297,7 @@ void *update_display(void *arg) {
                 display_stack(stack_win, cpu, memory);
                 display_source(source_win, memory, display->cpu->pc);
             }
-            usleep(100); // Adjust the refresh rate as needed
+            usleep(1000); // Adjust the refresh rate as needed
 
         } else {
             sem_wait(sem_refresh);
