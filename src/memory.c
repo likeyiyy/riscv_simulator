@@ -31,11 +31,11 @@ void memory_free(Memory *memory) {
 }
 
 uint32_t load_inst(Memory *memory, uint64_t address) {
-    if (address >= MEMORY_END_ADDR) {
+    if (address >= MEMORY_END_ADDR || address < MEMORY_BASE_ADDR) {
         return 0;
     }
     uint64_t memory_addr = address - MEMORY_BASE_ADDR;
-    return *((uint32_t *) (memory->data + address));
+    return *((uint32_t *) (memory->data + memory_addr));
 }
 
 uint64_t memory_read(Memory *memory, uint64_t address, uint32_t size, bool is_signed) {

@@ -85,7 +85,7 @@ void* cpu_simulator(void *arg) {
     uint64_t start_tsc;
 
     while (1) {
-        if (cpu->pc < 0x100 || cpu->pc >= MEMORY_SIZE) {
+        if (cpu->pc < 0x100 || cpu->pc >= MEMORY_END_ADDR) {
             raise_exception(cpu, CAUSE_LOAD_ACCESS_FAULT);
         }
         instruction = load_inst(memory, cpu->pc);
