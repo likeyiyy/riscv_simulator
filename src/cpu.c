@@ -47,12 +47,12 @@ void cpu_init(CPU *cpu, Memory *memory, CLINT *clint, PLIC *plic, UART *uart) {
 void trigger_interrupt(CPU *cpu, int interrupt_id) {
     PLIC *plic = get_plic();
     mfprintf("Keyboard Trigger\n");
-    plic->pending[interrupt_id / 32] |= (1 << (interrupt_id % 32));
+    plic->pending[interrupt_id >> 5] |= (1 << (interrupt_id & 0x1F));
     cpu->csr[CSR_MIP] |= MIP_MEIP;
     mfprintf("Keyboard Trigger interrupt %d, cpu->csr[CSR_MIP]: 0x%x, plic->pending[0]: 0x%x\n",
              interrupt_id,
              cpu->csr[CSR_MIP],
-             plic->pending[interrupt_id / 32]
+             plic->pending[interrupt_id >> 5]
     );
 }
 
@@ -131,9 +131,6 @@ void cpu_execute(CPU *cpu, uint32_t instruction) {
     }
     cpu->registers[0] = 0;  // 确保x0始终为0
     // 检查并处理中断
-    bool is_interrupt = handle_interrupt(cpu);
-    if (is_interrupt) {
-        return;
-    }
+    handle_interrupt(cpu);
 }
 

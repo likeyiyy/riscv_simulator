@@ -65,9 +65,9 @@ void plic_write(uint64_t address, uint64_t value, uint32_t size) {
 uint32_t plic_claim_interrupt(uint32_t hart_id) {
     PLIC *plic = get_plic();
     for (int i = 0; i < MAX_INTERRUPTS; i++) {
-        if ((plic->pending[i / 32] & (1 << (i % 32))) && (plic->enable[hart_id][i / 32] & (1 << (i % 32)))) {
+        if ((plic->pending[i >> 5] & (1 << (i & 0x1F))) && (plic->enable[hart_id][i >> 5] & (1 << (i & 0x1F)))) {
             if (plic->priority[i] > plic->threshold[hart_id]) {
-                plic->pending[i / 32] &= ~(1 << (i % 32)); // 清除挂起状态
+                plic->pending[i >> 5] &= ~(1 << (i & 0x1F)); // 清除挂起状态
                 plic->claim_complete[hart_id] = i;
                 mfprintf("Claimed interrupt %d\n", i);
                 return i;
@@ -79,7 +79,7 @@ uint32_t plic_claim_interrupt(uint32_t hart_id) {
 
 void plic_complete_interrupt(uint32_t hart_id, int irq) {
     PLIC *plic = get_plic();
-    if ((plic->enable[hart_id][irq / 32] & (1 << (irq % 32))) != 0) {
+    if ((plic->enable[hart_id][irq >> 5] & (1 << (irq & 0x1F))) != 0) {
         // 确保中断源已启用
         plic->claim_complete[hart_id] = -1; // 清除 claim_complete
     }
@@ -87,7 +87,7 @@ void plic_complete_interrupt(uint32_t hart_id, int irq) {
 
 bool plic_check_interrupt(PLIC *plic, int hart_id) {
     for (int i = 0; i < MAX_INTERRUPTS; i++) {
-        if ((plic->pending[i / 32] & (1 << (i % 32))) && (plic->enable[hart_id][i / 32] & (1 << (i % 32)))) {
+        if ((plic->pending[i >> 5] & (1 << (i & 0x1F))) && (plic->enable[hart_id][i >> 5] & (1 << (i & 0x1F)))) {
             if (plic->priority[i] > plic->threshold[hart_id]) {
                 return true; // 有中断可以触发
             }

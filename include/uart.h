@@ -24,6 +24,8 @@
 #define LSR_RX_READY (1 << 0)
 #define LSR_TX_IDLE  (1 << 5)
 #define LSR_THRE 0x60 // Transmitter Holding Register Empty
+#define UART_FIFO_SIZE 16  // FIFO 缓冲区大小
+
 
 
 typedef struct {
@@ -39,6 +41,10 @@ typedef struct {
     uint8_t SCR;  // Scratch Register
     uint16_t DLL; // Divisor Latch Low
     uint16_t DLM; // Divisor Latch High
+    uint8_t fifo[UART_FIFO_SIZE];  // 接收 FIFO 缓冲区
+    uint8_t fifo_head;  // FIFO 头指针
+    uint8_t fifo_tail;  // FIFO 尾指针
+    uint8_t fifo_count; // FIFO 中的字节数
 } UART;
 
 

@@ -55,7 +55,18 @@ void uart_write(uint64_t address, uint64_t value, uint32_t size) {
 
 uint8_t _uart_read(UART *uart, uint16_t port) {
     switch (port) {
-        case 0: return uart->RBR;
+        case 0: // RBR
+            if (uart->fifo_count > 0) {
+                uint8_t data = uart->fifo[uart->fifo_head];
+                uart->fifo_head = (uart->fifo_head + 1) % UART_FIFO_SIZE;
+                uart->fifo_count--;
+                if (uart->fifo_count == 0) {
+                    uart->LSR &= ~LSR_RX_READY; // 清除数据准备好标志
+                }
+                return data;
+            } else {
+                return 0; // FIFO 为空，返回 0
+            }
         case 1: return uart->IER;
         case 2: return uart->IIR;
         case 3: return uart->LCR;
@@ -75,13 +86,10 @@ uint64_t uart_read(uint64_t addr, uint32_t size) {
     uint64_t port = offset;
     if (offset < 8) {
         if (uart->LCR & 0x80 && (offset == DLL_REG || offset == DLM_REG)) {
-	    port = 0x8 + offset;
+	        port = 0x8 + offset;
         }
         char value = _uart_read(uart, port);
-	if (((uart->LCR & 0x80) == 0) && offset == RHR_REG) {
-            uart->LSR &= ~LSR_RX_READY; // Set Data NOT Ready
-	}
-	return value;
+	    return value;
     }
     return 0;
 }

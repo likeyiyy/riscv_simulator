@@ -42,9 +42,19 @@ void process_uart_input(KeyBoardData *data) {
         sem_post(data->sem_refresh); // 通知显示线程刷新
         // 处理 UART 输入
         if (data->key != ERR) {
-            data->cpu->uart->RBR = data->key; // 将字符写入 UART 数据寄存器
-            data->cpu->uart->LSR |= LSR_RX_READY; // 设置数据准备好标志
-            trigger_interrupt(data->cpu, UART0_IRQ); // 触发 UART 中断
+            UART *uart = data->cpu->uart;
+            // 检查 FIFO 是否已满
+            if (uart->fifo_count < UART_FIFO_SIZE) {
+                // 将字符写入 FIFO
+                mfprintf("GET KEY: %c\n", data->key);
+                uart->fifo[uart->fifo_tail] = data->key;
+                uart->fifo_tail = (uart->fifo_tail + 1) % UART_FIFO_SIZE;
+                uart->fifo_count++;
+                uart->LSR |= LSR_RX_READY; // 设置数据准备好标志
+                trigger_interrupt(data->cpu, UART0_IRQ); // 触发 UART 中断
+            } else {
+                // FIFO 已满，丢弃输入（可以考虑其他处理方式）
+            }
         }
     }
 }

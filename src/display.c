@@ -169,7 +169,7 @@ void display_screen(DisplayData* display_data, WINDOW *win, UART *uart) {
         uart->THR = 0;
     }
     // 显示光标占位符
-    if (should_view++ % 5000 == 0) {
+    if (should_view++ % 500 == 0) {
         if (show_cursor) {
             show_cursor = 0;
             mvwprintw(win, display_data->line, display_data->col, "_");
